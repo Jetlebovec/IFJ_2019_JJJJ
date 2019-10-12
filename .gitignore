@@ -2,3 +2,5 @@
 IFJ19.cbp
 *.exe
 *.o
+*.depend
+*.layout

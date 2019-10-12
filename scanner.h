@@ -17,5 +17,24 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "scanner.h"
+
+typedef enum
+{
+    TOKEN_INT,
+    TOKEN_CHAR = 0,
+} tokenType;
+
+// Struct of type Token
+typedef struct
+{
+    tokenType type;
+    char *attribute;
+} Token;
+
+// Reads the next token, returns error code
+int getToken(Token *token);
+
+
 
 #endif // SCANNER_H_INCLUDED

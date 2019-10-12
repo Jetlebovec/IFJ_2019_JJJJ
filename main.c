@@ -13,16 +13,31 @@
 
  #include <stdio.h>
  #include <stdlib.h>
+ #include "parser.h"
 
 
  int main (int argc, char* argv[])
  {
-    if (argc != 2)
+    if (argc > 1)
     {
         fprintf(stderr, "Invalid arguments\n");
+        return 99;
     }
+
+    //TODO Initialize stuff we dont have yet
+
+    // Complete analysis
+    int errorCode = analyse();
+
+    if (errorCode == 0)
+    {
+        //TODO Stuff that happens when no error occured
+
+    }
+
+    //TODO Clean all the stuff we dont have yet
 
     printf("Hello World\n");
 
-    return 0;
+    return errorCode;
  }

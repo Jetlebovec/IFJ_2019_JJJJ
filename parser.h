@@ -8,16 +8,17 @@
  *          Pojsl Jakub	    xpojsl00
  *          Sasín Jonáš	    xsasin05
  *
- *      File: scanner.c
+ *      File: parser.h
  */
+
+
+#ifndef PARSER_H_INCLUDED
+#define PARSER_H_INCLUDED
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "scanner.h"
 
-int getToken(Token *token)
-{
+// Main function of the parser, called from main, returns error code
+int analyse();
 
-
-    return 0;
-}
+#endif // PARSER_H_INCLUDED
