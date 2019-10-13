@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "scanner.h"
+#include "stack.h"
 
 int getToken(Token *token)
 {
