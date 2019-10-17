@@ -16,6 +16,13 @@
 #include "scanner.h"
 #include "stack.h"
 
+// Reserved keywords that must not be used as a variable name
+const char* keywords[7] =
+{
+    "def", "else", "if", "none", "pass", "return", "while"
+};
+
+
 int getToken(Token *token)
 {
 
