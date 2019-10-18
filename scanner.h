@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "scanner.h"
+#include "custom_string.h"
 
 // Enum of all the possible states
 typedef enum
@@ -122,18 +123,19 @@ typedef enum
     TOKEN_NOT_EQUAL,
 
     TOKEN_EOL,
-    TOKEN_EOF
+    TOKEN_EOF,
+    TOKEN_UNDEFINED
 } tokenType;
 
 // Struct of type Token
 typedef struct
 {
     tokenType type;
-    char *attribute;
+    tString *attribute;
 } Token;
 
 // Reads the next token, returns error code
-int getToken(Token *token);
+int get_token(Token *token);
 
 
 

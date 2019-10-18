@@ -23,9 +23,35 @@ const char* keywords[7] =
 };
 
 
-int getToken(Token *token)
+int get_token(Token *token)
 {
+    // TESTING TESTING TESTING TESTING TESTING TODO REWRITE FOR STDIN
+    FILE *file;
+    file = fopen("test.txt", "r");
+    // /TESTING
 
+    // Initialize all required variables
+    char c;
+    tState state;
+    token->type = TOKEN_UNDEFINED;
+    string_clear(token->attribute);
 
+    //  TODO REWRITE FOR STDIN TODO REWRITE FOR STDIN TODO REWRITE FOR STDIN TODO REWRITE FOR STDIN TODO REWRITE FOR STDIN
+    while (file)
+    {
+        c = getc(file);
+        if (c == EOF)
+        {
+            printf("\nFile end\n");
+            break;
+        } else
+        {
+            printf("%c", c);
+        }
+    }
+
+    // TESTING TESTING TESTING TESTING TESTING
+    fclose(file);
+    // /TESTING
     return 0;
 }

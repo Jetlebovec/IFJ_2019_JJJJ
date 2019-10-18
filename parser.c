@@ -13,18 +13,37 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "scanner.h"
 #include "parser.h"
 
 int analyse()
 {
+    // Initialize token
     Token newToken;
-    if (getToken(&newToken) != 0)
+    newToken.type = TOKEN_UNDEFINED;
+    newToken.attribute = (tString*) malloc(sizeof(tString));
+    if (newToken.attribute == NULL)
+    {
+        return 99;
+    }
+    string_init(newToken.attribute);
+
+    // Get new token from the scanner
+    if (get_token(&newToken) != 0)
     {
         return 1;
     }
 
-    printf("Token type %s, token attribute %s \n", newToken.type, newToken.attribute);
+    // TESTING
+    printf("Token attribute: ");
+    string_print(newToken.attribute);
+    printf("Token type: %d\n", newToken.type);
+    // /TESTING
+
+    // Free token
+    string_free(newToken.attribute);
+    free(newToken.attribute);
+
+
     return 0;
 }
 

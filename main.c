@@ -15,6 +15,7 @@
  #include <stdlib.h>
  #include "parser.h"
 
+ #include "custom_string.h"
 
  int main (int argc, char* argv[])
  {

@@ -17,6 +17,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "scanner.h"
+#include "custom_string.h"
 
 // Main function of the parser, called from main, returns error code
 int analyse();

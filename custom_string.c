@@ -8,68 +8,78 @@
  *          Pojsl Jakub	    xpojsl00
  *          Sasín Jonáš	    xsasin05
  *
- *      File: stack.c
+ *      File: custom_string.c
  */
-
-//library for work with a string structure
 
 #include <stdlib.h>
 #include <string.h>
 #include "custom_string.h"
 
-void string_clear(string *s)
+void string_clear(tString *s)
 {
 	s->length = 0;
 	s->str[0] = '\0';
 }
 
-int string_init(string *s)
+int string_init(tString *s)
 {
-	if ((s->str = (char *) malloc(STRINGLEN)) == NULL)
+    if (s == NULL)
+    {
+        return 1;
+    }
+
+	if ((s->str = (char *) malloc(STRINGLEN * sizeof(char))) == NULL)
 	{
 		return 1;
 	}
 	else
 	{
 		string_clear(s);
-		s->size = STRINGLEN;
+		s->allocSize = STRINGLEN;
 		return 0;
 	}
-	
 }
 
-void string_free(string *s)
+void string_free(tString *s)
 {
-	free(s);
+	free(s->str);
 }
 
-int string_append_char(string *s, char c)
+int string_append_char(tString *s, char c)
 {
-	if (s->length + 1 >= s->size)
+    if (s == NULL)
+    {
+        return 1;
+    }
+	if (s->length + 1 >= s->allocSize - RESERVED)
 	{
-		if ((s->str = (char *) realloc(s->str, s->length + STRINGLEN)) == NULL)
+		if ((s->str = (char *) realloc(s->str, (s->length + STRINGLEN) * sizeof(char))) == NULL)
 		{
 			return 1;
 		}
 	}
 
-	string_clear(s);
-	s->size = s->length + STRINGLEN;
+	//string_clear(s);
+	s->allocSize = s->length + STRINGLEN;
 	s->str[s->length++] = c;
 	s->str[s->length] = '\0';
 	return 0;
 }
 
-int string_concat(string *s1, string *s2)
+int string_concat(tString *s1, tString *s2)
 {
+    if (s1 == NULL || s2 == NULL)
+    {
+        return 1;
+    }
 	int new_size = s1->length + s2->length;
-	if (new_size >= s1->size)
+	if (new_size >= s1->allocSize)
 	{
-		if ((s1->str = (char *) realloc(s1->str, new_size)) == NULL)
+		if ((s1->str = (char *) realloc(s1->str, new_size * sizeof(char))) == NULL)
 		{
 			return 1;
 		}
-		s1->size = new_size;
+		s1->allocSize = new_size;
 	}
 
 	s1->length += s2->length;
@@ -77,6 +87,53 @@ int string_concat(string *s1, string *s2)
 	return 0;
 }
 
+int string_copy(tString *s1, tString *s2)
+{
+    if (s1 == NULL || s2 == NULL)
+    {
+        return 1;
+    }
+    if (s1->length >= s2->allocSize)
+    {
+        if ((s2->str = (char *) realloc(s2->str, s1->allocSize * sizeof(char))) == NULL)
+        {
+            return 1;
+        }
+        s2->allocSize = s1->allocSize;
+    }
 
+    s2->length = s1->length;
+    strcpy(s2->str, s1->str);
+    return 0;
+}
+
+int string_compare(tString *s1, tString* s2)
+{
+    if (s1 == NULL || s2 == NULL)
+    {
+        return -99;
+    }
+
+    return strcmp(s1->str, s2->str);
+}
+
+int string_compare_char(tString *s1, char* s2)
+{
+    if (s1 == NULL || s2 == NULL)
+    {
+        return -99;
+    }
+
+    return strcmp(s1->str, s2);
+}
+
+int string_print(tString *s)
+{
+    for (int i = 0; i < s->length; i++)
+    {
+        printf("%c", s->str[i]);
+    }
+    printf("\n");
+}
 
 
