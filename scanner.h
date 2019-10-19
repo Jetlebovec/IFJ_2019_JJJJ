@@ -39,9 +39,9 @@ typedef enum
 
     // String
     stSTRING_UNFINISHED,
-    stSTRING_EXCAPE,
+    stSTRING_ESCAPE,
     stSTRING_ESCAPE_HEX,
-    stSTRING_EXCAPE_HEX_HALF,
+    stSTRING_ESCAPE_HEX_HALF,
     //stSTRING,
 
     // Doc string
@@ -50,7 +50,7 @@ typedef enum
     stDOC_STRING_UNFINISHED,
     stDOC_STRING_UNFINISHED_A,
     stDOC_STRING_UNFINISHED_B,
-    stDOC_STRING,
+    //stDOC_STRING,
 
     // Comment
     stCOMMENT,
@@ -134,8 +134,17 @@ typedef struct
     tString *attribute;
 } Token;
 
-// Reads the next token, returns error code
-int get_token(Token *token);
+// Returns 1 if the character is a letter, 0 otherwise
+int isCharAlpha(char c);
+
+// Returns 1 if the character is a digit, 0 otherwise
+int isCharDigit(char c);
+
+// Finishes all operations before returning the token
+int finalize(Token *token);
+
+// Reads the next token, returns error code(0, 1, 99)
+int get_token(Token *token, FILE *file);
 
 
 

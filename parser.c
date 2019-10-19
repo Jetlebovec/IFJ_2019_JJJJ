@@ -27,8 +27,14 @@ int analyse()
     }
     string_init(newToken.attribute);
 
+    // TESTING WITH FILE
+    FILE *file;
+    file = fopen("test.txt", "r");
+    // TESTING WITH FILE
+
+
     // Get new token from the scanner
-    if (get_token(&newToken) != 0)
+    if (get_token(&newToken, file) != 0)
     {
         return 1;
     }
@@ -43,6 +49,9 @@ int analyse()
     string_free(newToken.attribute);
     free(newToken.attribute);
 
+    // TESTING WITH FILE
+    fclose(file);
+    // TESTING WITH FILE
 
     return 0;
 }
