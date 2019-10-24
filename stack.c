@@ -15,7 +15,8 @@
 #include <stdlib.h>
 #include "stack.h"
 
-int stackInit (tStack* s) {
+
+int stack_init (tStack* s) {
     // The stack is empty when initialized, so the value of top is -1
     if (s == NULL)
     {
@@ -27,7 +28,7 @@ int stackInit (tStack* s) {
     }
 }
 
-int stackEmpty (tStack* s) {
+int stack_empty (tStack* s) {
     // When the stack is empty, top should have the value -1
     if (s == NULL)
     {
@@ -36,7 +37,7 @@ int stackEmpty (tStack* s) {
     return s->top == -1;
 }
 
-int stackFull (tStack* s) {
+int stack_full (tStack* s) {
     // When the stack is full, top should be equal to the stack size - 1
     if (s == NULL)
     {
@@ -45,13 +46,13 @@ int stackFull (tStack* s) {
     return s->top == (MAX_STACK_SIZE - 1);
 }
 
-int stackTop (tStack* s, int *x) {
+int stack_top (tStack* s, int *x) {
     // Returns the int on the s.top index
     if (s == NULL)
     {
         return 99;
     }
-    if (stackEmpty(s))
+    if (stack_empty(s))
     {
         return 1;
     } else
@@ -62,13 +63,13 @@ int stackTop (tStack* s, int *x) {
 }
 
 
-int stackPop (tStack* s) {
+int stack_pop (tStack* s) {
     // Decrements the value of top making the previous character the new top
     if (s == NULL)
     {
         return 99;
     }
-    if (stackEmpty(s))
+    if (stack_empty(s))
     {
         return 1;
     } else
@@ -79,13 +80,13 @@ int stackPop (tStack* s) {
 }
 
 
-int stackPush (tStack* s, int x) {
+int stack_push (tStack* s, int x) {
     // Increments the value of top and places the new char on the new top index
     if (s == NULL)
     {
         return 99;
     }
-    if (stackFull(s))
+    if (stack_full(s))
     {
         return 1;
     } else

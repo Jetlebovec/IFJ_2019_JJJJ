@@ -17,6 +17,7 @@
 
 int analyse()
 {
+    int err_code = 0;
     // Initialize token
     Token newToken;
     newToken.type = TOKEN_UNDEFINED;
@@ -26,33 +27,55 @@ int analyse()
         return 99;
     }
     string_init(newToken.attribute);
+    // Initialize indentation stack of the scanner
+    stack_init(&indent_stack);
+    stack_push(&indent_stack, 0);
+
+
+    //****************************************************************TEST START
 
     // TESTING WITH FILE
     FILE *file;
     file = fopen("test.txt", "r");
     // TESTING WITH FILE
 
-
     // Get new token from the scanner
-    if (get_token(&newToken, file) != 0)
+    for (int i = 0; i < 150; i++)
     {
-        return 1;
+        if ((err_code = get_token(&newToken, file)) != 0)
+        {
+            return err_code;
+        } else
+        {
+            printf("Token %d:\n", i);
+            printf("Token type: %d\n", newToken.type);
+            printf("Token attribute: ");
+            string_print(newToken.attribute);
+            printf("\n");
+            if (newToken.type == TOKEN_EOF)
+            {
+                return 0;
+            }
+        }
     }
 
-    // TESTING
-    printf("Token attribute: ");
-    string_print(newToken.attribute);
-    printf("Token type: %d\n", newToken.type);
-    // /TESTING
 
-    // Free token
-    string_free(newToken.attribute);
-    free(newToken.attribute);
+    // TESTING
+    //printf("Token attribute: ");
+    //string_print(newToken.attribute);
+    //printf("Token type: %d\n", newToken.type);
+    // /TESTING
 
     // TESTING WITH FILE
     fclose(file);
     // TESTING WITH FILE
 
-    return 0;
+    //*****************************************************************TEST END
+
+    // Free token
+    string_free(newToken.attribute);
+    free(newToken.attribute);
+
+    return err_code;
 }
 

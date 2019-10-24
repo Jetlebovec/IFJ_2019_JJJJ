@@ -15,6 +15,9 @@
  #include <stdlib.h>
  #include "parser.h"
 
+ //TEST
+ #include "stack.h"
+
  #include "custom_string.h"
 
  int main (int argc, char* argv[])
@@ -41,4 +44,5 @@
     printf("Hello World\n");
 
     return errorCode;
+
  }

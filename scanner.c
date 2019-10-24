@@ -14,12 +14,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "scanner.h"
-#include "stack.h"
+
+#define KEYWORD_COUNT 7
+
+tStack indent_stack;
+// 1 if the stack is being emptied
+int state_dedenting = 0;
+// stores the searched indentation value
+int searched_value = 0;
+// 1 if eof has been reached and the stack is being emptied
+int eof_reached = 0;
 
 // Reserved keywords that must not be used as a variable name
-const char* keywords[7] =
+char* keywords[KEYWORD_COUNT] =
 {
-    "def", "else", "if", "none", "pass", "return", "while"
+    "def", "else", "if", "None", "pass", "return", "while"
 };
 
 // If the last token was EOL, indentation will not be ignored
@@ -43,6 +52,25 @@ int isCharDigit(char c)
     return 0;
 }
 
+int isStringKeyword(tString *s)
+{
+    if (s == NULL)
+    {
+        return 0;
+    }
+
+    int result;
+    for (int i = 0; i < KEYWORD_COUNT; i++)
+    {
+        result = string_compare_char(s, keywords[i]);
+        if (result == 0 && result != -99)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int finalize(Token *token)
 {
     if (token->type == TOKEN_EOL)
@@ -55,6 +83,47 @@ int finalize(Token *token)
     return 0;
 }
 
+int dedent_stack(Token *token)
+{
+    int stackTop = 0;
+    stack_top(&indent_stack, &stackTop);
+    if (stackTop == searched_value)
+    {
+        // If the value is found, exits dedenting state and continues reading
+        state_dedenting = 0;
+        searched_value = 0;
+        return 0;
+    } else if (stackTop == 0)
+    {
+        // If 0 is reached before finding the searched value, returns lexical error
+        return 1;
+    } else
+    {
+        // If the value is not found, pops and generates dedent
+        token->type = TOKEN_DEDENT;
+        stack_pop(&indent_stack);
+        return -1;
+    }
+}
+
+int empty_stack(Token *token)
+{
+    int stackTop = 0;
+    stack_top(&indent_stack, &stackTop);
+    if (stackTop == 0)
+    {
+        // Generates EOF token once the stack has been emptied
+        token->type = TOKEN_EOF;
+        return 0;
+    } else
+    {
+        // Generates dedent token for every stack pop until the stack is emptied
+        token->type = TOKEN_DEDENT;
+        stack_pop(&indent_stack);
+        return 0;
+    }
+}
+
 // TODO ERASE FILE INPUT
 int get_token(Token *token, FILE *file)
 {
@@ -65,6 +134,32 @@ int get_token(Token *token, FILE *file)
     string_clear(token->attribute);
     int indentation_counter = 0;
     int hex_char_counter = 0;
+
+    // If eof has been reached, empties the stack while generating dedents
+    // Once the stack has been emptied, generates EOF
+    if (eof_reached == 1)
+    {
+        empty_stack(token);
+        return finalize(token);
+    }
+
+    // If the scanner is currently in the dedenting state, dedent instead of reading from the file
+    // Tries to find the searched value on the stack
+    // (-1)Generates DEDENT for each stack_pop
+    // (1)If the stack is emptied without finding the searched value, returns lexical error
+    // (0)If the value is found, continues reading
+    if (state_dedenting == 1)
+    {
+        int return_code = 0;
+        return_code = dedent_stack(token);
+        if (return_code == 1)
+        {
+            return 1;
+        } else if (return_code == -1)
+        {
+            return finalize(token);
+        }
+    }
 
     //  TODO REWRITE FOR STDIN TODO REWRITE FOR STDIN TODO REWRITE FOR STDIN TODO REWRITE FOR STDIN TODO REWRITE FOR STDIN
     // Reads the input
@@ -181,7 +276,10 @@ int get_token(Token *token, FILE *file)
                 }
                 else if (c == EOF)
                 {
-                    token->type = TOKEN_EOF;
+                    // Pops the stack and generates dedent if the stack is not empty
+                    // If the stack is empty, generates eof
+                    eof_reached = 1;
+                    empty_stack(token);
                     return finalize(token);
                 }
                 else
@@ -204,10 +302,13 @@ int get_token(Token *token, FILE *file)
                 } else // ASCII - Alphanum, _
                 {
                     ungetc(c, file);
-                    // TODO
-                    // TODO
-                    // TODO If (token->attribute) is keyword...
-                    token->type = TOKEN_IDENTIFIER;
+                    if (isStringKeyword(token->attribute) == 1)
+                    {
+                        token->type = TOKEN_KEYWORD;
+                    } else
+                    {
+                        token->type = TOKEN_IDENTIFIER;
+                    }
                     return finalize(token);
                 }
                 break;
@@ -576,16 +677,39 @@ int get_token(Token *token, FILE *file)
                 {
                     indentation_counter++;
                     state = stINDENTATION_COUNT;
+                } else if (c == '#' || c == '\n' || c == -1/*|| c == '\"'*/ )
+                {
+                    // Ignores the indentation if the line is empty or commented
+                    ungetc(c, file);
+                    indentation_counter = 0;
+                    state = stSTART;
                 } else
                 {
                     ungetc(c, file);
-                    // TODO
-                    // TODO
-                    // TODO use stack for indent and dedent check
-                    // TODO
-                    // TODO
-                    // TODO check the next character if the indentation should be ignored
-                    state = stSTART;
+                    // Checks if the indent count is greater than the top of the stack
+                    int stackTop = 0;
+                    stack_top(&indent_stack, &stackTop);
+                    // If greater, pushes indent count to the stack and generates indent
+                    if (indentation_counter > stackTop)
+                    {
+                        stack_push(&indent_stack, indentation_counter);
+                        token->type = TOKEN_INDENT;
+                        return finalize(token);
+                    } else if (indentation_counter == stackTop)
+                    {
+                        // If equal, resets the indentation counter, does not generate a token
+                        // Returns to stSTART
+                        indentation_counter = 0;
+                        state = stSTART;
+                    } else
+                    {
+                        // If lesser, starts dedenting phase and returns 1 dedent
+                        state_dedenting = 1;
+                        searched_value = indentation_counter;
+                        stack_pop(&indent_stack);
+                        token->type = TOKEN_DEDENT;
+                        return finalize(token);
+                    }
                 }
                 break;
             // End of stINDENTATION_COUNT

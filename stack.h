@@ -25,26 +25,49 @@ typedef struct {
 	int top;
 } tStack;
 
-// Initializes the stack, returns 0 if successful, otherwise returns error code
-int stackInit (tStack* s);
+/**
+ * @brief Initializes the stack
+ * @param s stack
+ * @return 0 if successful, 99 if null
+ */
+int stack_init (tStack* s);
 
-// Returns 0 if empty, 99 if null pointer, otherwise not empty
-int stackEmpty (tStack* s);
+/**
+ * @brief Checks if the stack is empty
+ * @param s stack
+ * @return 1 if empty, 0 if not, 99 if null
+ */
+int stack_empty (tStack* s);
 
-// Returns 0 if full, 99 if null pointer, otherwise not full
-int stackFull (tStack* s);
+/**
+ * @brief Checks if the stack is full
+ * @param s stack
+ * @return 1 if full, 0 if not, 99 if null
+ */
+int stack_full (tStack* s);
 
-// Stores the top of the stack to the passed reference
-// Returns 99 if null pointer, 0 if successful, 1 if stack was empty
-int stackTop (tStack* s, int* x);
+/**
+ * @brief Rewrites x with the value at the top of the stack
+ * @param s stack
+ * @param x int to store the top in
+ * @return 0 if successful, 1 if the stack is empty, 99 if null
+ */
+int stack_top (tStack* s, int* x);
 
-// Pops the top of the stack
-// Returns 99 if null pointer, 0 if successful, 1 if stack was empty
-int stackPop (tStack* s);
+/**
+ * @brief Pops the stack
+ * @param s stack
+ * @return 0 if successful, 1 if the stack is empty, 99 if null
+ */
+int stack_pop (tStack* s);
 
-// Pushes x to the top of the stack
-// Returns 99 if null pointer, 0 if successful, 1 if stack was full
-int stackPush (tStack* s, int x);
+/**
+ * @brief Pushes x to the stack
+ * @param s stack
+ * @param x int to push
+ * @return 0 if successful, 1 if the stack is full, 99 if null
+ */
+int stack_push (tStack* s, int x);
 
 
 #endif // STACK_H_INCLUDED
