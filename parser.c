@@ -44,7 +44,7 @@ int analyse()
     {
         if ((err_code = get_token(&newToken, file)) != 0)
         {
-            return err_code;
+            break;
         } else
         {
             printf("Token %d:\n", i);
@@ -54,17 +54,10 @@ int analyse()
             printf("\n");
             if (newToken.type == TOKEN_EOF)
             {
-                return 0;
+                break;
             }
         }
     }
-
-
-    // TESTING
-    //printf("Token attribute: ");
-    //string_print(newToken.attribute);
-    //printf("Token type: %d\n", newToken.type);
-    // /TESTING
 
     // TESTING WITH FILE
     fclose(file);
@@ -74,7 +67,6 @@ int analyse()
 
     // Free token
     string_free(newToken.attribute);
-    free(newToken.attribute);
 
     return err_code;
 }

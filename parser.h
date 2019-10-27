@@ -20,7 +20,10 @@
 #include "scanner.h"
 #include "custom_string.h"
 
-// Main function of the parser, called from main, returns error code
+/**
+ * @brief Main parser function
+ * @return Returns error code
+ */
 int analyse();
 
 #endif // PARSER_H_INCLUDED

@@ -143,6 +143,13 @@ int get_token(Token *token, FILE *file)
         return finalize(token);
     }
 
+    // If last token was end of line, a new line is being read
+    // When a new line is being read, check the indentation first
+    if (last_token_eol == 1)
+    {
+        state = stINDENTATION_COUNT;
+    }
+
     // If the scanner is currently in the dedenting state, dedent instead of reading from the file
     // Tries to find the searched value on the stack
     // (-1)Generates DEDENT for each stack_pop
@@ -173,6 +180,14 @@ int get_token(Token *token, FILE *file)
                 if (isCharAlpha(c) || c == '_') // a...Z
                 {
                     state = stID_KEYWORD;
+                    if (string_append_char(token->attribute, c) != 0)
+                    {
+                        return 99;
+                    }
+                }
+                else if (c == '0') // 0
+                {
+                    state = stNUM_ZERO;
                     if (string_append_char(token->attribute, c) != 0)
                     {
                         return 99;
@@ -316,6 +331,34 @@ int get_token(Token *token, FILE *file)
             //
             // NUMBER SECTION
             //
+            // stNUM_ZERO
+            case stNUM_ZERO:
+                if (c == '.')
+                {
+                    if (string_append_char(token->attribute, c) != 0)
+                    {
+                        return 99;
+                    }
+                    state = stNUM_POINT;
+                } else if (c == 'E' || c == 'e')
+                {
+                    if (string_append_char(token->attribute, 'e') != 0)
+                    {
+                        return 99;
+                    }
+                    state = stNUM_E;
+                } else if (isCharDigit(c))
+                {
+                    token->type = TOKEN_UNDEFINED;
+                    return 1;
+                } else
+                {
+                    ungetc(c, file);
+                    token->type = TOKEN_NUM;
+                    return finalize(token);
+                }
+                break;
+            // End of stNUM_ZERO
             // stNUM
             case stNUM:
                 if (isCharDigit(c))

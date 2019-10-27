@@ -21,7 +21,9 @@
 #include "custom_string.h"
 #include "stack.h"
 
-// Enum of all the possible states
+/**
+ * @enum States
+ */
 typedef enum
 {
     // Start
@@ -32,6 +34,7 @@ typedef enum
 
     // Number
     stNUM,
+    stNUM_ZERO,
     stNUM_POINT,
     stNUM_DEC,
     stNUM_E,
@@ -85,7 +88,9 @@ typedef enum
 } tState;
 
 
-// Enum of all the possible token types
+/**
+ * @enum Token types
+ */
 typedef enum
 {
     TOKEN_IDENTIFIER, //0
@@ -128,42 +133,82 @@ typedef enum
     TOKEN_UNDEFINED
 } tokenType;
 
-// Struct of type Token
+/**
+ * @struct Token struct
+ */
 typedef struct
 {
     tokenType type;
     tString *attribute;
 } Token;
 
+/**
+ * @var Stack for indentation counting
+ */
 tStack indent_stack;
-// 1 if the stack is being emptied
+
+/**
+ * @var Equals 1 if currently dedenting, 0 otherwise
+ */
 int state_dedenting;
-// stores the searched indentation value
+
+/**
+ * @var Indentation value that is being searched for in the stack
+ */
 int searched_value;
-// 1 if eof has been reached and the stack is being emptied
+
+/**
+ * @var Equals 1 when EOF has been found, 0 otherwise
+ */
 int eof_reached;
 
-// Returns 1 if the character is a letter, 0 otherwise
+/**
+ * @brief Checks if the character is a letter
+ * @param c Checked character
+ * @return 1 if letter, 0 otherwise
+ */
 int isCharAlpha(char c);
 
-// Returns 1 if the character is a digit, 0 otherwise
-int isCharDigit(char c);
+/**
+ * @brief Checks if the character is a digit
+ * @param c Checked character
+ * @return 1 if digit, 0 otherwise
+ */
+ int isCharDigit(char c);
 
-// Returns 1 if the character is a keyword, 0 otherwise
+/**
+ * @brief Checks if the string is a keyword
+ * @param s Checked string
+ * @return 1 if keyword, 0 otherwise
+ */
 int isStringKeyword(tString *s);
 
-// Finishes all operations before returning the token
+/**
+ * @brief Finishes all required operations before returning a token
+ * @param token Current token
+ * @return 0
+ */
 int finalize(Token *token);
 
-// Dedents the stack and tries to find the searched value on the stack
+/**
+ * @brief Tries to find the searched indentation value on the stack
+ * @param token Current token
+ * @return 0 if found, 1 if empty, -1 and dedent token if not found
+ */
 int dedent_stack(Token *token);
 
-// Empties the stack after reading EOF
+/**
+ * @brief Removes one value and generates dedent, or generates eof if empty stack
+ * @param token Current token
+ * @return 0
+ */
 int empty_stack(Token *token);
 
-// Reads the next token, returns error code(0, 1, 99)
+/**
+ * @brief Reads the next token
+ * @param token Reference to the token to rewrite with a new one
+ * @return 0 if success, 1 if lex_error, 99 if internal error
+ */
 int get_token(Token *token, FILE *file);
-
-
 
 #endif // SCANNER_H_INCLUDED
