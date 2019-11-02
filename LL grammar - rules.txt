@@ -8,7 +8,7 @@
 <term> -> , <term> 
 <term> -> Ɛ 
 
-<def_function> -> def id (<params>) : EOL INDENT <statement> <return> dedent
+<def_function> -> def id (<params>) : EOL INDENT <statement> <return> EOL dedent
 <params> -> id <param>
 <params> -> Ɛ
 <param> -> , id <param>
