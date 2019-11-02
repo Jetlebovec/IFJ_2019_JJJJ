@@ -20,7 +20,6 @@
 <statement> -> id = <expression> EOL <statement>
 <statement> -> id(term) EOL <statement>
 <statement> -> id = id(term) EOL <statement>
-<statement> -> if <expression> : EOL INDENT <statement> EOL DEDENT <statement>
 <statement> -> if <expression> : EOL INDENT <statement> DEDENT else : EOL INDENT <statement> EOL DEDENT <statement>
 <statement> -> while <expression> : EOL INDENT <statement> EOL DEDENT <statement>
 <statement> -> pass EOL <statement>
