@@ -1,0 +1,28 @@
+<type> -> int
+<type> -> float
+<type> -> str
+<type> -> none
+
+<term> -> <type> <term>
+<term> -> id <term>
+<term> -> , <term> 
+<term> -> Ɛ 
+
+<def_function> -> def id (<params>) : EOL INDENT <statement> <return> dedent
+<params> -> id <param>
+<params> -> Ɛ
+<param> -> , id <param>
+<param> -> Ɛ
+<return> -> return <expression>
+<return> -> Ɛ
+
+<statement> -> <expression> EOL <statement>
+<statement> -> id = <expression> EOL <statement>
+<statement> -> id(term) EOL <statement>
+<statement> -> id = id(term) EOL <statement>
+<statement> -> if <expression> : EOL INDENT <statement> EOL DEDENT <statement>
+<statement> -> if <expression> : EOL INDENT <statement> DEDENT else : EOL INDENT <statement> EOL DEDENT <statement>
+<statement> -> while <expression> : EOL INDENT <statement> EOL DEDENT <statement>
+<statement> -> pass EOL <statement>
+
+<statement> -> Ɛ
