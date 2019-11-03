@@ -57,10 +57,10 @@ int string_append_char(tString *s, char c)
 		{
 			return 1;
 		}
+		//printf("Realocc, from %d to %d\n", s->allocSize, s->allocSize + STRINGLEN);
+		s->allocSize = s->allocSize + STRINGLEN;
 	}
-
-	//string_clear(s);
-	s->allocSize = s->length + STRINGLEN;
+	//s->allocSize = s->length + STRINGLEN;
 	s->str[s->length++] = c;
 	s->str[s->length] = '\0';
 	return 0;
@@ -134,6 +134,7 @@ int string_print(tString *s)
         printf("%c", s->str[i]);
     }
     printf("\n");
+    return 0;
 }
 
 

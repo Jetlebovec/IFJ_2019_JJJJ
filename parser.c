@@ -67,6 +67,7 @@ int analyse()
 
     // Free token
     string_free(newToken.attribute);
+    free(newToken.attribute);
 
     return err_code;
 }
