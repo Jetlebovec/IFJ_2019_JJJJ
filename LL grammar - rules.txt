@@ -1,11 +1,11 @@
 <type> -> int
 <type> -> float
 <type> -> str
-<type> -> none
 
-<term> -> <type> <term>
-<term> -> id <term>
-<term> -> , <term> 
+<term_n> -> <type> <term>
+<term_n> -> id <term>
+<term_n> -> None <term>
+<term> -> , <term_n> 
 <term> -> Ɛ 
 
 <def_function> -> def id (<params>) : EOL INDENT <statement> <return> EOL dedent
@@ -18,10 +18,11 @@
 
 <statement> -> <expression> EOL <statement>
 <statement> -> id = <expression> EOL <statement>
-<statement> -> id(term) EOL <statement>
-<statement> -> id = id(term) EOL <statement>
+<statement> -> id(<term_n>) EOL <statement>
+<statement> -> id = id(<term_n>) EOL <statement>
 <statement> -> if <expression> : EOL INDENT <statement> DEDENT else : EOL INDENT <statement> EOL DEDENT <statement>
 <statement> -> while <expression> : EOL INDENT <statement> EOL DEDENT <statement>
 <statement> -> pass EOL <statement>
+
 
 <statement> -> Ɛ
