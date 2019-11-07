@@ -20,6 +20,7 @@
 #include "scanner.h"
 #include "custom_string.h"
 
+
 /**
  * @brief Main parser function
  * @return Returns error code

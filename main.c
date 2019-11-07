@@ -14,11 +14,8 @@
  #include <stdio.h>
  #include <stdlib.h>
  #include "parser.h"
+ #include "symtable.h"
 
- //TEST
- #include "stack.h"
-
- #include "custom_string.h"
 
  int main (int argc, char* argv[])
  {
@@ -44,4 +41,46 @@
     printf("Hello World\n");
 
     return errorCode;
+
+
+/*  TREE TEST
+    tBSTNodePtr maintree;
+    BST_init(&maintree);
+
+    BST_insert(&maintree, "sdfsdf", 1, NULL);
+    BST_print(&maintree, 0);
+    printf("\n");
+
+    BST_insert(&maintree, "dsfsdf", 1, NULL);
+    BST_print(&maintree, 0);
+    printf("\n");
+
+    BST_insert(&maintree, "zet", 1, NULL);
+    BST_print(&maintree, 0);
+    printf("\n");
+
+    BST_insert(&maintree, "khf", 1, NULL);
+    BST_print(&maintree, 0);
+    printf("\n");
+
+    BST_insert(&maintree, "zet", 0, NULL);
+    BST_print(&maintree, 0);
+    printf("\n");
+
+    tBSTNodePtr foundtest;
+    printf("%d\n\n", BST_search(&maintree, "dsfsdf", &foundtest));
+
+    BST_delete(&maintree, "dsfsdf");
+    BST_print(&maintree, 0);
+    printf("\n");
+
+    printf("%d\n\n", BST_search(&maintree, "dsfsdf", &foundtest));
+
+    BST_dispose(&maintree);
+    BST_print(&maintree, 0);
+    printf("\n");
+
+    printf("Hello World\n");
+    return 0;
+*/
  }
