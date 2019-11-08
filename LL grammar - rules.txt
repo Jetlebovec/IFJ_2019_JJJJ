@@ -1,28 +1,55 @@
+//Kdekoli v hlavnim tele programu se muze vyskytnout statement nebo definice fce
+<program> -> <statement> <program>
+<program> -> <def_function> <program>
+<program> -> EOF
+
 <type> -> int
 <type> -> float
 <type> -> str
 
-<term_n> -> <type> <term>
-<term_n> -> id <term>
-<term_n> -> None <term>
-<term> -> , <term_n> 
-<term> -> Ɛ 
+//term_n je potreba pro volani fce kde muze byt vicekrat za sebou oddelen carkou
+<term> -> <type> <term_n>
+<term> -> id <term_n>
+<term> -> None <term_n>
+<term> -> Ɛ
+<term_n> -> , <term> 
+<term_n> -> Ɛ 
 
-<def_function> -> def id (<params>) : EOL INDENT <statement> <return> EOL dedent
+<def_function> -> def id ( <params> ) : EOL INDENT <statement> <return> EOL dedent
 <params> -> id <param>
 <params> -> Ɛ
 <param> -> , id <param>
 <param> -> Ɛ
-<return> -> return <expression>
+<return> -> return <return_value>  
 <return> -> Ɛ
+<return_value> -> <expression>
+<return_value> -> Ɛ 
 
+//prikazy ktere se mohou vyskytnout kdekoli v tele programu
 <statement> -> <expression> EOL <statement>
-<statement> -> id = <expression> EOL <statement>
-<statement> -> id(<term_n>) EOL <statement>
-<statement> -> id = id(<term_n>) EOL <statement>
+<statement> -> id <idwhat> EOL <statement>
 <statement> -> if <expression> : EOL INDENT <statement> DEDENT else : EOL INDENT <statement> EOL DEDENT <statement>
 <statement> -> while <expression> : EOL INDENT <statement> EOL DEDENT <statement>
+<statement> -> <function> EOL <statement>
 <statement> -> pass EOL <statement>
-
-
+<statement> -> EOL <statement>
 <statement> -> Ɛ
+ 
+//vestavene funkce (??)
+<function> -> inputs()
+<function> -> inputi()
+<function> -> inputf()
+<function> -> print(<term_n>)
+<function> -> len(str)
+<function> -> substr(str,int,int)
+<function> -> ord(int,str)
+<function> -> chr(int)
+
+//id muze byt bud promenna nebo nazev fce
+<idwhat> -> = <assign>
+<idwhat> -> ( <term_n> )
+
+//do promenne muze byt prirazen vysledek volane fce nebo hodnota vyrazu(prirazeni jine samostatne prom. se vyhodnocuje jako vyraz)
+<assign> -> id( <term_n> )
+<assign> -> <expression>
+<assign> -> <function>
