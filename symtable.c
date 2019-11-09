@@ -15,6 +15,20 @@
 #include <stdlib.h>
 #include "symtable.h"
 
+void BST_free_data(tSymdata *data)
+{
+    if (data != NULL)
+    {
+        free(data->key);
+        if (data->parameters != NULL)
+        {
+            free(data->parameters->str);
+            free(data->parameters);
+        }
+        free(data);
+    }
+}
+
 void BST_init(tBSTNodePtr *RootPtr)
 {
     if (RootPtr != NULL)
@@ -58,7 +72,7 @@ int BST_search(tBSTNodePtr *RootPtr, char *key, tBSTNodePtr *foundNode)
     }
 }
 
-int BST_insert(tBSTNodePtr *RootPtr, char *key, int isVar, void *content)
+int BST_insert(tBSTNodePtr *RootPtr, char *key, int isVar, tSymdata *content)
 {
     // The new node is the first one
     if (RootPtr == NULL)
@@ -88,7 +102,7 @@ int BST_insert(tBSTNodePtr *RootPtr, char *key, int isVar, void *content)
         // If the node already exists, rewrites it
         if (strcmp(current->key, key) == 0)
         {
-            free(current->data);
+            BST_free_data(current->data);
             free(current->key);
             current->data = content;
             current->key = key;
@@ -137,7 +151,7 @@ void replace_by_rightmost(tBSTNodePtr toBeReplaced)
     // If the first node in the left subtree is the rightmost one, replaces the original node
     if (current->RPtr == NULL)
     {
-        free(toBeReplaced->data);
+        BST_free_data(toBeReplaced->data);
         free(toBeReplaced->key);
         toBeReplaced->isVariable = current->isVariable;
         toBeReplaced->data = current->data;
@@ -154,7 +168,7 @@ void replace_by_rightmost(tBSTNodePtr toBeReplaced)
             current = current->RPtr;
         }
         // Replaces the original node
-        free(toBeReplaced->data);
+        BST_free_data(toBeReplaced->data);
         free(toBeReplaced->key);
         toBeReplaced->isVariable = current->isVariable;
         toBeReplaced->data = current->data;
@@ -189,8 +203,8 @@ void BST_delete (tBSTNodePtr *RootPtr, char *key)
                     {
                         previous->RPtr = NULL;
                     }
+                    BST_free_data(current->data);
                     free(current->key);
-                    free(current->data);
                     free(current);
                 } else if (current->LPtr != NULL && current->RPtr == NULL)
                 {
@@ -203,8 +217,8 @@ void BST_delete (tBSTNodePtr *RootPtr, char *key)
                     {
                         previous->RPtr = current->LPtr;
                     }
+                    BST_free_data(current->data);
                     free(current->key);
-                    free(current->data);
                     free(current);
                 } else if (current->LPtr == NULL && current->RPtr != NULL)
                 {
@@ -217,8 +231,8 @@ void BST_delete (tBSTNodePtr *RootPtr, char *key)
                     {
                         previous->RPtr = current->RPtr;
                     }
+                    BST_free_data(current->data);
                     free(current->key);
-                    free(current->data);
                     free(current);
                 } else
                 {
@@ -253,8 +267,8 @@ void BST_dispose(tBSTNodePtr *RootPtr)
         // Recursively dispose of both sub-trees
         BST_dispose(&((*RootPtr)->LPtr));
         BST_dispose(&((*RootPtr)->RPtr));
+        BST_free_data((*RootPtr)->data);
         free((*RootPtr)->key);
-        free((*RootPtr)->data);
         free((*RootPtr));
         *RootPtr = NULL;
     }
@@ -273,4 +287,74 @@ void BST_print(tBSTNodePtr *RootPtr, int indent)
         BST_print(&((*RootPtr)->RPtr), indent + 1);
     }
 }
+
+void symtable_init(tBSTNodePtr *symtable)
+{
+    BST_init(symtable);
+}
+
+int symtable_create_function(tBSTNodePtr *symtable, char *key)
+{
+    tSymdata *data = malloc(sizeof(tSymdata));
+    if (data == NULL)
+    {
+        return 99;
+    }
+    data->key = NULL;
+    data->parameters = NULL;
+    BST_insert(symtable, key, 0, data);
+    return 0;
+}
+
+int symtable_create_variable(tBSTNodePtr *symtable, char *key)
+{
+    tSymdata *data = malloc(sizeof(tSymdata));
+    if (data == NULL)
+    {
+        return 99;
+    }
+    BST_insert(symtable, key, 1, data);
+    return 0;
+}
+
+int symtable_search_function(tBSTNodePtr *symtable, char *key, tSymdata **foundFunction)
+{
+    tBSTNodePtr foundNode;
+    if (BST_search(symtable, key, &foundNode) == 0)
+    {
+        if (foundNode->isVariable == 0)
+        {
+            *foundFunction = foundNode->data;
+            return 0;
+        }
+    }
+    *foundFunction = NULL;
+    return 1;
+}
+
+int symtable_search_variable(tBSTNodePtr *symtable, char *key, tSymdata **foundVariable)
+{
+    tBSTNodePtr foundNode;
+    if (BST_search(symtable, key, &foundNode) == 0)
+    {
+        if (foundNode->isVariable == 1)
+        {
+            *foundVariable = foundNode->data;
+            return 0;
+        }
+    }
+    *foundVariable = NULL;
+    return 1;
+}
+
+void symtable_delete_symbol(tBSTNodePtr *symtable, char *key)
+{
+    BST_delete(symtable, key);
+}
+
+void symtable_dispose(tBSTNodePtr *symtable)
+{
+    BST_dispose(symtable);
+}
+
 

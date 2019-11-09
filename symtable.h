@@ -18,15 +18,92 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
+#include "custom_string.h"
+
+// ============================================================== EXTERNAL
+
+/**
+ * @struct Variable/function data structure
+*/
+typedef struct symdata
+{
+    char *key;
+    bool defined;
+    tString *parameters; // null if variable
+
+} tSymdata;
 
 typedef struct tBSTNode {
 	char *key;
 	int isVariable;
-	void *data;
+	tSymdata *data;
 	struct tBSTNode *LPtr;
 	struct tBSTNode *RPtr;
 } *tBSTNodePtr;
+
+/**
+ * @brief Initializes the symtable
+ * @param symtable Pointer to the symtable
+*/
+void symtable_init(tBSTNodePtr *symtable);
+
+/**
+ * @brief Inserts an empty function into the symtable without defined properties
+ * @param symtable Pointer to the symtable
+ * @param key Name of the function
+ * @return 0 if ok, 99 if error
+*/
+int symtable_create_function(tBSTNodePtr *symtable, char *key);
+
+/**
+ * @brief Inserts an empty variable into the symtable without defined properties
+ * @param symtable Pointer to the symtable
+ * @param key Name of the variable
+ * @return 0 if ok, 99 if error
+*/
+int symtable_create_variable(tBSTNodePtr *symtable, char *key);
+
+/**
+ * @brief Searches for the function in the symtable and stores a reference to it's data in the parameter
+ * @param symtable Pointer to the symtable
+ * @param key Name of the function
+ * @param foundFunction Pointer to a symbol data pointer, stores the search result (NULL if not found)
+ * @return 0 if found, 1 if not
+*/
+int symtable_search_function(tBSTNodePtr *symtable, char *key, tSymdata **foundFunction);
+
+/**
+ * @brief Searches for the variable in the symtable and stores a reference to it's data in the parameter
+ * @param symtable Pointer to the symtable
+ * @param key Name of the variable
+ * @param foundVariable Pointer to a symbol data pointer, stores the search result (NULL if not found)
+ * @return 0 if found, 1 if not
+*/
+int symtable_search_variable(tBSTNodePtr *symtable, char *key, tSymdata **foundVariable);
+
+/**
+ * @brief Creates a chain of tokens for syntax analysis... or just deletes a symbol, try to guess
+ * @param symtable Pointer to the symtable
+ * @param key Name of the symbol
+ */
+void symtable_delete_symbol(tBSTNodePtr *symtable, char *key);
+
+/**
+ * @brief Frees and destroys the symtable
+ * @param symtable Pointer to the symtable
+ */
+void symtable_dispose(tBSTNodePtr *symtable);
+
+
+// ============================================================== INTERNAL
+
+/**
+ * @brief Frees the tSymdata structure
+ * @param data Pointer to the data structure
+*/
+void BST_free_data(tSymdata *data);
 
 /**
  * @brief Tree initialization
@@ -51,7 +128,7 @@ int BST_search(tBSTNodePtr *RootPtr, char *key, tBSTNodePtr *foundNode);
  * @param content Pointer to the inserted structure
  * @return 0 if ok, 1 if error
 */
-int BST_insert(tBSTNodePtr *RootPtr, char *key, int isVar, void *content);
+int BST_insert(tBSTNodePtr *RootPtr, char *key, int isVar, tSymdata *content);
 
 /**
  * @brief Deletes the node based on the given key
@@ -72,6 +149,7 @@ void BST_dispose(tBSTNodePtr *RootPtr);
  * @param indent Indentation when printing (for testing pass 0)
 */
 void BST_print(tBSTNodePtr *RootPtr, int indent);
+
 
 
 #endif // SYMTABLE_H_INCLUDED

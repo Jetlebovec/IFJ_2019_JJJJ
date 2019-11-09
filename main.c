@@ -83,4 +83,69 @@
     printf("Hello World\n");
     return 0;
 */
+/*  SYMTABLE TEST
+
+    tBSTNodePtr symtable;
+    tSymdata *data;
+    symtable_init(&symtable);
+    symtable_create_function(&symtable, "555");
+    symtable_create_function(&symtable, "222");
+    BST_print(&symtable, 0);
+
+    symtable_create_variable(&symtable, "777");
+    BST_print(&symtable, 0);
+
+    if (symtable_search_function(&symtable, "222", &data) == 0)
+    {
+        printf("Function 222 found\n");
+    } else
+    {
+        printf("Function 222 not found\n");
+    }
+    if (data != NULL)
+    {
+        printf("NOT NULL OK\n");
+    }
+
+    if (symtable_search_variable(&symtable, "777", &data) == 0)
+    {
+        printf("Variable 777 found\n");
+    } else
+    {
+        printf("Variable 777 not found\n");
+    }
+    if (data != NULL)
+    {
+        printf("NOT NULL OK\n");
+    }
+
+    symtable_create_variable(&symtable, "999");
+    BST_print(&symtable, 0);
+
+    symtable_delete_symbol(&symtable, "777");
+    BST_print(&symtable, 0);
+
+    symtable_delete_symbol(&symtable, "777");
+    BST_print(&symtable, 0);
+
+    if (symtable_search_variable(&symtable, "777", &data) == 0)
+    {
+        printf("Variable 777 found\n");
+    } else
+    {
+        printf("Variable 777 not found\n");
+    }
+    if (data == NULL)
+    {
+        printf("NULL OK\n");
+    }
+
+    symtable_delete_symbol(&symtable, "555");
+    BST_print(&symtable, 0);
+
+    symtable_dispose(&symtable);
+    BST_print(&symtable, 0);
+    printf("Hello World\n");
+    return 0;
+*/
  }
