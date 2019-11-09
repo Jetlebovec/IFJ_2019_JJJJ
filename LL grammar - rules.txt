@@ -26,12 +26,12 @@
 <return_value> -> Ɛ 
 
 //prikazy ktere se mohou vyskytnout kdekoli v tele programu
-<statement> -> <expression> EOL <statement>
-<statement> -> id <idwhat> EOL <statement>
-<statement> -> if <expression> : EOL INDENT <statement> DEDENT else : EOL INDENT <statement> EOL DEDENT <statement>
-<statement> -> while <expression> : EOL INDENT <statement> EOL DEDENT <statement>
-<statement> -> <function> EOL <statement>
-<statement> -> pass EOL <statement>
+<statement> -> <expression> <statement>
+<statement> -> id <idwhat> <statement>
+<statement> -> if <expression> : EOL INDENT <statement> DEDENT else : EOL INDENT <statement> DEDENT <statement>
+<statement> -> while <expression> : EOL INDENT <statement> DEDENT <statement>
+<statement> -> <function> <statement>
+<statement> -> pass <statement>
 <statement> -> EOL <statement>
 <statement> -> Ɛ
  
