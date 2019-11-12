@@ -11,6 +11,7 @@
 <term_n> -> , <term> 
 <term_n> -> Ɛ 
 
+//function definitions
 <def_function> -> def id ( <params> ) : EOL <eol> INDENT <statement> <return> <statement> dedent
 <params> -> id <param>
 <params> -> Ɛ
@@ -21,6 +22,7 @@
 <return_value> -> <expression>
 <return_value> -> Ɛ 
 
+//infinite eol chain
 <eol> -> EOL <eol>
 <eol> -> Ɛ
 
@@ -40,4 +42,3 @@
 //do promenne muze byt prirazen vysledek volane fce nebo hodnota vyrazu(prirazeni jine samostatne prom. se vyhodnocuje jako vyraz)
 <assign> -> id( <term_n> )
 <assign> -> <expression>
-<assign> -> <function>
