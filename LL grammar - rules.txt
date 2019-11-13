@@ -4,7 +4,7 @@
 <program> -> EOF
 
 //term_n je potreba pro volani fce kde muze byt vicekrat za sebou oddelen carkou
-<term> -> <value> <term_n>
+<term> -> value <term_n>
 <term> -> id <term_n>
 <term> -> None <term_n>
 <term> -> Ɛ
