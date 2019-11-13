@@ -12,11 +12,12 @@
 <term_n> -> Ɛ 
 
 //function definitions
-<def_function> -> def id ( <params> ) : EOL <eol> INDENT <statement> <return> <statement> dedent
-<params> -> id <param>
-<params> -> Ɛ
-<param> -> , id <param>
+<def_function> -> def id ( <param> ) : EOL <eol> INDENT <statement> <return> <statement> DEDENT
+<param> -> id <param_n>
 <param> -> Ɛ
+<param_n> -> , <param>
+<param_n> -> Ɛ
+
 <return> -> return <return_value> EOL <eol>
 <return> -> Ɛ
 <return_value> -> <expression>
@@ -37,8 +38,8 @@
 
 //id muze byt bud promenna nebo nazev fce
 <idwhat> -> = <assign>
-<idwhat> -> ( <term_n> )
+<idwhat> -> ( <term> )
 
 //do promenne muze byt prirazen vysledek volane fce nebo hodnota vyrazu(prirazeni jine samostatne prom. se vyhodnocuje jako vyraz)
-<assign> -> id( <term_n> )
+<assign> -> id( <term> )
 <assign> -> <expression>
