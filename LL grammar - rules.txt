@@ -12,28 +12,23 @@
 <term_n> -> Ɛ 
 
 //function definitions
-<def_function> -> def id ( <param> ) : EOL <eol> INDENT <statement> <return> <statement> DEDENT
+<def_function> -> def id ( <param> ) : EOL INDENT <statement> <return> <statement> DEDENT
 <param> -> id <param_n>
 <param> -> Ɛ
 <param_n> -> , <param>
 <param_n> -> Ɛ
 
-<return> -> return <return_value> EOL <eol>
+<return> -> return <return_value> EOL
 <return> -> Ɛ
 <return_value> -> <expression>
 <return_value> -> Ɛ 
 
-//infinite eol chain
-<eol> -> EOL <eol>
-<eol> -> Ɛ
-
 //prikazy ktere se mohou vyskytnout kdekoli v tele programu
-<statement> -> <expression> EOL <eol> <statement>
-<statement> -> id <idwhat> EOL <eol> <statement>
-<statement> -> if <expression> : EOL <eol> INDENT <statement> DEDENT else : EOL <eol> INDENT <statement> DEDENT <statement>
-<statement> -> while <expression> : EOL <eol> INDENT <statement> DEDENT <statement>
+<statement> -> <expression> EOL <statement>
+<statement> -> id <idwhat> EOL <statement>
+<statement> -> if <expression> : EOL INDENT <statement> DEDENT else : EOL INDENT <statement> DEDENT <statement>
+<statement> -> while <expression> : EOL INDENT <statement> DEDENT <statement>
 <statement> -> pass EOL <statement>
-<statement> -> EOL <statement>
 <statement> -> Ɛ
 
 //id muze byt bud promenna nebo nazev fce
