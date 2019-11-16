@@ -1,5 +1,4 @@
 //Kdekoli v hlavnim tele programu se muze vyskytnout statement nebo definice fce
-0. <program> -> EOL <program>
 1. <program> -> <statement> <program>
 2. <program> -> <def_function> <program>
 3. <program> -> EOF
