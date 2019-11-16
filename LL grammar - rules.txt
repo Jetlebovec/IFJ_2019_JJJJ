@@ -1,40 +1,40 @@
 //Kdekoli v hlavnim tele programu se muze vyskytnout statement nebo definice fce
-<program> -> <statement> <program>
-<program> -> <def_function> <program>
-<program> -> EOF
+1. <program> -> <statement> <program>
+2. <program> -> <def_function> <program>
+3. <program> -> EOF
 
 //term_n je potreba pro volani fce kde muze byt vicekrat za sebou oddelen carkou
-<term> -> value <term_n>
-<term> -> id <term_n>
-<term> -> None <term_n>
-<term> -> Ɛ
-<term_n> -> , <term> 
-<term_n> -> Ɛ 
+4. <term> -> value <term_n>
+5. <term> -> id <term_n>
+6. <term> -> None <term_n>
+7. <term> -> Ɛ
+8. <term_n> -> , <term> 
+9. <term_n> -> Ɛ 
 
 //function definitions
-<def_function> -> def id ( <param> ) : EOL INDENT <statement> <return> <statement> DEDENT
-<param> -> id <param_n>
-<param> -> Ɛ
-<param_n> -> , <param>
-<param_n> -> Ɛ
+10. <def_function> -> def id ( <param> ) : EOL INDENT <statement> <return> <statement> DEDENT
+11. <param> -> id <param_n>
+12. <param> -> Ɛ
+13. <param_n> -> , <param>
+14. <param_n> -> Ɛ
 
-<return> -> return <return_value> EOL
-<return> -> Ɛ
-<return_value> -> <expression>
-<return_value> -> Ɛ 
+15. <return> -> return <return_value> EOL
+16. <return> -> Ɛ
+17. <return_value> -> <expression>
+18. <return_value> -> Ɛ 
 
 //prikazy ktere se mohou vyskytnout kdekoli v tele programu
-<statement> -> <expression> EOL <statement>
-<statement> -> id <idwhat> EOL <statement>
-<statement> -> if <expression> : EOL INDENT <statement> DEDENT else : EOL INDENT <statement> DEDENT <statement>
-<statement> -> while <expression> : EOL INDENT <statement> DEDENT <statement>
-<statement> -> pass EOL <statement>
-<statement> -> Ɛ
+19. <statement> -> <expression> EOL <statement>
+20. <statement> -> id <idwhat> EOL <statement>
+21. <statement> -> if <expression> : EOL INDENT <statement> DEDENT else : EOL INDENT <statement> DEDENT <statement>
+22. <statement> -> while <expression> : EOL INDENT <statement> DEDENT <statement>
+23. <statement> -> pass EOL <statement>
+24. <statement> -> Ɛ
 
 //id muze byt bud promenna nebo nazev fce
-<idwhat> -> = <assign>
-<idwhat> -> ( <term> )
+25. <idwhat> -> = <assign>
+26. <idwhat> -> ( <term> )
 
 //do promenne muze byt prirazen vysledek volane fce nebo hodnota vyrazu(prirazeni jine samostatne prom. se vyhodnocuje jako vyraz)
-<assign> -> id( <term> )
-<assign> -> <expression>
+27. <assign> -> id( <term> )
+28. <assign> -> <expression>
