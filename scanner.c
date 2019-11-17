@@ -32,7 +32,8 @@ char* keywords[KEYWORD_COUNT] =
 };
 
 // If the last token was EOL, indentation will not be ignored
-int last_token_eol = 0;
+// If file begins with EOL, the EOL is ignored
+int last_token_eol = 1;
 
 int isCharAlpha(char c)
 {
@@ -229,8 +230,12 @@ int get_token(Token *token, FILE *file)
                 {
                     if (c == '\n')
                     {
-                        token->type = TOKEN_EOL;
-                        return finalize(token);
+                        // Multiple EOLs are ignored
+                        if (last_token_eol == 0)
+                        {
+                            token->type = TOKEN_EOL;
+                            return finalize(token);
+                        }
                     }
                     state = stSTART;
                 }
@@ -687,8 +692,35 @@ int get_token(Token *token, FILE *file)
             case stDOC_STRING_UNFINISHED_B:
                 if (c == '\"')
                 {
-                    token->type = TOKEN_DOC_STRING;
-                    return finalize(token);
+                    // If the last token was EOL, this docstring is a multiline comment
+                    if (last_token_eol == 1)
+                    {
+                        // Ignores it
+                        string_clear(token->attribute);
+                        // Makes sure the rest of the line after the docstring is whitespace only
+                        while (file)
+                        {
+                            c = getc(file);
+                            if (c == ' ')
+                            {
+                                continue;
+                            } else if (c == '\n' || c == -1)
+                            {
+                                ungetc(c, file);
+                                break;
+                            } else
+                            {
+                                token->type = TOKEN_UNDEFINED;
+                                return 1;
+                            }
+                        }
+                        state = stSTART;
+                    } else
+                    {
+                        // Otherwise this docstring is a string literal
+                        token->type = TOKEN_STRING;
+                        return finalize(token);
+                    }
                 } else
                 {
                     token->type = TOKEN_UNDEFINED;
@@ -720,7 +752,7 @@ int get_token(Token *token, FILE *file)
                 {
                     indentation_counter++;
                     state = stINDENTATION_COUNT;
-                } else if (c == '#' || c == '\n' || c == -1/*|| c == '\"'*/ )
+                } else if (c == '#' || c == '\n' || c == -1 || c == '"')
                 {
                     // Ignores the indentation if the line is empty or commented
                     ungetc(c, file);
