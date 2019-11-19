@@ -15,6 +15,137 @@
 #include <stdlib.h>
 #include "parser.h"
 
+int program(prog_data* data);
+int statement(prog_data* data);
+int def_function(prog_data* data);
+int term(prog_data* data);
+int term_n(prog_data* data);
+int param(prog_data* data);
+int param_n(prog_data* data);
+int statement_fun(prog_data* data);
+int return_value(prog_data* data);
+int idwhat(prog_data* data);
+int assign(prog_data* data);
+
+
+
+int program(prog_data* data) {
+
+    get_token(data->token, data->file);
+
+
+    //<program> -> <def_function> <program>
+    if (string_compare(data->token.attribute, "def")) {
+
+        if(!def_function(data)) {
+            return 1;
+        }
+        return program(data);
+    }
+
+    //<program> -> <statement> <program>
+    if (string_compare(data->token.attribute, "if")
+        || string_compare(data->token.attribute, "while")
+        || string_compare(data->token.attribute, "pass")
+        || data->token.type == TOKEN_IDENTIFIER
+        )
+    {
+        if (!statement(data)) {
+            return 1;
+        }
+        return program(data);
+    }
+
+    //<program> -> EOF
+    if (data->token.type == TOKEN_EOF) {
+        return 0;
+    }
+    else {
+        return 1;
+    }
+
+}
+
+
+int statement(prog_data* data)
+{
+
+
+}
+
+
+int def_function(prog_data* data)
+{
+
+
+}
+
+int statement_fun(prog_data* data)
+{
+
+
+}
+
+int idwhat(prog_data* data)
+{
+
+
+}
+
+int term(prog_data* data)
+{
+    get_token(data->token, data->file);
+
+    //<term> -> value <term_n>
+    //<term> -> id <term_n>
+    //<term> -> None <term_n>
+    if (data->token.type == TOKEN_STRING ||
+        data->token.type == TOKEN_NUM ||
+        data->token.type == TOKEN_NUM_DEC ||
+        data->token.type == TOKEN_NUM_EXP ||
+        data->token.type == TOKEN_IDENTIFIER ||
+        string_compare(data->token.attribute, "None")
+            )
+    {
+        term_n(data);
+    }
+
+    //<term> -> Ɛ
+    return 0; //syntax ok
+
+}
+
+int term_n(prog_data* data)
+{
+
+
+}
+
+int param(prog_data* data)
+{
+
+
+}
+int param_n(prog_data* data)
+{
+
+
+}
+
+
+int assign(prog_data* data)
+{
+
+
+}
+
+
+int return_value(prog_data* data)
+{
+
+
+}
+
 int analyse()
 {
     int err_code = 0;
@@ -62,6 +193,7 @@ int analyse()
     // TESTING WITH FILE
     fclose(file);
     // TESTING WITH FILE
+
 
     //*****************************************************************TEST END
 

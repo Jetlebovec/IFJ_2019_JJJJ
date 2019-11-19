@@ -12,29 +12,36 @@
 9. <term_n> -> Ɛ 
 
 //function definitions
-10. <def_function> -> def id ( <param> ) : EOL INDENT <statement> <return> <statement> DEDENT
+10. <def_function> -> def id ( <param> ) : EOL INDENT <statement_fun> DEDENT
 11. <param> -> id <param_n>
 12. <param> -> Ɛ
 13. <param_n> -> , <param>
 14. <param_n> -> Ɛ
 
-15. <return> -> return <return_value> EOL
-16. <return> -> Ɛ
-17. <return_value> -> <expression>
-18. <return_value> -> Ɛ 
+15. <statement_fun> -> <expression> EOL <statement_fun>
+16. <statement_fun> -> id <idwhat> EOL <statement_fun>
+17. <statement_fun> -> if <expression> : EOL INDENT <statement_fun> DEDENT else : EOL INDENT <statement_fun> DEDENT <statement_fun>
+18. <statement_fun> -> while <expression> : EOL INDENT <statement_fun> DEDENT <statement_fun>
+19. <statement_fun> -> pass EOL <statement_fun>
+20. <statement_fun> -> return <return_value> EOL <statement_fun>
+21. <statement_fun> -> Ɛ
+
+22. <return_value> -> <expression>
+23. <return_value> -> Ɛ 
 
 //prikazy ktere se mohou vyskytnout kdekoli v tele programu
-19. <statement> -> <expression> EOL <statement>
-20. <statement> -> id <idwhat> EOL <statement>
-21. <statement> -> if <expression> : EOL INDENT <statement> DEDENT else : EOL INDENT <statement> DEDENT <statement>
-22. <statement> -> while <expression> : EOL INDENT <statement> DEDENT <statement>
-23. <statement> -> pass EOL <statement>
-24. <statement> -> Ɛ
+24. <statement> -> <expression> EOL <statement>
+25. <statement> -> id <idwhat> EOL <statement>
+26. <statement> -> if <expression> : EOL INDENT <statement> DEDENT else : EOL INDENT <statement> DEDENT <statement>
+27. <statement> -> while <expression> : EOL INDENT <statement> DEDENT <statement>
+28. <statement> -> pass EOL <statement>
+29. <statement> -> Ɛ
 
 //id muze byt bud promenna nebo nazev fce
-25. <idwhat> -> = <assign>
-26. <idwhat> -> ( <term> )
+30. <idwhat> -> = <assign>
+31. <idwhat> -> ( <term> )
 
 //do promenne muze byt prirazen vysledek volane fce nebo hodnota vyrazu(prirazeni jine samostatne prom. se vyhodnocuje jako vyraz)
-27. <assign> -> id( <term> )
-28. <assign> -> <expression>
+32. <assign> -> id( <term> )
+33. <assign> -> <expression>
+
