@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include "scanner.h"
 #include "custom_string.h"
-#include "symtable.h.h"
+#include "symtable.h"
 
 #define LEX_OK			            0
 #define SYNTAX_OK 					0
