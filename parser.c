@@ -35,7 +35,7 @@ int program(prog_data* data) {
 
 
     //<program> -> <def_function> <program>
-    if (string_compare(data->token.attribute, "def")) {
+    if (string_compare_char(data->token.attribute, "def")) {
 
         if(!def_function(data)) {
             return 1;
@@ -44,9 +44,9 @@ int program(prog_data* data) {
     }
 
     //<program> -> <statement> <program>
-    if (string_compare(data->token.attribute, "if")
-        || string_compare(data->token.attribute, "while")
-        || string_compare(data->token.attribute, "pass")
+    if (string_compare_char(data->token.attribute, "if")
+        || string_compare_char(data->token.attribute, "while")
+        || string_compare_char(data->token.attribute, "pass")
         || data->token.type == TOKEN_IDENTIFIER
         )
     {
@@ -104,7 +104,7 @@ int term(prog_data* data)
         data->token.type == TOKEN_NUM_DEC ||
         data->token.type == TOKEN_NUM_EXP ||
         data->token.type == TOKEN_IDENTIFIER ||
-        string_compare(data->token.attribute, "None")
+        string_compare_char(data->token.attribute, "None")
             )
     {
         term_n(data);
