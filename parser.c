@@ -66,12 +66,13 @@ int program(prog_data* data) {
 
     GET_TOKEN(data)
 
+    //error number stored
+    int err = 0;
 
     //<program> -> <def_function> <program>
     if (DEF) {
 
-        //error number stored
-        int err = def_function(data);
+        err = def_function(data);
 
         if(err != 0) {
             return err;
@@ -84,7 +85,7 @@ int program(prog_data* data) {
     if (IS_STATEMENT)
     {
 
-        int err = statement(data);
+        err = statement(data);
 
         if (err != 0) {
             return err;
@@ -123,13 +124,14 @@ int def_function(prog_data* data)
 
     CHECK_TOKEN_TYPE(data, TOKEN_IDENTIFIER)
 
-        //todo sem control
+        //TODO sem control
 
 
     GET_TOKEN(data)
 
     CHECK_TOKEN_TYPE(data, TOKEN_LBRACKET)
 
+    //error number stored
     int err = param(data);
 
     if (err != 0) {
@@ -155,7 +157,7 @@ int def_function(prog_data* data)
     if (IS_STATEMENT_FUN)
     {
 
-        int err = statement_fun(data);
+        err = statement_fun(data);
 
         if (err != 0) {
             return err;
