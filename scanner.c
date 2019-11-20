@@ -296,11 +296,20 @@ int get_token(Token *token, FILE *file)
                 }
                 else if (c == EOF)
                 {
-                    // Pops the stack and generates dedent if the stack is not empty
-                    // If the stack is empty, generates eof
                     eof_reached = 1;
-                    empty_stack(token);
-                    return finalize(token);
+                    // Inserts EOL before EOF if there is none
+                    if (last_token_eol != 1)
+                    {
+                        token->type = TOKEN_EOL;
+                        return finalize(token);
+                    } else
+                    {
+                        // Pops the stack and generates dedent if the stack is not empty
+                        // If the stack is empty, generates eof
+                        eof_reached = 1;
+                        empty_stack(token);
+                        return finalize(token);
+                    }
                 }
                 else
                 {
@@ -662,6 +671,9 @@ int get_token(Token *token, FILE *file)
                 if (c == '\"')
                 {
                     state = stDOC_STRING_UNFINISHED_A;
+                } else if (c == '\\')
+                {
+                    state = stDOC_STRING_ESCAPE;
                 } else if (c > 31 || c == '\n')
                 {
                     if (string_append_char(token->attribute, c) != 0)
@@ -676,6 +688,28 @@ int get_token(Token *token, FILE *file)
                 }
                 break;
             // End of stDOC_STRING_UNFINISHED
+            // stDOC_STRING_ESCAPE
+            case stDOC_STRING_ESCAPE:
+                if (c == '\"')
+                {
+                    // Appends only " if the sequence is \"
+                    if (string_append_char(token->attribute, '\"') != 0)
+                    {
+                        return 99;
+                    }
+                    state = stDOC_STRING_UNFINISHED;
+                } else
+                {
+                    // Appends \ if the sequence is \X, ungets X and returns to the normal state
+                    if (string_append_char(token->attribute, '\\') != 0)
+                    {
+                        return 99;
+                    }
+                    ungetc(c, file);
+                    state = stDOC_STRING_UNFINISHED;
+                }
+                break;
+            // End of st_DOC_STRING_ESCAPE
             // stDOC_STRING_UNFINISHED_A
             case stDOC_STRING_UNFINISHED_A:
                 if (c == '\"')
@@ -683,8 +717,13 @@ int get_token(Token *token, FILE *file)
                     state = stDOC_STRING_UNFINISHED_B;
                 } else
                 {
-                    token->type = TOKEN_UNDEFINED;
-                    return 1;
+                    // Appends the " and returns to the normal docstring state
+                    if (string_append_char(token->attribute, '\"') != 0)
+                    {
+                        return 99;
+                    }
+                    ungetc(c, file);
+                    state = stDOC_STRING_UNFINISHED;
                 }
                 break;
             // End of stDOC_STRING_UNFINISHED_A
@@ -692,6 +731,7 @@ int get_token(Token *token, FILE *file)
             case stDOC_STRING_UNFINISHED_B:
                 if (c == '\"')
                 {
+                    /*
                     // If the last token was EOL, this docstring is a multiline comment
                     if (last_token_eol == 1)
                     {
@@ -721,10 +761,22 @@ int get_token(Token *token, FILE *file)
                         token->type = TOKEN_STRING;
                         return finalize(token);
                     }
+                    */
+                    token->type = TOKEN_STRING;
+                    return finalize(token);
                 } else
                 {
-                    token->type = TOKEN_UNDEFINED;
-                    return 1;
+                    // Appends " 2 times and returns to the normal docstring state
+                    if (string_append_char(token->attribute, '\"') != 0)
+                    {
+                        return 99;
+                    }
+                    if (string_append_char(token->attribute, '\"') != 0)
+                    {
+                        return 99;
+                    }
+                    ungetc(c, file);
+                    state = stDOC_STRING_UNFINISHED;
                 }
                 break;
             // End of stDOC_STRING_UNFINISHED_B
@@ -752,7 +804,7 @@ int get_token(Token *token, FILE *file)
                 {
                     indentation_counter++;
                     state = stINDENTATION_COUNT;
-                } else if (c == '#' || c == '\n' || c == -1 || c == '"')
+                } else if (c == '#' || c == '\n' || c == -1 /*|| c == '"'*/)
                 {
                     // Ignores the indentation if the line is empty or commented
                     ungetc(c, file);

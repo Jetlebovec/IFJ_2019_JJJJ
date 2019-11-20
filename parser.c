@@ -94,6 +94,7 @@ int idwhat(prog_data* data)
 
 int term(prog_data* data)
 {
+
     get_token(data->token, data->file);
 
     //<term> -> value <term_n>
@@ -111,6 +112,7 @@ int term(prog_data* data)
     }
 
     //<term> -> Ɛ
+
     return 0; //syntax ok
 
 }
@@ -163,14 +165,16 @@ int analyse()
     stack_push(&indent_stack, 0);
 
 
-    //****************************************************************TEST START
+
 
     // TESTING WITH FILE
     FILE *file;
     file = fopen("test.txt", "r");
     // TESTING WITH FILE
 
-    // Get new token from the scanner
+    //****************************************************************TEST START
+
+    // Test prints the first 150 tokens from test.txt
     for (int i = 0; i < 150; i++)
     {
         if ((err_code = get_token(&newToken, file)) != 0)
@@ -190,12 +194,12 @@ int analyse()
         }
     }
 
+    //*****************************************************************TEST END
+
     // TESTING WITH FILE
     fclose(file);
     // TESTING WITH FILE
 
-
-    //*****************************************************************TEST END
 
     // Free token
     string_free(newToken.attribute);
