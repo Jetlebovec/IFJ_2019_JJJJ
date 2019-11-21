@@ -278,7 +278,7 @@ int assign(prog_data* data)
 
         //<assign> -> id( <term> )
         //ID is a function
-        if (symtable_search_function(data->global_table, data->token.attribute, *tmp)) {
+        if (symtable_search_function(data->global_table, data->token.attribute.str, *tmp)) {
 
             GET_TOKEN(data)
 
@@ -298,7 +298,7 @@ int assign(prog_data* data)
         //<assign> -> <expression>
         //we in aint in a function
         if (data->local_table == NULL) {
-            if (symtable_search_variable(data->global_table, data->token.attribute, *tmp)) {
+            if (symtable_search_variable(data->global_table, data->token.attribute.str, *tmp)) {
 
                 //TODO expression
                 return SYNTAX_OK
@@ -310,7 +310,7 @@ int assign(prog_data* data)
         }
         //we in function
         if (data->local_table != NULL){
-            if (symtable_search_variable(data->local_table, data->token.attribute, *tmp)) {
+            if (symtable_search_variable(data->local_table, data->token.attribute.str, *tmp)) {
 
                 //TODO expression
                 return SYNTAX_OK
