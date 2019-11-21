@@ -182,12 +182,19 @@ int idwhat(prog_data* data)
     }
     //<idwhat> -> ( <term> )
     else if (data->token.type == TOKEN_LBRACKET) {
-        return term(data);
+        term(data);
     }
     else {
         return SYNTAX_ERR;
     }
 
+    if(data->token.type != TOKEN_RBRACKET) {
+        return SYNTAX_ERR;
+    }
+    else {
+        return SYNTAX_OK;
+    }
+    
 }
 
 // <term> rule
