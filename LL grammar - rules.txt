@@ -40,8 +40,9 @@
 //id muze byt bud promenna nebo nazev fce
 30. <idwhat> -> = <assign>
 31. <idwhat> -> ( <term> )
+32. <idwhat> -> Ɛ
 
 //do promenne muze byt prirazen vysledek volane fce nebo hodnota vyrazu(prirazeni jine samostatne prom. se vyhodnocuje jako vyraz)
-32. <assign> -> id( <term> )
-33. <assign> -> <expression>
+33. <assign> -> id( <term> )
+34. <assign> -> <expression>
 

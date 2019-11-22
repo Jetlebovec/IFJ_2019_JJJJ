@@ -45,13 +45,22 @@ token.type == TOKEN_NUM_DEC ||      \
 token.type == TOKEN_NUM_EXP ||      \
 token.type == TOKEN_IDENTIFIER
 
+//macro to check if token could be beginning of expression
+#define IS_EXPR(token)                 \
+token.type == TOKEN_STRING ||       \
+token.type == TOKEN_NUM ||          \
+token.type == TOKEN_NUM_DEC ||      \
+token.type == TOKEN_NUM_EXP ||      \
+token.type == TOKEN_LBRACKET
+
+
 //checks if we want to use the statement rule
 #define IS_STATEMENT_FUN (IF || WHILE || PASS || RETURN || IS_VALUE(data->token))
 #define IS_STATEMENT (IF || WHILE || PASS || IS_VALUE(data->token))
 
 //getting token and checking if lex err didnt occur
-#define GET_TOKEN(data)                             \
-if(get_token(data->token, data->file) != LEX_OK) {  \
+#define GET_TOKEN(data)                                                   \
+if(get_token(&(data->token), data->file) != LEX_OK) {  \
     return LEX_ERR; }
 
 //checking if we got the expected token
@@ -59,15 +68,34 @@ if(get_token(data->token, data->file) != LEX_OK) {  \
 if(data->token.type != token_type) {   \
     return SYNTAX_ERR; }
 
+//checking if token is expected keyword
+#define CHECK_KEYWORD(data, keyword)   \
+if(string_compare_char(data->token.attribute, keyword)) {   \
+    return SYNTAX_ERR; }
+
+
+int init_global_table(prog_data* data)
+{
+    symtable_init(data->global_table);
+    data->token_loaded = false;
+
+    //TODO first go through program
+}
+
 
 
 // <program> rule
 int program(prog_data* data) {
 
-    GET_TOKEN(data)
+    //if there is no loaded token, get one
+    if(data->token_loaded != true) {
+        GET_TOKEN(data)
+        data->token_loaded = true;
+    }        
 
     //error number stored
     int err = 0;
+
 
     //<program> -> <def_function> <program>
     if (DEF) {
@@ -106,15 +134,271 @@ int program(prog_data* data) {
 
 
 int statement(prog_data* data)
-{
+{   
+    int err = 0;
 
+//<statement> -> <expression> EOL <statement>
+//rozdelil jsem rozpoznavani expressionu, kdyz zacina id bude to resit az pravidlo id what
+//tady bude pripad kdy zacina random hodnotou (cislo, retezec..)
+
+    if(IS_EXPR(data->token))
+    {
+        //TODO expression
+
+        CHECK_TOKEN_TYPE(data, TOKEN_EOL)
+        GET_TOKEN(data)
+        return statement(data);
+    }
+
+// <statement> -> id <idwhat> EOL <statement>
+    if(data->token.type == TOKEN_IDENTIFIER)
+    {
+            
+        if((err = idwhat(data) != 0)) {
+        return err;
+        }
+
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data,TOKEN_EOL)
+
+        GET_TOKEN(data)
+
+        return statement(data);
+    }
+
+//<statement> -> if <expression> : EOL INDENT <statement> DEDENT else : EOL INDENT <statement> DEDENT
+    if(IF) 
+    {        
+        //TODO expression
+
+        CHECK_TOKEN_TYPE(data, TOKEN_COLON)
+
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data, TOKEN_EOL)
+
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data, TOKEN_INDENT)
+
+        GET_TOKEN(data)
+
+        //recursive calling of statement rule
+        if((err = statement(data) != 0)) {
+            return err;
+        }
+
+        CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
+
+        GET_TOKEN(data)
+
+        CHECK_KEYWORD(data, "else")
+
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data,TOKEN_COLON)
+         
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data, TOKEN_EOL)
+
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data, TOKEN_INDENT)
+
+        GET_TOKEN(data)
+
+        if((err = statement(data) != 0)) {
+            return err;
+        }
+
+        CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
+
+        GET_TOKEN(data)
+        return statement(data);
+    }
+
+    //<statement> -> while <expression> : EOL INDENT <statement> DEDENT <statement>
+    if(WHILE) 
+    {
+         //TODO expression
+
+        CHECK_TOKEN_TYPE(data, TOKEN_COLON)
+
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data, TOKEN_EOL)
+
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data, TOKEN_INDENT)
+
+        GET_TOKEN(data)
+
+        if((err = statement(data) != 0)) {
+            return err;
+        }
+
+        CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
+
+        GET_TOKEN(data)
+        return statement(data);
+    }
+
+    //<statement> -> pass EOL <statement>
+    if(PASS)
+    {
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data, TOKEN_EOL)
+
+        return statement(data);
+    }
+
+    //<statement> -> Ɛ
+    return SYNTAX_OK;
 
 }
 
 int statement_fun(prog_data* data)
 {
+    int err = 0;
 
+//<statement_fun> -> <expression> EOL <statement_fun>
 
+    if(IS_EXPR(data->token))
+    {
+        //TODO expression
+
+        CHECK_TOKEN_TYPE(data, TOKEN_EOL)
+        GET_TOKEN(data)
+        return statement_fun(data);
+    }
+
+// <statement_fun> -> id <idwhat> EOL <statement_fun>
+    if(data->token.type == TOKEN_IDENTIFIER)
+    {
+            
+        if((err = idwhat(data) != 0)) {
+        return err;
+        }
+
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data,TOKEN_EOL)
+
+        GET_TOKEN(data)
+
+        return statement_fun(data);
+    }
+
+//<statement_fun> -> if <expression> : EOL INDENT <statement_fun> DEDENT else : EOL INDENT <statement_fun> DEDENT
+    if(IF) 
+    {        
+        //TODO expression
+
+        CHECK_TOKEN_TYPE(data, TOKEN_COLON)
+
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data, TOKEN_EOL)
+
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data, TOKEN_INDENT)
+
+        GET_TOKEN(data)
+
+        //recursive calling of statement_fun rule
+        if((err = statement_fun(data) != 0)) {
+            return err;
+        }
+
+        CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
+
+        GET_TOKEN(data)
+
+        CHECK_KEYWORD(data, "else")
+
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data,TOKEN_COLON)
+         
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data, TOKEN_EOL)
+
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data, TOKEN_INDENT)
+
+        GET_TOKEN(data)
+
+        if((err = statement_fun(data) != 0)) {
+            return err;
+        }
+
+        CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
+
+        GET_TOKEN(data)
+        return statement_fun(data);
+    }
+
+    //<statement_fun> -> while <expression> : EOL INDENT <statement_fun> DEDENT <statement_fun>
+    if(WHILE) 
+    {
+         //TODO expression
+
+        CHECK_TOKEN_TYPE(data, TOKEN_COLON)
+
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data, TOKEN_EOL)
+
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data, TOKEN_INDENT)
+
+        GET_TOKEN(data)
+
+        if((err = statement_fun(data) != 0)) {
+            return err;
+        }
+
+        CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
+
+        GET_TOKEN(data)
+        return statement_fun(data);
+    }
+
+    //<statement_fun> -> pass EOL <statement_fun>
+    if(PASS)
+    {
+        GET_TOKEN(data)
+
+        CHECK_TOKEN_TYPE(data, TOKEN_EOL)
+
+        GET_TOKEN(data)
+        return statement_fun(data);
+    }
+
+//<statement_fun> -> return <return_value> EOL <statement_fun>
+    if(RETURN)
+    {   
+        if((err = return_value(data)) != 0) {
+            return err;
+        }
+
+        CHECK_TOKEN_TYPE(data, TOKEN_EOL)
+
+        GET_TOKEN(data)
+
+        return statement_fun(data);
+    }
+
+    //<statement_fun> -> Ɛ
+    return SYNTAX_OK;
 }
 
 //<def_function> rule
@@ -168,13 +452,17 @@ int def_function(prog_data* data)
     }
 
     CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
-
+    data->token_loaded = false;
 }
 
 //<idwhat> rule
 int idwhat(prog_data* data)
 {
+
     GET_TOKEN(data)
+
+    //pozn.: muze prijit operator a bude se vyhodnocovat jako vyraz
+    
 
     //<idwhat> -> = <assign>
     if (data->token.type == TOKEN_ASSIGN) {
@@ -308,7 +596,7 @@ int assign(prog_data* data)
             if (symtable_search_variable(data->global_table, data->token.attribute.str, *tmp)) {
 
                 //TODO expression
-                return SYNTAX_OK
+                return SYNTAX_OK;
 
             }
             else {
@@ -320,7 +608,7 @@ int assign(prog_data* data)
             if (symtable_search_variable(data->local_table, data->token.attribute.str, *tmp)) {
 
                 //TODO expression
-                return SYNTAX_OK
+                return SYNTAX_OK;
 
             }
             else {

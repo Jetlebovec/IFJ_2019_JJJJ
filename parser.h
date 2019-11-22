@@ -40,6 +40,8 @@ typedef struct {
 
     Token token; //
 
+    bool token_loaded;  //overeni, zda nacitat novy token 
+
 } prog_data;
 
 /**
