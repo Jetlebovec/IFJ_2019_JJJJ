@@ -264,18 +264,90 @@ int param_n(prog_data* data)
 
 }
 
-
+//<assign> rule
+//TODO : check everything and try to simplify with macros
 int assign(prog_data* data)
 {
+    GET_TOKEN(data)
 
+    if (IS_VALUE(data->token)) {
+
+        int err = 0;
+        //temporary data pointer to symtable
+        tSymdata **tmp;
+
+        if (data->token.type != TOKEN_IDENTIFIER) {
+
+            //TODO expression
+
+            return SYNTAX_OK;
+        }
+
+        //<assign> -> id( <term> )
+        //ID is a function
+        if (symtable_search_function(data->global_table, data->token.attribute.str, *tmp)) {
+
+            GET_TOKEN(data)
+
+            CHECK_TOKEN_TYPE(data, TOKEN_LBRACKET)
+
+            err = term(data);
+
+            if (err != 0) {
+                return err;
+            }
+
+            CHECK_TOKEN_TYPE(data, TOKEN_RBRACKET)
+
+            return SYNTAX_OK;
+        }
+
+        //<assign> -> <expression>
+        //we in aint in a function
+        if (data->local_table == NULL) {
+            if (symtable_search_variable(data->global_table, data->token.attribute.str, *tmp)) {
+
+                //TODO expression
+                return SYNTAX_OK
+
+            }
+            else {
+                return SEM_UNDEF_ERR;
+            }
+        }
+        //we in function
+        if (data->local_table != NULL){
+            if (symtable_search_variable(data->local_table, data->token.attribute.str, *tmp)) {
+
+                //TODO expression
+                return SYNTAX_OK
+
+            }
+            else {
+                return SEM_UNDEF_ERR;
+            }
+        }
+
+    }
+    else {
+        return SYNTAX_ERR;
+    }
+
+    //TODO
 
 }
 
-
+//<return_value> rule
 int return_value(prog_data* data)
 {
-
-
+    //<return_value> -> <expression>
+    if (IS_VALUE(data->token)) {
+        //TODO expressions
+    }
+    //<return_value> -> Ɛ
+    else {
+        return SYNTAX_OK;
+    }
 }
 
 int analyse()
