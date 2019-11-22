@@ -470,6 +470,7 @@ int idwhat(prog_data* data)
     if (data->token.type == TOKEN_ASSIGN) {
         return assign(data);
     }
+
     //<idwhat> -> ( <term> )
     else if (data->token.type == TOKEN_LBRACKET) {
         term(data);
