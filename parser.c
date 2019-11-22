@@ -60,9 +60,9 @@ token.type == TOKEN_LBRACKET
 #define IS_STATEMENT (IF || WHILE || PASS || IS_VALUE(data->token))
 
 //getting token and checking if lex err didnt occur
-#define GET_TOKEN(data)                                                   \
-if(get_token(&(data->token), data->file) != LEX_OK) {  \
-    return LEX_ERR; }
+#define GET_TOKEN(data)                         \
+err = get_token(&(data->token), data->file);    \
+if (err != 0) { return err; }
 
 //checking if we got the expected token
 #define CHECK_TOKEN_TYPE(data, token_type)   \
@@ -89,15 +89,14 @@ int init_global_table(prog_data* data)
 // <program> rule
 int program(prog_data* data) {
 
+    //error number stored
+    int err = 0;
+
     //if there is no loaded token, get one
     if(data->token_loaded != true) {
         GET_TOKEN(data)
         data->token_loaded = true;
-    }        
-
-    //error number stored
-    int err = 0;
-
+    }
 
     //<program> -> <def_function> <program>
     if (DEF) {
@@ -406,6 +405,9 @@ int statement_fun(prog_data* data)
 //<def_function> rule
 int def_function(prog_data* data)
 {
+    //error number stored
+    int err = 0;
+
     GET_TOKEN(data)
 
     CHECK_TOKEN_TYPE(data, TOKEN_IDENTIFIER)
@@ -417,8 +419,7 @@ int def_function(prog_data* data)
 
     CHECK_TOKEN_TYPE(data, TOKEN_LBRACKET)
 
-    //error number stored
-    int err = param(data);
+    err = param(data);
 
     if (err != 0) {
         return err;
@@ -460,6 +461,8 @@ int def_function(prog_data* data)
 //<idwhat> rule
 int idwhat(prog_data* data)
 {
+    //error number stored
+    int err = 0;
 
     GET_TOKEN(data)
 
@@ -496,6 +499,9 @@ int idwhat(prog_data* data)
 // <term> rule
 int term(prog_data* data)
 {
+    //error number stored
+    int err = 0;
+
     GET_TOKEN(data)
 
     //<term> -> value <term_n>
@@ -516,6 +522,9 @@ int term(prog_data* data)
 // <term_n> rule
 int term_n(prog_data* data)
 {
+    //error number stored
+    int err = 0;
+
     GET_TOKEN(data)
 
     //<term_n> -> , <term>
@@ -531,6 +540,9 @@ int term_n(prog_data* data)
 // <param> rule
 int param(prog_data* data)
 {
+    //error number stored
+    int err = 0;
+
     GET_TOKEN(data)
 
     //<param> -> id
@@ -548,6 +560,9 @@ int param(prog_data* data)
 // <param_n> rule
 int param_n(prog_data* data)
 {
+    //error number stored
+    int err = 0;
+
     GET_TOKEN(data)
 
     //<param_n> -> , <param>
@@ -564,11 +579,13 @@ int param_n(prog_data* data)
 //TODO : check everything and try to simplify with macros
 int assign(prog_data* data)
 {
+    //error number stored
+    int err = 0;
+
     GET_TOKEN(data)
 
     if (IS_VALUE(data->token)) {
 
-        int err = 0;
         //temporary data pointer to symtable
         tSymdata **tmp;
 
