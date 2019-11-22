@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parser.h"
+//#include "token_list.h"
 
 //function prototypes
 int program(prog_data* data);
@@ -76,8 +77,9 @@ if(string_compare_char(data->token.attribute, keyword)) {   \
 
 int init_global_table(prog_data* data)
 {
-    symtable_init(data->global_table);
+    symtable_init(data->global_table);    
     data->token_loaded = false;
+
 
     //TODO first go through program
 }
@@ -471,17 +473,22 @@ int idwhat(prog_data* data)
     //<idwhat> -> ( <term> )
     else if (data->token.type == TOKEN_LBRACKET) {
         term(data);
-    }
-    else {
-        return SYNTAX_ERR;
+        if(data->token.type != TOKEN_RBRACKET) {
+            return SYNTAX_ERR;
+        }
+        else {
+            return SYNTAX_OK;
+        }
     }
 
-    if(data->token.type != TOKEN_RBRACKET) {
-        return SYNTAX_ERR;
-    }
+    //<idwhat> -> Ɛ (id muze byt samotne na radku pokud bylo definovano)
     else {
+
+        //TODO sem control
         return SYNTAX_OK;
     }
+
+    
     
 }
 

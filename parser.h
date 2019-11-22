@@ -20,6 +20,7 @@
 #include "scanner.h"
 #include "custom_string.h"
 #include "symtable.h"
+//#include "token_list.h"
 
 #define LEX_OK			            0
 #define SYNTAX_OK 					0
@@ -35,6 +36,8 @@
 typedef struct {
     tBSTNodePtr *global_table;        // Global symbol table
     tBSTNodePtr *local_table;        // Local symbol table
+
+    //tDLList token_list; //list of all tokens
 
     FILE *file; //soubor, ze kterého čte scanner
 
