@@ -180,6 +180,7 @@ int idwhat(prog_data* data)
     if (data->token.type == TOKEN_ASSIGN) {
         return assign(data);
     }
+
     //<idwhat> -> ( <term> )
     else if (data->token.type == TOKEN_LBRACKET) {
         term(data);
@@ -187,12 +188,12 @@ int idwhat(prog_data* data)
     else {
         return SYNTAX_ERR;
     }
-
-    if(data->token.type != TOKEN_RBRACKET) {
-        return SYNTAX_ERR;
+    //after reading terms
+    if(data->token.type == TOKEN_RBRACKET) {
+        return SYNTAX_OK;
     }
     else {
-        return SYNTAX_OK;
+        return SYNTAX_ERR;
     }
     
 }
