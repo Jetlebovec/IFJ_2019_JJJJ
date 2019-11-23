@@ -139,6 +139,7 @@ int statement(prog_data* data)
 //rozdelil jsem rozpoznavani expressionu, kdyz zacina id bude to resit az pravidlo id what
 //tady bude pripad kdy zacina random hodnotou (cislo, retezec..)
 
+// <statement> -> <expression> EOL <statement>
     if(IS_EXPR(data->token))
     {
         //TODO expression
@@ -151,14 +152,16 @@ int statement(prog_data* data)
 // <statement> -> id <idwhat> EOL <statement>
     if(data->token.type == TOKEN_IDENTIFIER)
     {
-            
-        if((err = idwhat(data) != 0)) {
-        return err;
+
+        err = idwhat(data);
+
+        if(err != 0) {
+            return err;
         }
 
         GET_TOKEN(data)
 
-        CHECK_TOKEN_TYPE(data,TOKEN_EOL)
+        CHECK_TOKEN_TYPE(data, TOKEN_EOL)
 
         GET_TOKEN(data)
 
@@ -183,7 +186,9 @@ int statement(prog_data* data)
         GET_TOKEN(data)
 
         //recursive calling of statement rule
-        if((err = statement(data) != 0)) {
+        err = statement(data);
+
+        if(err != 0) {
             return err;
         }
 
@@ -207,7 +212,10 @@ int statement(prog_data* data)
 
         GET_TOKEN(data)
 
-        if((err = statement(data) != 0)) {
+        //recursive statement call
+        err = statement(data);
+
+        if(err != 0) {
             return err;
         }
 
@@ -234,7 +242,10 @@ int statement(prog_data* data)
 
         GET_TOKEN(data)
 
-        if((err = statement(data) != 0)) {
+        //recursive statement
+        err = statement(data);
+
+        if(err != 0) {
             return err;
         }
 
@@ -277,9 +288,11 @@ int statement_fun(prog_data* data)
 // <statement_fun> -> id <idwhat> EOL <statement_fun>
     if(data->token.type == TOKEN_IDENTIFIER)
     {
-            
-        if((err = idwhat(data) != 0)) {
-        return err;
+
+        err = idwhat(data);
+
+        if(err != 0) {
+            return err;
         }
 
         GET_TOKEN(data)
@@ -308,8 +321,9 @@ int statement_fun(prog_data* data)
 
         GET_TOKEN(data)
 
-        //recursive calling of statement_fun rule
-        if((err = statement_fun(data) != 0)) {
+        err = statement_fun(data);
+
+        if(err != 0) {
             return err;
         }
 
@@ -333,7 +347,9 @@ int statement_fun(prog_data* data)
 
         GET_TOKEN(data)
 
-        if((err = statement_fun(data) != 0)) {
+        err = statement_fun(data);
+
+        if(err != 0) {
             return err;
         }
 
@@ -360,7 +376,9 @@ int statement_fun(prog_data* data)
 
         GET_TOKEN(data)
 
-        if((err = statement_fun(data) != 0)) {
+        err = statement_fun(data);
+
+        if(err != 0) {
             return err;
         }
 
@@ -383,8 +401,12 @@ int statement_fun(prog_data* data)
 
 //<statement_fun> -> return <return_value> EOL <statement_fun>
     if(RETURN)
-    {   
-        if((err = return_value(data)) != 0) {
+    {
+        GET_TOKEN(data)
+
+        err = return_value(data);
+
+        if(err != 0) {
             return err;
         }
 
