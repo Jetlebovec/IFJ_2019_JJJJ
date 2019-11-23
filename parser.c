@@ -124,12 +124,9 @@ int program(prog_data* data) {
     }
 
     //<program> -> EOF
-    if (data->token.type == TOKEN_EOF) {
-        return SYNTAX_OK;
-    }
-    else {
-        return SYNTAX_ERR;
-    }
+    CHECK_TOKEN_TYPE(data, TOKEN_EOF)
+
+    return SYNTAX_OK;
 
 }
 
@@ -675,7 +672,29 @@ int analyse()
     stack_push(&indent_stack, 0);
 
 
+    //create the structure to store parser data
+    prog_data Data;
 
+    //initialize the global symtable
+    tBSTNodePtr *global_table;
+    symtable_init(global_table);
+
+    //initialize the structure to store parser data
+    Data.token = newToken;
+    Data.local_table = NULL;
+    Data.global_table = global_table;
+    Data.file = stdin;
+    Data.token_loaded = 0;
+
+    init_global_table(&(Data));
+
+    //starting the recursive descent
+    err_code = program(&(Data));
+
+    symtable_dispose(global_table);
+
+
+    /*
 
     // TESTING WITH FILE
     FILE *file;
@@ -709,6 +728,8 @@ int analyse()
     // TESTING WITH FILE
     fclose(file);
     // TESTING WITH FILE
+
+     */
 
 
     // Free token
