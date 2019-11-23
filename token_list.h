@@ -17,6 +17,7 @@ typedef struct {                                  /* dvousměrně vázaný sezna
 void DLInitList (tDLList *);
 void DLDisposeList (tDLList *);
 void DLInsertLast(tDLList *, Token *token);
+void DLDeleteFirst (tDLList *L);
 void DLFirst (tDLList *);
 void DLLast (tDLList *);
 int DLActive (tDLList *);
