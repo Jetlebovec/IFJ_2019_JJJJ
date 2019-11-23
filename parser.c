@@ -75,17 +75,6 @@ if(string_compare_char(data->token.attribute, keyword)) {   \
     return SYNTAX_ERR; }
 
 
-int init_global_table(prog_data* data)
-{
-    symtable_init(data->global_table);    
-    data->token_loaded = false;
-
-
-    //TODO first go through program
-}
-
-
-
 // <program> rule
 int program(prog_data* data) {
 
@@ -483,10 +472,11 @@ int idwhat(prog_data* data)
     //error number stored
     int err = 0;
 
+    //ulozeni predchoziho
+
     GET_TOKEN(data)
 
     //pozn.: muze prijit operator a bude se vyhodnocovat jako vyraz
-    
 
     //<idwhat> -> = <assign>
     if (data->token.type == TOKEN_ASSIGN) {
@@ -707,8 +697,6 @@ int analyse()
     Data.global_table = global_table;
     Data.file = stdin;
     Data.token_loaded = 0;
-
-    init_global_table(&(Data));
 
     //starting the recursive descent
     err_code = program(&(Data));
