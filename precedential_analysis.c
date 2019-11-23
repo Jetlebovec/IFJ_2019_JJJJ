@@ -107,19 +107,15 @@ Prec_table_index get_symbol_index(Token* token)
 	}
 }
 
-//get first token from list and delete it
-Token load_token(prog_data* data)
-{    
-    Token token = data->expression_list.First->token;
-    DLDeleteFirst(&(data->expression_list));     
-    return token;   
-}
+//access to current token
+#define TOKEN data->expression_list.First->token
+//get next token
+#define NEXT_TOKEN DLDeleteFirst(&(data->expression_list));
 
 //main function for expression handle
 int expression(prog_data* data)
 {
     //TODO stack 
-    //start with first token)
+    //start with first token
 
-    Token token = load_token(data);
 }
