@@ -605,6 +605,7 @@ int idwhat(prog_data* data)
     if (err != 0) {
         return err;
     }
+    //zkopirujeme tokenu typ a atribut
     temp.type = data->token.type;
     if(string_copy(&temp.attribute, &data->token.attribute) != 0) {
         return ERROR_INTERNAL;
@@ -678,8 +679,6 @@ int idwhat(prog_data* data)
         //TODO sem control
         return SYNTAX_OK;
     }
-
-    
     
 }
 
@@ -806,13 +805,29 @@ int assign(prog_data* data) {
         return SYNTAX_OK;
     }
 
+    //ulozeni predchoziho tokenu - identifikator promenne, dulezite asf
+    Token temp;
+    init_token(&temp, &err);
+    if (err != 0) {
+        return err;
+    }
+    //zkopirujeme tokenu typ a atribut
+    temp.type = data->token.type;
+    if(string_copy(&temp.attribute, &data->token.attribute) != 0) {
+        return ERROR_INTERNAL;
+    }
+    //token ulozen jako temp
+
+    GET_TOKEN(data)
+
     //<assign> -> id( <term> )
     //ID is a function
-    if (symtable_search_function(data->global_table, data->token.attribute.str, *tmp)) {
+    if (data->token.type == TOKEN_LBRACKET) {
 
-        GET_TOKEN(data)
+        //TODO sem action
 
-        CHECK_TOKEN_TYPE(data, TOKEN_LBRACKET)
+        string_free(temp.attribute);
+        free(temp.attribute);
 
         err = term(data);
 
@@ -826,29 +841,41 @@ int assign(prog_data* data) {
     }
 
     //<assign> -> <expression>
-    //TODO expression
+    if(IS_OP(data->token))
+    {
+        //EXPRESSION
+        //we add the whole expression until eol is found into List
+        tDLList expr;
+        DLInitList(&expr);
 
-    /*
-    //we aint in a function
-    if (data->local_table == NULL) {
-        if (symtable_search_variable(data->global_table, data->token.attribute.str, *tmp)) {
-
-            return SYNTAX_OK;
-
-        } else {
-            return SEM_UNDEF_ERR;
+        //WE NEED TO STORE THE PREVIOUS TOKEN FIRST
+        DLInsertLast(&expr, &temp, &err);
+        if (err != 0) {
+            return err;
         }
+        string_free(temp.attribute);
+        free(temp.attribute);
+
+        //storing rest of the expression
+        while(data->token.type != TOKEN_EOL)
+        {
+            DLInsertLast(&expr, &data->token, &err);
+            if (err != 0) {
+                return err;
+            }
+            GET_TOKEN(data)
+        }
+
+        data->expression_list = expr;
+        err = expression(data);   //precedential analysis
+        if (err != 0) {
+            return err;
+        }
+        DLDisposeList(&expr);
     }
-    //we in function
-    if (data->local_table != NULL) {
-        if (symtable_search_variable(data->local_table, data->token.attribute.str, *tmp)) {
-
-            return SYNTAX_OK;
-
-        } else {
-            return SEM_UNDEF_ERR;
-        }
-    }*/
+    else {
+        return SYNTAX_ERR;
+    }
 
 }
 
