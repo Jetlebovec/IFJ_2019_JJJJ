@@ -53,6 +53,20 @@ token.type == TOKEN_NUM_DEC ||      \
 token.type == TOKEN_NUM_EXP ||      \
 token.type == TOKEN_LBRACKET
 
+//macro to check if token is operator
+#define IS_OP(token)                 \
+token.type == TOKEN_PLUS ||          \
+token.type == TOKEN_MINUS ||         \
+token.type == TOKEN_MULTI ||        \
+token.type == TOKEN_INT_DIV ||      \
+token.type == TOKEN_FLOAT_DIV ||    \
+token.type == TOKEN_GREATER ||      \
+token.type == TOKEN_GREATER_EQUAL || \
+token.type == TOKEN_LESSER  ||      \
+token.type == TOKEN_LESSER_EQUAL || \
+token.type == TOKEN_EQUAL ||        \
+token.type == TOKEN_NOT_EQUAL
+
 
 //checks if we want to use the statement rule
 #define IS_STATEMENT_FUN (IF || WHILE || PASS || RETURN || IS_VALUE(data->token))
@@ -585,19 +599,68 @@ int idwhat(prog_data* data)
     //error number stored
     int err = 0;
 
-    //ulozeni predchoziho
+    //ulozeni predchoziho tokenu - identifikator promenne, dulezite asf
+    Token temp;
+    init_token(&temp, &err);
+    if (err != 0) {
+        return err;
+    }
+    temp.type = data->token.type;
+    if(string_copy(&temp.attribute, &data->token.attribute) != 0) {
+        return ERROR_INTERNAL;
+    }
+    //token ulozen jako temp
 
     GET_TOKEN(data)
 
-    //pozn.: muze prijit operator a bude se vyhodnocovat jako vyraz
+    //muze prijit operator a bude se vyhodnocovat jako vyraz
+    if(IS_OP(data->token))
+    {
+        //EXPRESSION
+        //we add the whole expression until eol is found into List
+        tDLList expr;
+        DLInitList(&expr);
+
+        //WE NEED TO STORE THE PREVIOUS TOKEN FIRST
+        DLInsertLast(&expr, &temp, &err);
+        if (err != 0) {
+            return err;
+        }
+        string_free(temp.attribute);
+        free(temp.attribute);
+
+        //storing rest of the expression
+        while(data->token.type != TOKEN_EOL)
+        {
+            DLInsertLast(&expr, &data->token, &err);
+            if (err != 0) {
+                return err;
+            }
+            GET_TOKEN(data)
+        }
+
+        data->expression_list = expr;
+        err = expression(data);   //precedential analysis
+        if (err != 0) {
+            return err;
+        }
+        DLDisposeList(&expr);
+    }
 
     //<idwhat> -> = <assign>
     if (data->token.type == TOKEN_ASSIGN) {
+
+        string_free(temp.attribute);
+        free(temp.attribute);
+
         return assign(data);
     }
 
     //<idwhat> -> ( <term> )
     else if (data->token.type == TOKEN_LBRACKET) {
+        string_free(temp.attribute);
+        free(temp.attribute);
+
         term(data);
         if(data->token.type != TOKEN_RBRACKET) {
             return SYNTAX_ERR;
@@ -609,6 +672,8 @@ int idwhat(prog_data* data)
 
     //<idwhat> -> Ɛ (id muze byt samotne na radku pokud bylo definovano)
     else {
+        string_free(temp.attribute);
+        free(temp.attribute);
 
         //TODO sem control
         return SYNTAX_OK;
@@ -761,11 +826,13 @@ int assign(prog_data* data) {
     }
 
     //<assign> -> <expression>
+    //TODO expression
+
+    /*
     //we aint in a function
     if (data->local_table == NULL) {
         if (symtable_search_variable(data->global_table, data->token.attribute.str, *tmp)) {
 
-            //TODO expression
             return SYNTAX_OK;
 
         } else {
@@ -776,13 +843,12 @@ int assign(prog_data* data) {
     if (data->local_table != NULL) {
         if (symtable_search_variable(data->local_table, data->token.attribute.str, *tmp)) {
 
-            //TODO expression
             return SYNTAX_OK;
 
         } else {
             return SEM_UNDEF_ERR;
         }
-    }
+    }*/
 
 }
 
@@ -826,9 +892,11 @@ void init_token(Token *token, int *error_code){
         token.attribute = (tString*) malloc(sizeof(tString));
         if (token.attribute == NULL)
         {
-            error_code = 99;
+            error_code = ERROR_INTERNAL;
         }
-        string_init(token.attribute);
+        if (string_init(token.attribute) != 0) {
+            error_code = ERROR_INTERNAL;
+        }
 }
 
 int analyse()
