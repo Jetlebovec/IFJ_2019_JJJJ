@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include "scanner.h"
+#include "parser.h"
  
 typedef struct tDLElem {                 /* prvek lss */
         Token token;                                         /* data */
@@ -18,6 +19,3 @@ void DLInitList (tDLList *);
 void DLDisposeList (tDLList *);
 void DLInsertLast(tDLList *, Token *token);
 void DLDeleteFirst (tDLList *L);
-void DLFirst (tDLList *);
-void DLLast (tDLList *);
-int DLActive (tDLList *);

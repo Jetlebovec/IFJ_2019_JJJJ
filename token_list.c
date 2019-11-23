@@ -3,11 +3,7 @@
 **      DLInitList ...... inicializace seznamu před prvním použitím,
 **      DLDisposeList ... zrušení všech prvků seznamu,
 **      DLInsertLast .... vložení prvku na konec seznamu,
-**      DLFirst ......... nastavení aktivity na první prvek,
-**      DLLast .......... nastavení aktivity na poslední prvek,
-**      DLCopy .......... vrací hodnotu aktivního prvku,
-**      DLSucc .......... posune aktivitu na další prvek seznamu,
-**      DLActive ........ zjišťuje aktivitu seznamu.
+ *      DLDeleteFirst.... odstranime prvni prvek
 **/
 
 #include "token_list.h"
@@ -48,14 +44,14 @@ void DLDisposeList (tDLList *L) {
     L->Last = NULL;
 }
 
-void DLInsertLast(tDLList *L, Token *token) {
+void DLInsertLast(tDLList *L, Token *token, int *err_code) {
 /*
 ** Vloží nový prvek na konec seznamu L (symetrická operace k DLInsertFirst).
 **/
 
     tDLElemPtr vkladany;
     if ((vkladany = (tDLElemPtr) malloc(sizeof(struct tDLElem))) == NULL)
-        return 99;
+        err_code = 99;
 
 //pokud je seznam prazndy, vlozi se novy prvek na 1. misto a je zároveň i poslední
     if (L->First == NULL) {
@@ -91,25 +87,4 @@ void DLDeleteFirst (tDLList *L) {
     free(L->First);
 //druhy prvek se stava prvnim
     L->First = druhy;
-}
-
-void DLFirst (tDLList *L) {
-/*
-** Nastaví aktivitu na první prvek seznamu L.
-**/
-    L->Act = L->First;
-}
-
-void DLLast (tDLList *L) {
-/*
-** Nastaví aktivitu na poslední prvek seznamu L.
-**/
-    L->Act = L->Last;
-}
-
-int DLActive (tDLList *L) {
-/*
-** Je-li seznam L aktivní, vrací nenulovou hodnotu, jinak vrací 0.
-**/
-    return (L->Act != NULL);
 }

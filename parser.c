@@ -134,11 +134,15 @@ int statement(prog_data* data)
         //we add the whole expression until eol is found into List
         tDLList expr;
         DLInitList(&expr);
-        do {
-            DLInsertLast(&expr, &data->token);
+
+        while(data->token.type != TOKEN_EOL)
+        {
+            DLInsertLast(&expr, &data->token, &err);
+            if (err != 0) {
+                return err;
+            }
             GET_TOKEN(data)
         }
-        while(data->token.type != TOKEN_EOL);
 
         data->expression_list = expr;
         err = expression(data);   //precedential analysis
@@ -178,11 +182,15 @@ int statement(prog_data* data)
         //we add the whole expression until colon is found into List
         tDLList expr;
         DLInitList(&expr);
-        do {
-            DLInsertLast(&expr, &data->token);
+
+        while(data->token.type != TOKEN_COLON)
+        {
+            DLInsertLast(&expr, &data->token, &err);
+            if (err != 0) {
+                return err;
+            }
             GET_TOKEN(data)
         }
-        while(data->token.type != TOKEN_COLON);
 
         data->expression_list = expr;
         err = expression(data);   //precedential analysis
@@ -250,11 +258,15 @@ int statement(prog_data* data)
         //we add the whole expression until colon is found into List
         tDLList expr;
         DLInitList(&expr);
-        do {
-            DLInsertLast(&expr, &data->token);
+
+        while(data->token.type != TOKEN_COLON)
+        {
+            DLInsertLast(&expr, &data->token, &err);
+            if (err != 0) {
+                return err;
+            }
             GET_TOKEN(data)
         }
-        while(data->token.type != TOKEN_COLON);
 
         data->expression_list = expr;
         err = expression(data);   //precedential analysis
@@ -315,11 +327,15 @@ int statement_fun(prog_data* data)
         //we add the whole expression until eol is found into List
         tDLList expr;
         DLInitList(&expr);
-        do {
-            DLInsertLast(&expr, &data->token);
+
+        while(data->token.type != TOKEN_EOL)
+        {
+            DLInsertLast(&expr, &data->token, &err);
+            if (err != 0) {
+                return err;
+            }
             GET_TOKEN(data)
         }
-        while(data->token.type != TOKEN_EOL);
 
         data->expression_list = expr;
         err = expression(data);   //precedential analysis
@@ -359,11 +375,15 @@ int statement_fun(prog_data* data)
         //we add the whole expression until colon is found into List
         tDLList expr;
         DLInitList(&expr);
-        do {
-            DLInsertLast(&expr, &data->token);
+
+        while(data->token.type != TOKEN_COLON)
+        {
+            DLInsertLast(&expr, &data->token, &err);
+            if (err != 0) {
+                return err;
+            }
             GET_TOKEN(data)
         }
-        while(data->token.type != TOKEN_COLON);
 
         data->expression_list = expr;
         err = expression(data);   //precedential analysis
@@ -429,11 +449,15 @@ int statement_fun(prog_data* data)
         //we add the whole expression until colon is found into List
         tDLList expr;
         DLInitList(&expr);
-        do {
-            DLInsertLast(&expr, &data->token);
+
+        while(data->token.type != TOKEN_COLON)
+        {
+            DLInsertLast(&expr, &data->token, &err);
+            if (err != 0) {
+                return err;
+            }
             GET_TOKEN(data)
         }
-        while(data->token.type != TOKEN_COLON);
 
         data->expression_list = expr;
         err = expression(data);   //precedential analysis
@@ -697,11 +721,15 @@ int assign(prog_data* data) {
         //we add the whole expression until eol is found into List
         tDLList expr;
         DLInitList(&expr);
-        do {
-            DLInsertLast(&expr, &data->token);
+
+        while(data->token.type != TOKEN_EOL)
+        {
+            DLInsertLast(&expr, &data->token, &err);
+            if (err != 0) {
+                return err;
+            }
             GET_TOKEN(data)
         }
-        while(data->token.type != TOKEN_EOL);
 
         data->expression_list = expr;
         err = expression(data);   //precedential analysis
@@ -769,11 +797,15 @@ int return_value(prog_data* data)
         //we add the whole expression until eol is found into List
         tDLList expr;
         DLInitList(&expr);
-        do {
-            DLInsertLast(&expr, &data->token);
+
+        while(data->token.type != TOKEN_EOL)
+        {
+            DLInsertLast(&expr, &data->token, &err);
+            if (err != 0) {
+                return err;
+            }
             GET_TOKEN(data)
         }
-        while(data->token.type != TOKEN_EOL);
 
         data->expression_list = expr;
         err = expression(data);   //precedential analysis
