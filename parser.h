@@ -21,7 +21,8 @@
 #include "custom_string.h"
 #include "symtable.h"
 #include "token_list.h"
-#include "<stdbool. h>"
+#include <stdbool. h>
+#include "precedential_analysis.h"
 
 #define LEX_OK			            0
 #define SYNTAX_OK 					0

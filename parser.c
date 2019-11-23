@@ -130,7 +130,22 @@ int statement(prog_data* data)
 // <statement> -> <expression> EOL <statement>
     if(IS_EXPR(data->token))
     {
-        //TODO expression
+        //EXPRESSION
+        //we add the whole expression until eol is found into List
+        tDLList expr;
+        DLInitList(&expr);
+        do {
+            DLInsertLast(&expr, &data->token);
+            GET_TOKEN(data)
+        }
+        while(data->token.type != TOKEN_EOL);
+
+        data->expression_list = expr;
+        err = expression(data);   //precedential analysis
+        if (err != 0) {
+            return err;
+        }
+        DLDisposeList(&expr);
 
         CHECK_TOKEN_TYPE(data, TOKEN_EOL)
         GET_TOKEN(data)
@@ -158,8 +173,23 @@ int statement(prog_data* data)
 
 //<statement> -> if <expression> : EOL INDENT <statement> DEDENT else : EOL INDENT <statement> DEDENT
     if(IF) 
-    {        
-        //TODO expression
+    {
+        //EXPRESSION
+        //we add the whole expression until colon is found into List
+        tDLList expr;
+        DLInitList(&expr);
+        do {
+            DLInsertLast(&expr, &data->token);
+            GET_TOKEN(data)
+        }
+        while(data->token.type != TOKEN_COLON);
+
+        data->expression_list = expr;
+        err = expression(data);   //precedential analysis
+        if (err != 0) {
+            return err;
+        }
+        DLDisposeList(&expr);
 
         CHECK_TOKEN_TYPE(data, TOKEN_COLON)
 
@@ -216,7 +246,22 @@ int statement(prog_data* data)
     //<statement> -> while <expression> : EOL INDENT <statement> DEDENT <statement>
     if(WHILE) 
     {
-         //TODO expression
+        //EXPRESSION
+        //we add the whole expression until colon is found into List
+        tDLList expr;
+        DLInitList(&expr);
+        do {
+            DLInsertLast(&expr, &data->token);
+            GET_TOKEN(data)
+        }
+        while(data->token.type != TOKEN_COLON);
+
+        data->expression_list = expr;
+        err = expression(data);   //precedential analysis
+        if (err != 0) {
+            return err;
+        }
+        DLDisposeList(&expr);
 
         CHECK_TOKEN_TYPE(data, TOKEN_COLON)
 
@@ -266,7 +311,22 @@ int statement_fun(prog_data* data)
 
     if(IS_EXPR(data->token))
     {
-        //TODO expression
+        //EXPRESSION
+        //we add the whole expression until eol is found into List
+        tDLList expr;
+        DLInitList(&expr);
+        do {
+            DLInsertLast(&expr, &data->token);
+            GET_TOKEN(data)
+        }
+        while(data->token.type != TOKEN_EOL);
+
+        data->expression_list = expr;
+        err = expression(data);   //precedential analysis
+        if (err != 0) {
+            return err;
+        }
+        DLDisposeList(&expr);
 
         CHECK_TOKEN_TYPE(data, TOKEN_EOL)
         GET_TOKEN(data)
@@ -294,8 +354,23 @@ int statement_fun(prog_data* data)
 
 //<statement_fun> -> if <expression> : EOL INDENT <statement_fun> DEDENT else : EOL INDENT <statement_fun> DEDENT
     if(IF) 
-    {        
-        //TODO expression
+    {
+        //EXPRESSION
+        //we add the whole expression until colon is found into List
+        tDLList expr;
+        DLInitList(&expr);
+        do {
+            DLInsertLast(&expr, &data->token);
+            GET_TOKEN(data)
+        }
+        while(data->token.type != TOKEN_COLON);
+
+        data->expression_list = expr;
+        err = expression(data);   //precedential analysis
+        if (err != 0) {
+            return err;
+        }
+        DLDisposeList(&expr);
 
         CHECK_TOKEN_TYPE(data, TOKEN_COLON)
 
@@ -350,7 +425,22 @@ int statement_fun(prog_data* data)
     //<statement_fun> -> while <expression> : EOL INDENT <statement_fun> DEDENT <statement_fun>
     if(WHILE) 
     {
-        //TODO expression
+        //EXPRESSION
+        //we add the whole expression until colon is found into List
+        tDLList expr;
+        DLInitList(&expr);
+        do {
+            DLInsertLast(&expr, &data->token);
+            GET_TOKEN(data)
+        }
+        while(data->token.type != TOKEN_COLON);
+
+        data->expression_list = expr;
+        err = expression(data);   //precedential analysis
+        if (err != 0) {
+            return err;
+        }
+        DLDisposeList(&expr);
 
         CHECK_TOKEN_TYPE(data, TOKEN_COLON)
 
@@ -603,7 +693,22 @@ int assign(prog_data* data) {
     //<assign> -> <expression>
     if (data->token.type != TOKEN_IDENTIFIER) {
 
-        //TODO expression
+        //EXPRESSION
+        //we add the whole expression until eol is found into List
+        tDLList expr;
+        DLInitList(&expr);
+        do {
+            DLInsertLast(&expr, &data->token);
+            GET_TOKEN(data)
+        }
+        while(data->token.type != TOKEN_EOL);
+
+        data->expression_list = expr;
+        err = expression(data);   //precedential analysis
+        if (err != 0) {
+            return err;
+        }
+        DLDisposeList(&expr);
 
         return SYNTAX_OK;
     }
@@ -656,9 +761,26 @@ int assign(prog_data* data) {
 //<return_value> rule
 int return_value(prog_data* data)
 {
+    int err = 0;
+
     //<return_value> -> <expression>
     if (IS_VALUE(data->token)) {
-        //TODO expressions
+        //EXPRESSION
+        //we add the whole expression until eol is found into List
+        tDLList expr;
+        DLInitList(&expr);
+        do {
+            DLInsertLast(&expr, &data->token);
+            GET_TOKEN(data)
+        }
+        while(data->token.type != TOKEN_EOL);
+
+        data->expression_list = expr;
+        err = expression(data);   //precedential analysis
+        if (err != 0) {
+            return err;
+        }
+        DLDisposeList(&expr);
     }
     //<return_value> -> Ɛ
     else {
@@ -666,29 +788,38 @@ int return_value(prog_data* data)
     }
 }
 
+void init_token(Token *token, int *error_code){
+
+        token.type = TOKEN_UNDEFINED;
+        token.attribute = (tString*) malloc(sizeof(tString));
+        if (token.attribute == NULL)
+        {
+            error_code = 99;
+        }
+        string_init(token.attribute);
+}
+
 int analyse()
 {
     int err_code = 0;
+
     // Initialize token
     Token newToken;
-    newToken.type = TOKEN_UNDEFINED;
-    newToken.attribute = (tString*) malloc(sizeof(tString));
-    if (newToken.attribute == NULL)
-    {
-        return 99;
-    }
-    string_init(newToken.attribute);
+
+    init_token(&newToken, &err_code);
+    if (err_code != 0)
+        return err_code;
+
     // Initialize indentation stack of the scanner
     stack_init(&indent_stack);
     stack_push(&indent_stack, 0);
 
-
-    //create the structure to store parser data
-    prog_data Data;
-
     //initialize the global symtable
     tBSTNodePtr *global_table;
     symtable_init(global_table);
+
+    //create the structure to store parser data
+    prog_data Data;
 
     //initialize the structure to store parser data
     Data.token = newToken;
@@ -697,8 +828,10 @@ int analyse()
     Data.file = stdin;
     Data.token_loaded = 0;
 
+    //STARTING FOR REAL
     //starting the recursive descent
-    err_code = program(&(Data));
+    err_code = program(&Data);
+
 
     symtable_dispose(global_table);
 
