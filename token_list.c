@@ -52,6 +52,7 @@ void DLInsertLast(tDLList *L, Token *token) {
 /*
 ** Vloží nový prvek na konec seznamu L (symetrická operace k DLInsertFirst).
 **/
+
     tDLElemPtr vkladany;
     if ((vkladany = (tDLElemPtr) malloc(sizeof(struct tDLElem))) == NULL)
         return 99;
@@ -60,17 +61,36 @@ void DLInsertLast(tDLList *L, Token *token) {
     if (L->First == NULL) {
         L->First = vkladany;
         L->Last = vkladany;
-        vkladany->lptr = NULL;
         vkladany->rptr = NULL;
         vkladany->token = token;
-    } else {
+    }
+    else {
 //posledni prvek se stava predposlednim, ukazuje na nove vlozeny, nove vlozeny ukazuje na predposledni
         L->Last->rptr = vkladany;
-        vkladany->lptr = L->Last;
         L->Last = vkladany;
         vkladany->rptr = NULL;
         vkladany->token = token;
     }
+}
+
+void DLDeleteFirst (tDLList *L) {
+/*
+** Zruší první prvek seznamu L. Pokud byl první prvek aktivní, aktivita
+** se ztrácí. Pokud byl seznam L prázdný, nic se neděje.
+**/
+
+//ulozeni ukazatele na druhy prvek
+    tDLElemPtr druhy = L->First->rptr;
+//overeni prazdnosti seznamu
+    if (L->First == NULL)
+        return;
+//zruseni pripadne aktivity prvku
+    if (L->First == L->Act)
+        L->Act = NULL;
+//uvolneni prvniho prvku z pameti
+    free(L->First);
+//druhy prvek se stava prvnim
+    L->First = druhy;
 }
 
 void DLFirst (tDLList *L) {
@@ -85,18 +105,6 @@ void DLLast (tDLList *L) {
 ** Nastaví aktivitu na poslední prvek seznamu L.
 **/
     L->Act = L->Last;
-}
-
-void DLCopy (tDLList *L, Token *token) {
-/*
-** Prostřednictvím parametru token vrátí hodnotu aktivního prvku seznamu L.
-** Pokud seznam L není aktivní, volá funkci DLError ().
-**/
-    if (L->Act == NULL)
-        DLError();
-    else
-        *token = L->Act->token;
-
 }
 
 int DLActive (tDLList *L) {

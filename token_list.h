@@ -19,5 +19,4 @@ void DLDisposeList (tDLList *);
 void DLInsertLast(tDLList *, Token *token);
 void DLFirst (tDLList *);
 void DLLast (tDLList *);
-void DLCopy (tDLList *, Token *token);
 int DLActive (tDLList *);

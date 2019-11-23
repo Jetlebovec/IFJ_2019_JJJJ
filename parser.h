@@ -37,7 +37,7 @@
 typedef struct {
     tBSTNodePtr *global_table;        // Global symbol table
     tBSTNodePtr *local_table;        // Local symbol table
-    
+
     FILE *file; //soubor, ze kterého čte scanner
 
     Token token; //
