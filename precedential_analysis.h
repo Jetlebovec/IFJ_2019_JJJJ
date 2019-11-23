@@ -11,6 +11,7 @@
  *      File: precedential_analysis.h
  */
 
+int expression(prog_data* data);
 
 #include <stdio.h>
 #include <stdlib.h>

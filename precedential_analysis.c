@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parser.h"
-#include "parser.c"
 #include "precedential_analysis.h"
 
 #define TABLE_SIZE 16
