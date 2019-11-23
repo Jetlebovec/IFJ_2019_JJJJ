@@ -111,6 +111,8 @@ Prec_table_index get_symbol_index(Token* token)
 #define TOKEN data->expression_list.First->token
 //get next token
 #define NEXT_TOKEN DLDeleteFirst(&(data->expression_list));
+//end of exp
+#define IS_END data->expression_list.First == NULL
 
 //main function for expression handle
 int expression(prog_data* data)
