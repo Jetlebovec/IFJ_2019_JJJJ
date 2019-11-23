@@ -37,14 +37,15 @@
 typedef struct {
     tBSTNodePtr *global_table;        // Global symbol table
     tBSTNodePtr *local_table;        // Local symbol table
-
-    //tDLList token_list; //list of all tokens
-
+    
     FILE *file; //soubor, ze kterého čte scanner
 
     Token token; //
 
-    bool token_loaded;  //overeni, zda nacitat novy token 
+    bool token_loaded;  //overeni, zda nacitat novy token
+
+    tDLList expression_list; //list of tokens that form expression
+
 
 } prog_data;
 
