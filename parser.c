@@ -132,7 +132,7 @@ int program(prog_data* data) {
 
 }
 
-
+// <statement> rule
 int statement(prog_data* data)
 {   
     int err = 0;
@@ -329,6 +329,7 @@ int statement(prog_data* data)
 
 }
 
+// <statement_fun> rule
 int statement_fun(prog_data* data)
 {
     int err = 0;
@@ -762,7 +763,6 @@ int param_n(prog_data* data)
 }
 
 //<assign> rule
-//TODO : check everything and try to simplify with macros
 int assign(prog_data* data) {
 
     //error number stored
@@ -913,6 +913,7 @@ int return_value(prog_data* data)
     }
 }
 
+//function to initialize new token
 void init_token(Token *token, int *error_code){
 
         token.type = TOKEN_UNDEFINED;
@@ -926,6 +927,7 @@ void init_token(Token *token, int *error_code){
         }
 }
 
+//starts the analysis
 int analyse()
 {
     int err_code = 0;

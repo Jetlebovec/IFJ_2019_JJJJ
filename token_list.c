@@ -34,6 +34,8 @@ void DLDisposeList (tDLList *L) {
         //posunuti na dalsi prvek
         L->First = L->First->rptr;
         //uvolneni prvniho prvku
+        string_free(pom->token.attribute);
+        free(pom->token.attribute);
         free(pom);
         //ulozeni prvniho prvku
         pom = L->First;
@@ -44,7 +46,7 @@ void DLDisposeList (tDLList *L) {
     L->Last = NULL;
 }
 
-void DLInsertLast(tDLList *L, Token *token, int *err_code) {
+void DLInsertLast(tDLList *L, Token *token_in, int *err_code) {
 /*
 ** Vloží nový prvek na konec seznamu L (symetrická operace k DLInsertFirst).
 **/
@@ -52,6 +54,14 @@ void DLInsertLast(tDLList *L, Token *token, int *err_code) {
     tDLElemPtr vkladany;
     if ((vkladany = (tDLElemPtr) malloc(sizeof(struct tDLElem))) == NULL)
         err_code = 99;
+
+    //inicializujeme token
+    init_token(&vkladany->token, err_code);
+    //zkopirujeme tokenu typ a atribut
+    vkladany->token.type = token_in->type;
+    if(string_copy(&vkladany->token.attribute, &token_in->attribute) != 0) {
+        err_code = 99;
+    }
 
 //pokud je seznam prazndy, vlozi se novy prvek na 1. misto a je zároveň i poslední
     if (L->First == NULL) {
@@ -84,6 +94,8 @@ void DLDeleteFirst (tDLList *L) {
     if (L->First == L->Act)
         L->Act = NULL;
 //uvolneni prvniho prvku z pameti
+    string_free(L->First->token.attribute);
+    free(L->First->token.attribute);
     free(L->First);
 //druhy prvek se stava prvnim
     L->First = druhy;
