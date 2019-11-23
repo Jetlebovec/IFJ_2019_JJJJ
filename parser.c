@@ -14,7 +14,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parser.h"
-//#include "token_list.h"
 
 //function prototypes
 int program(prog_data* data);
@@ -629,7 +628,7 @@ int assign(prog_data* data) {
     }
 
     //<assign> -> <expression>
-    //we in aint in a function
+    //we aint in a function
     if (data->local_table == NULL) {
         if (symtable_search_variable(data->global_table, data->token.attribute.str, *tmp)) {
 

@@ -20,7 +20,8 @@
 #include "scanner.h"
 #include "custom_string.h"
 #include "symtable.h"
-//#include "token_list.h"
+#include "token_list.h"
+#include "<stdbool. h>"
 
 #define LEX_OK			            0
 #define SYNTAX_OK 					0
