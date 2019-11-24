@@ -543,13 +543,34 @@ int def_function(prog_data* data)
 {
     //error number stored
     int err = 0;
+    //init of local symbol table
+    symtable_init(data->local_table);
+    tSymdata *symdataPtr;
 
     GET_TOKEN(data)
 
     CHECK_TOKEN_TYPE(data, TOKEN_IDENTIFIER)
 
-        //TODO sem control
+    // sem control
 
+    //function already defined - redefiniton is not allowed
+    if(!symtable_search_function(data->global_table, data->token.attribute, &symdataPtr))
+    {
+        return SEM_UNDEF_ERR;
+    }
+    //prom with same name already exist - fun name cant be the same
+    else if(!symtable_search_variable(data->global_table, data->token.attribute, &symdataPtr))
+    {
+        return SEM_UNDEF_ERR;
+    }
+    //add function to symtable
+    else
+    {           
+        symtable_create_function(data->global_table, data->token.attribute);
+    }
+    //saving pointer to symdata of this function for counting params
+    symtable_search_function(data->global_table, data->token.attribute, &data->current_fun_data);
+    
 
     GET_TOKEN(data)
 
@@ -730,12 +751,32 @@ int param(prog_data* data)
 {
     //error number stored
     int err = 0;
+    tSymdata *symdataPtr;
 
     GET_TOKEN(data)
 
     //<param> -> id
     if(data->token.type == TOKEN_IDENTIFIER) {
+
         //TODO sem control
+        //look in global table if function with the same name exists
+       if(!symtable_search_function(data->global_table, data->token.attribute, &symdataPtr))
+       {
+           return SEM_UNDEF_ERR;
+       }
+       //look for var in local table (if previous param wasnt same name)
+       else if (!symtable_search_function(data->local_table, data->token.attribute, &symdataPtr))
+       {
+           return SEM_UNDEF_ERR;
+       }
+       //add param to local table
+       else
+       {
+           symtable_create_variable(data->local_table, data->token.attribute);
+       }
+       //TODO param counter
+       //data->current_fun_data->param_count++
+
 
         return param_n(data);
     }
