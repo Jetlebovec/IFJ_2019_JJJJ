@@ -663,13 +663,14 @@ int idwhat(prog_data* data)
         string_free(temp.attribute);
         free(temp.attribute);
 
-        term(data);
-        if(data->token.type != TOKEN_RBRACKET) {
-            return SYNTAX_ERR;
+        err = term(data);
+        if (err != 0) {
+            return err;
         }
-        else {
-            return SYNTAX_OK;
-        }
+
+        CHECK_TOKEN_TYPE(data, TOKEN_RBRACKET)
+        return SYNTAX_OK;
+
     }
 
     //<idwhat> -> Ɛ (id muze byt samotne na radku pokud bylo definovano)
