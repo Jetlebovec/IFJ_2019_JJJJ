@@ -596,7 +596,9 @@ int def_function(prog_data* data)
     //add function to symtable
     else
     {
-        symtable_create_function(data->global_table, data->token.attribute->str);
+        err = symtable_create_function(data->global_table, data->token.attribute->str);
+        if (err != 0)
+            return err;
     }
     //saving pointer to symdata of this function for counting params
     symtable_search_function(data->global_table, data->token.attribute->str, &data->current_fun_data);
@@ -673,11 +675,9 @@ int idwhat(prog_data* data)
     {
         //EXPRESSION
         //we add the whole expression until eol is found into List
-        tDLList expr;
-        DLInitList(&expr);
 
         //WE NEED TO STORE THE PREVIOUS TOKEN FIRST
-        DLInsertLast(&expr, &temp, &err);
+        DLInsertLast(&data->expression_list, &temp, &err);
         if (err != 0) {
             return err;
         }
@@ -687,19 +687,18 @@ int idwhat(prog_data* data)
         //storing rest of the expression
         while(data->token.type != TOKEN_EOL)
         {
-            DLInsertLast(&expr, &data->token, &err);
+            DLInsertLast(&data->expression_list, &data->token, &err);
             if (err != 0) {
                 return err;
             }
             GET_TOKEN(data)
         }
 
-        data->expression_list = expr;
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
-        DLDisposeList(&expr);
+        DLDisposeList(&data->expression_list);
 
         return SYNTAX_OK;
     }
@@ -798,23 +797,24 @@ int param(prog_data* data)
 
         //TODO sem control
         //look in global table if function with the same name exists
-       if(!symtable_search_function(data->global_table, data->token.attribute->str, &symdataPtr))
+       if(symtable_search_function(data->global_table, data->token.attribute->str, &symdataPtr) == 0)
        {
            return SEM_UNDEF_ERR;
        }
        //look for var in local table (if previous param wasnt same name)
-       else if (!symtable_search_function(data->local_table, data->token.attribute->str, &symdataPtr))
+       else if (symtable_search_function(data->local_table, data->token.attribute->str, &symdataPtr) == 0)
        {
            return SEM_UNDEF_ERR;
        }
        //add param to local table
        else
        {
-           symtable_create_variable(data->local_table, data->token.attribute->str);
+           err = symtable_create_variable(data->local_table, data->token.attribute->str);
+           if (err != 0)
+               return err;
        }
        //TODO param counter
        //data->current_fun_data->param_count++
-
 
         return param_n(data);
     }
@@ -834,7 +834,7 @@ int param_n(prog_data* data)
 
     //<param_n> -> , <param>
     if(data->token.type == TOKEN_COMMA) {
-        param(data);
+        return param(data);
     }
 
     //<param_n> -> Ɛ
@@ -850,9 +850,6 @@ int assign(prog_data* data) {
 
     GET_TOKEN(data)
 
-    //temporary data pointer to symtable
-    //tSymdata **tmp;
-
     //after '=' (assign token) we expect string, number, id, or l-bracket - expression
     if (!(IS_VALUE(data->token) || data->token.type == TOKEN_LBRACKET)) {
         return SYNTAX_ERR;
@@ -863,24 +860,20 @@ int assign(prog_data* data) {
 
         //EXPRESSION
         //we add the whole expression until eol is found into List
-        tDLList expr;
-        DLInitList(&expr);
-
         while(data->token.type != TOKEN_EOL)
         {
-            DLInsertLast(&expr, &data->token, &err);
+            DLInsertLast(&data->expression_list, &data->token, &err);
             if (err != 0) {
                 return err;
             }
             GET_TOKEN(data)
         }
 
-        data->expression_list = expr;
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
-        DLDisposeList(&expr);
+        DLDisposeList(&data->expression_list);
 
         return SYNTAX_OK;
     }
@@ -921,17 +914,14 @@ int assign(prog_data* data) {
 
         return SYNTAX_OK;
     }
-
     //<assign> -> <expression>
-    if(IS_OP(data->token))
+    else
     {
         //EXPRESSION
         //we add the whole expression until eol is found into List
-        tDLList expr;
-        DLInitList(&expr);
 
         //WE NEED TO STORE THE PREVIOUS TOKEN FIRST
-        DLInsertLast(&expr, &temp, &err);
+        DLInsertLast(&data->expression_list, &temp, &err);
         if (err != 0) {
             return err;
         }
@@ -941,26 +931,21 @@ int assign(prog_data* data) {
         //storing rest of the expression
         while(data->token.type != TOKEN_EOL)
         {
-            DLInsertLast(&expr, &data->token, &err);
+            DLInsertLast(&data->expression_list, &data->token, &err);
             if (err != 0) {
                 return err;
             }
             GET_TOKEN(data)
         }
 
-        data->expression_list = expr;
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
-        DLDisposeList(&expr);
-    }
-    else {
-        return SYNTAX_ERR;
-    }
+        DLDisposeList(&data->expression_list);
 
-    return SYNTAX_OK;
-
+        return SYNTAX_OK;
+    }
 }
 
 //<return_value> rule
@@ -972,29 +957,25 @@ int return_value(prog_data* data)
     if (IS_VALUE(data->token) || IS_EXPR(data->token)) {
         //EXPRESSION
         //we add the whole expression until eol is found into List
-        tDLList expr;
-        DLInitList(&expr);
-
         while(data->token.type != TOKEN_EOL)
         {
-            DLInsertLast(&expr, &data->token, &err);
+            DLInsertLast(&data->expression_list, &data->token, &err);
             if (err != 0) {
                 return err;
             }
             GET_TOKEN(data)
         }
 
-        data->expression_list = expr;
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
-        DLDisposeList(&expr);
+        DLDisposeList(&data->expression_list);
 
         return SYNTAX_OK;
     }
-    //<return_value> -> Ɛ
 
+    //<return_value> -> Ɛ
     return SYNTAX_OK;
 
 }
