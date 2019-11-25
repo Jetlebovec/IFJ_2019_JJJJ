@@ -1,4 +1,4 @@
-CFLAGS = -pedantic -Wall -Wextra -std=gnu99
+CFLAGS = -pedantic -Wall -Wextra -std=c99
 SOURCES = $(wildcard *.c)
 OBJECTS = $(SOURCES:.c=.o)
 PROGRAMS = ifj2019
