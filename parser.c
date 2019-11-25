@@ -712,6 +712,7 @@ int term(prog_data* data)
 {
     //error number stored
     int err = 0;
+    tSymdata *symdataPtr;
 
     GET_TOKEN(data)
 
@@ -720,7 +721,21 @@ int term(prog_data* data)
     //<term> -> None <term_n>
     if (IS_VALUE(data->token) || NONE)
     {
-        //TODO sem control
+        //TODO sem control - number of params
+        
+        //if token is id, check local and global table if it was defined
+        if(data->token.type == TOKEN_IDENTIFIER)
+        {
+            //first look in local table 
+            if(!symtable_search_variable(data->local_table, data->token.attribute->str, &symdataPtr))
+            {
+                //if wasnt found, look in global table, if it is nor there, it wasnt defined -> sem err
+                if(!symtable_search_variable(data->global_table, data->token.attribute->str, &symdataPtr))
+                {
+                    return SEM_UNDEF_ERR;
+                }
+            }
+        }
 
         return term_n(data);
     }
@@ -760,7 +775,7 @@ int param(prog_data* data)
     //<param> -> id
     if(data->token.type == TOKEN_IDENTIFIER) {
 
-        //TODO sem control
+        //sem control
         //look in global table if function with the same name exists
        if(!symtable_search_function(data->global_table, data->token.attribute->str, &symdataPtr))
        {
