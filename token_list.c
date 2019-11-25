@@ -1,10 +1,15 @@
-/*
-**
-**      DLInitList ...... inicializace seznamu před prvním použitím,
-**      DLDisposeList ... zrušení všech prvků seznamu,
-**      DLInsertLast .... vložení prvku na konec seznamu,
- *      DLDeleteFirst.... odstranime prvni prvek
-**/
+/**
+ *      Project: IFJ – Implementace překladače imperativního jazyka IFJ19
+ *      Team 65, variant 1
+ *
+ *      Authors:
+ *          Diviš Jan	    xdivis12
+ *          Kopáček Jiří	xkopac06
+ *          Pojsl Jakub	    xpojsl00
+ *          Sasín Jonáš	    xsasin05
+ *
+ *      File: token_list.c
+ */
 
 #include "token_list.h"
 
@@ -96,4 +101,18 @@ void DLDeleteFirst (tDLList *L) {
     free(L->First);
 //druhy prvek se stava prvnim
     L->First = druhy;
+}
+
+//function to initialize new token
+void init_token(Token *token, int *error_code){
+
+        token->type = TOKEN_UNDEFINED;
+        token->attribute = (tString*) malloc(sizeof(tString));
+        if (token->attribute == NULL)
+        {
+            *error_code = 99;
+        }
+        if (string_init(token->attribute) != 0) {
+            *error_code = 99;
+        }
 }

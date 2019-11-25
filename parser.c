@@ -28,8 +28,6 @@ int return_value(prog_data* data);
 int idwhat(prog_data* data);
 int assign(prog_data* data);
 
-void init_token(Token *token, int *error_code);
-
 //checking keywords
 #define DEF string_compare_char(data->token.attribute, "def")
 #define ELSE string_compare_char(data->token.attribute, "else")
@@ -959,20 +957,6 @@ int return_value(prog_data* data)
 
     return SYNTAX_OK;
 
-}
-
-//function to initialize new token
-void init_token(Token *token, int *error_code){
-
-        token->type = TOKEN_UNDEFINED;
-        token->attribute = (tString*) malloc(sizeof(tString));
-        if (token->attribute == NULL)
-        {
-            *error_code = ERROR_INTERNAL;
-        }
-        if (string_init(token->attribute) != 0) {
-            *error_code = ERROR_INTERNAL;
-        }
 }
 
 //starts the analysis
