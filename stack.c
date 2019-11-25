@@ -97,7 +97,5 @@ int stack_push (tStack* s, int x) {
     }
 }
 
-/* Konec c202.c */
-
 
 

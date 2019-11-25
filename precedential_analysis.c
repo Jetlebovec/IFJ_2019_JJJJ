@@ -118,8 +118,6 @@ int expression(prog_data* data)
     //TODO stack
     //start with first token
 
-    NEXT_TOKEN
-
     return SYNTAX_OK;
 
 }

@@ -69,8 +69,8 @@ token.type == TOKEN_NOT_EQUAL
 
 
 //checks if we want to use the statement rule
-#define IS_STATEMENT_FUN (IF || WHILE || PASS || RETURN || IS_VALUE(data->token))
-#define IS_STATEMENT (IF || WHILE || PASS || IS_VALUE(data->token))
+#define IS_STATEMENT_FUN (IF || WHILE || PASS || RETURN || IS_VALUE(data->token) || IS_EXPR(data->token))
+#define IS_STATEMENT (IF || WHILE || PASS || IS_VALUE(data->token) || IS_EXPR(data->token))
 
 //getting token and checking if lex err didnt occur
 #define GET_TOKEN(data)                         \
@@ -84,7 +84,7 @@ if(data->token.type != token_type) {   \
 
 //checking if token is expected keyword
 #define CHECK_KEYWORD(data, keyword)   \
-if(string_compare_char(data->token.attribute, keyword)) {   \
+if(string_compare_char(data->token.attribute, keyword) != 0) {   \
     return SYNTAX_ERR; }
 
 
@@ -132,6 +132,7 @@ int program(prog_data* data) {
 
 }
 
+
 // <statement> rule
 int statement(prog_data* data)
 {
@@ -146,24 +147,20 @@ int statement(prog_data* data)
     {
         //EXPRESSION
         //we add the whole expression until eol is found into List
-        tDLList expr;
-        DLInitList(&expr);
-
         while(data->token.type != TOKEN_EOL)
         {
-            DLInsertLast(&expr, &data->token, &err);
+            DLInsertLast(&data->expression_list, &data->token, &err);
             if (err != 0) {
                 return err;
             }
             GET_TOKEN(data)
         }
 
-        data->expression_list = expr;
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
-        DLDisposeList(&expr);
+        DLDisposeList(&data->expression_list);
 
         CHECK_TOKEN_TYPE(data, TOKEN_EOL)
         GET_TOKEN(data)
@@ -180,8 +177,6 @@ int statement(prog_data* data)
             return err;
         }
 
-        GET_TOKEN(data)
-
         CHECK_TOKEN_TYPE(data, TOKEN_EOL)
 
         GET_TOKEN(data)
@@ -194,24 +189,24 @@ int statement(prog_data* data)
     {
         //EXPRESSION
         //we add the whole expression until colon is found into List
-        tDLList expr;
-        DLInitList(&expr);
+        GET_TOKEN(data);
+        if (!(IS_VALUE(data->token) || IS_EXPR(data->token)))
+            return SYNTAX_ERR;
 
-        while(data->token.type != TOKEN_COLON)
+        while(data->token.type != TOKEN_COLON || data->token.type != TOKEN_EOL)
         {
-            DLInsertLast(&expr, &data->token, &err);
+            DLInsertLast(&data->expression_list, &data->token, &err);
             if (err != 0) {
                 return err;
             }
             GET_TOKEN(data)
         }
 
-        data->expression_list = expr;
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
-        DLDisposeList(&expr);
+        DLDisposeList(&data->expression_list);
 
         CHECK_TOKEN_TYPE(data, TOKEN_COLON)
 
@@ -226,10 +221,17 @@ int statement(prog_data* data)
         GET_TOKEN(data)
 
         //recursive calling of statement rule
-        err = statement(data);
+        if (IS_STATEMENT)
+        {
 
-        if(err != 0) {
-            return err;
+            err = statement(data);
+
+            if (err != 0) {
+                return err;
+            }
+        }
+        else {
+            return SYNTAX_ERR;
         }
 
         CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
@@ -253,10 +255,17 @@ int statement(prog_data* data)
         GET_TOKEN(data)
 
         //recursive statement call
-        err = statement(data);
+        if (IS_STATEMENT)
+        {
 
-        if(err != 0) {
-            return err;
+            err = statement(data);
+
+            if (err != 0) {
+                return err;
+            }
+        }
+        else {
+            return SYNTAX_ERR;
         }
 
         CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
@@ -270,24 +279,24 @@ int statement(prog_data* data)
     {
         //EXPRESSION
         //we add the whole expression until colon is found into List
-        tDLList expr;
-        DLInitList(&expr);
+        GET_TOKEN(data);
+        if (!(IS_VALUE(data->token) || IS_EXPR(data->token)))
+            return SYNTAX_ERR;
 
-        while(data->token.type != TOKEN_COLON)
+        while(data->token.type != TOKEN_COLON || data->token.type != TOKEN_EOL)
         {
-            DLInsertLast(&expr, &data->token, &err);
+            DLInsertLast(&data->expression_list, &data->token, &err);
             if (err != 0) {
                 return err;
             }
             GET_TOKEN(data)
         }
 
-        data->expression_list = expr;
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
-        DLDisposeList(&expr);
+        DLDisposeList(&data->expression_list);
 
         CHECK_TOKEN_TYPE(data, TOKEN_COLON)
 
@@ -302,10 +311,17 @@ int statement(prog_data* data)
         GET_TOKEN(data)
 
         //recursive statement
-        err = statement(data);
+        if (IS_STATEMENT)
+        {
 
-        if(err != 0) {
-            return err;
+            err = statement(data);
+
+            if (err != 0) {
+                return err;
+            }
+        }
+        else {
+            return SYNTAX_ERR;
         }
 
         CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
@@ -340,24 +356,20 @@ int statement_fun(prog_data* data)
     {
         //EXPRESSION
         //we add the whole expression until eol is found into List
-        tDLList expr;
-        DLInitList(&expr);
-
         while(data->token.type != TOKEN_EOL)
         {
-            DLInsertLast(&expr, &data->token, &err);
+            DLInsertLast(&data->expression_list, &data->token, &err);
             if (err != 0) {
                 return err;
             }
             GET_TOKEN(data)
         }
 
-        data->expression_list = expr;
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
-        DLDisposeList(&expr);
+        DLDisposeList(&data->expression_list);
 
         CHECK_TOKEN_TYPE(data, TOKEN_EOL)
         GET_TOKEN(data)
@@ -374,8 +386,6 @@ int statement_fun(prog_data* data)
             return err;
         }
 
-        GET_TOKEN(data)
-
         CHECK_TOKEN_TYPE(data,TOKEN_EOL)
 
         GET_TOKEN(data)
@@ -388,24 +398,24 @@ int statement_fun(prog_data* data)
     {
         //EXPRESSION
         //we add the whole expression until colon is found into List
-        tDLList expr;
-        DLInitList(&expr);
+        GET_TOKEN(data);
+        if (!(IS_VALUE(data->token) || IS_EXPR(data->token)))
+            return SYNTAX_ERR;
 
-        while(data->token.type != TOKEN_COLON)
+        while(data->token.type != TOKEN_COLON || data->token.type != TOKEN_EOL)
         {
-            DLInsertLast(&expr, &data->token, &err);
+            DLInsertLast(&data->expression_list, &data->token, &err);
             if (err != 0) {
                 return err;
             }
             GET_TOKEN(data)
         }
 
-        data->expression_list = expr;
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
-        DLDisposeList(&expr);
+        DLDisposeList(&data->expression_list);
 
         CHECK_TOKEN_TYPE(data, TOKEN_COLON)
 
@@ -419,10 +429,17 @@ int statement_fun(prog_data* data)
 
         GET_TOKEN(data)
 
-        err = statement_fun(data);
+        if (IS_STATEMENT_FUN)
+        {
 
-        if(err != 0) {
-            return err;
+            err = statement_fun(data);
+
+            if (err != 0) {
+                return err;
+            }
+        }
+        else {
+            return SYNTAX_ERR;
         }
 
         CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
@@ -445,10 +462,17 @@ int statement_fun(prog_data* data)
 
         GET_TOKEN(data)
 
-        err = statement_fun(data);
+        if (IS_STATEMENT_FUN)
+        {
 
-        if(err != 0) {
-            return err;
+            err = statement_fun(data);
+
+            if (err != 0) {
+                return err;
+            }
+        }
+        else {
+            return SYNTAX_ERR;
         }
 
         CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
@@ -462,24 +486,24 @@ int statement_fun(prog_data* data)
     {
         //EXPRESSION
         //we add the whole expression until colon is found into List
-        tDLList expr;
-        DLInitList(&expr);
+        GET_TOKEN(data);
+        if (!(IS_VALUE(data->token) || IS_EXPR(data->token)))
+            return SYNTAX_ERR;
 
-        while(data->token.type != TOKEN_COLON)
+        while(data->token.type != TOKEN_COLON || data->token.type != TOKEN_EOL)
         {
-            DLInsertLast(&expr, &data->token, &err);
+            DLInsertLast(&data->expression_list, &data->token, &err);
             if (err != 0) {
                 return err;
             }
             GET_TOKEN(data)
         }
 
-        data->expression_list = expr;
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
-        DLDisposeList(&expr);
+        DLDisposeList(&data->expression_list);
 
         CHECK_TOKEN_TYPE(data, TOKEN_COLON)
 
@@ -493,10 +517,17 @@ int statement_fun(prog_data* data)
 
         GET_TOKEN(data)
 
-        err = statement_fun(data);
+        if (IS_STATEMENT_FUN)
+        {
 
-        if(err != 0) {
-            return err;
+            err = statement_fun(data);
+
+            if (err != 0) {
+                return err;
+            }
+        }
+        else {
+            return SYNTAX_ERR;
         }
 
         CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
@@ -544,7 +575,6 @@ int def_function(prog_data* data)
     //error number stored
     int err = 0;
     //init of local symbol table
-    symtable_init(data->local_table);
     tSymdata *symdataPtr;
 
     GET_TOKEN(data)
@@ -554,12 +584,12 @@ int def_function(prog_data* data)
     // sem control
 
     //function already defined - redefiniton is not allowed
-    if(!symtable_search_function(data->global_table, data->token.attribute->str, &symdataPtr))
+    if(symtable_search_function(data->global_table, data->token.attribute->str, &symdataPtr) == 0)
     {
         return SEM_UNDEF_ERR;
     }
     //prom with same name already exist - fun name cant be the same
-    else if(!symtable_search_variable(data->global_table, data->token.attribute->str, &symdataPtr))
+    else if(symtable_search_variable(data->global_table, data->token.attribute->str, &symdataPtr) == 0)
     {
         return SEM_UNDEF_ERR;
     }
@@ -670,6 +700,8 @@ int idwhat(prog_data* data)
             return err;
         }
         DLDisposeList(&expr);
+
+        return SYNTAX_OK;
     }
 
     //<idwhat> -> = <assign>
@@ -692,6 +724,8 @@ int idwhat(prog_data* data)
         }
 
         CHECK_TOKEN_TYPE(data, TOKEN_RBRACKET)
+
+        GET_TOKEN(data)
         return SYNTAX_OK;
 
     }
@@ -700,6 +734,8 @@ int idwhat(prog_data* data)
     else {
         string_free(temp.attribute);
         free(temp.attribute);
+
+        GET_TOKEN(data)
 
         //TODO sem control
         return SYNTAX_OK;
@@ -881,6 +917,8 @@ int assign(prog_data* data) {
 
         CHECK_TOKEN_TYPE(data, TOKEN_RBRACKET)
 
+        GET_TOKEN(data)
+
         return SYNTAX_OK;
     }
 
@@ -931,7 +969,7 @@ int return_value(prog_data* data)
     int err = 0;
 
     //<return_value> -> <expression>
-    if (IS_VALUE(data->token)) {
+    if (IS_VALUE(data->token) || IS_EXPR(data->token)) {
         //EXPRESSION
         //we add the whole expression until eol is found into List
         tDLList expr;
@@ -952,6 +990,8 @@ int return_value(prog_data* data)
             return err;
         }
         DLDisposeList(&expr);
+
+        return SYNTAX_OK;
     }
     //<return_value> -> Ɛ
 
@@ -976,18 +1016,19 @@ int analyse()
     if (err_code != 0)
         return err_code;
 
+    DLInitList(&Data.expression_list);
+
+    Data.token_loaded = false;
+    Data.current_fun_data = NULL;
+
     symtable_init(Data.global_table);
     symtable_init(Data.local_table);
 
     Data.file = stdin;
-    Data.token_loaded = 0;
 
     //STARTING FOR REAL
     //starting the recursive descent
     err_code = program(&Data);
-
-
-    symtable_dispose(Data.global_table);
 
 
     /*
@@ -1027,10 +1068,19 @@ int analyse()
 
      */
 
+    //free list
+    DLDisposeList(&Data.expression_list);
+
+    //free symtables
+    symtable_dispose(Data.global_table);
+    symtable_dispose(Data.local_table);
 
     // Free token
     string_free(Data.token.attribute);
     free(Data.token.attribute);
+
+    //test print
+    printf("%d", &err_code);
 
     return err_code;
 }
