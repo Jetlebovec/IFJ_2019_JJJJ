@@ -980,28 +980,21 @@ int analyse()
 {
     int err_code = 0;
 
-    // Initialize token
-    Token newToken;
-
-    init_token(&newToken, &err_code);
-    if (err_code != 0)
-        return err_code;
-
     // Initialize indentation stack of the scanner
     stack_init(&indent_stack);
     stack_push(&indent_stack, 0);
-
-    //initialize the global symtable
-    tBSTNodePtr *global_table = NULL;
-    symtable_init(global_table);
 
     //create the structure to store parser data
     prog_data Data;
 
     //initialize the structure to store parser data
-    Data.token = newToken;
-    Data.local_table = NULL;
-    Data.global_table = global_table;
+    init_token(&(Data.token), &err_code);
+    if (err_code != 0)
+        return err_code;
+
+    symtable_init(Data.global_table);
+    symtable_init(Data.local_table);
+
     Data.file = stdin;
     Data.token_loaded = 0;
 
@@ -1010,7 +1003,7 @@ int analyse()
     err_code = program(&Data);
 
 
-    symtable_dispose(global_table);
+    symtable_dispose(Data.global_table);
 
 
     /*
@@ -1052,8 +1045,8 @@ int analyse()
 
 
     // Free token
-    string_free(newToken.attribute);
-    free(newToken.attribute);
+    string_free(Data.token.attribute);
+    free(Data.token.attribute);
 
     return err_code;
 }
