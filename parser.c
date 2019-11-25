@@ -1061,7 +1061,7 @@ int analyse()
     free(Data.token.attribute);
 
     //test print
-    printf("%d", &err_code);
+    printf("%d", err_code);
 
     return err_code;
 }
