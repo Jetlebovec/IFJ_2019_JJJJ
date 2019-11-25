@@ -20,7 +20,6 @@ void DLInitList (tDLList *L) {
 **/
 
 //list je prazny tudiz vsechny ukazatele jsou nastaveny na NULL
-    L->Act = NULL;
     L->First = NULL;
     L->Last = NULL;
 }
@@ -46,7 +45,6 @@ void DLDisposeList (tDLList *L) {
         pom = L->First;
     }
 
-    L->Act = NULL;
     L->First = NULL;
     L->Last = NULL;
 }
@@ -57,15 +55,21 @@ void DLInsertLast(tDLList *L, Token *token_in, int *err_code) {
 **/
 
     tDLElemPtr vkladany;
-    if ((vkladany = (tDLElemPtr) malloc(sizeof(struct tDLElem))) == NULL)
+    if ((vkladany = (tDLElemPtr) malloc(sizeof(struct tDLElem))) == NULL) {
         *err_code = 99;
+        return;
+    }
 
     //inicializujeme token
     init_token(&vkladany->token, err_code);
+    if (*err_code == 99) {
+        return;
+    }
     //zkopirujeme tokenu typ a atribut
     vkladany->token.type = token_in->type;
     if(string_copy(vkladany->token.attribute, token_in->attribute) != 0) {
         *err_code = 99;
+        return;
     }
 
 //pokud je seznam prazndy, vlozi se novy prvek na 1. misto a je zároveň i poslední
@@ -87,14 +91,11 @@ void DLDeleteFirst (tDLList *L) {
 ** se ztrácí. Pokud byl seznam L prázdný, nic se neděje.
 **/
 
-//ulozeni ukazatele na druhy prvek
-    tDLElemPtr druhy = L->First->rptr;
 //overeni prazdnosti seznamu
     if (L->First == NULL)
         return;
-//zruseni pripadne aktivity prvku
-    if (L->First == L->Act)
-        L->Act = NULL;
+//ulozeni ukazatele na druhy prvek
+    tDLElemPtr druhy = L->First->rptr;
 //uvolneni prvniho prvku z pameti
     string_free(L->First->token.attribute);
     free(L->First->token.attribute);
@@ -111,8 +112,10 @@ void init_token(Token *token, int *error_code){
         if (token->attribute == NULL)
         {
             *error_code = 99;
+            return;
         }
         if (string_init(token->attribute) != 0) {
             *error_code = 99;
+            return;
         }
 }

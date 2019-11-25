@@ -22,7 +22,6 @@ typedef struct tDLElem {                 /* prvek lss */
 
 typedef struct {                                  /* dvousměrně vázaný seznam */
     tDLElemPtr First;                      /* ukazatel na první prvek seznamu */
-    tDLElemPtr Act;                     /* ukazatel na aktuální prvek seznamu */
     tDLElemPtr Last;
 } tDLList;
 
