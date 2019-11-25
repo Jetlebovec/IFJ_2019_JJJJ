@@ -14,7 +14,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "parser.h"
 #include "precedential_analysis.h"
 
 #define TABLE_SIZE 16
@@ -59,7 +58,6 @@ typedef enum
     LBR,    //12
     RBR,    //13
     TERM,   //14
-    EQ,     //15
     DOLLAR,  //16
 
 } Prec_table_index;
@@ -101,7 +99,7 @@ Prec_table_index get_symbol_index(Token* token)
     case TOKEN_NUM_EXP:
 	case TOKEN_STRING:
 		return TERM;
-	
+
 	default:
 		return DOLLAR;
 	}
@@ -117,7 +115,11 @@ Prec_table_index get_symbol_index(Token* token)
 //main function for expression handle
 int expression(prog_data* data)
 {
-    //TODO stack 
+    //TODO stack
     //start with first token
+
+    NEXT_TOKEN
+
+    return SYNTAX_OK;
 
 }

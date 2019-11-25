@@ -17,12 +17,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "scanner.h"
 #include "custom_string.h"
 #include "symtable.h"
 #include "token_list.h"
-#include <stdbool.h>
-#include "precedential_analysis.h"
+//#include "precedential_analysis.h"
 
 #define LEX_OK			            0
 #define SYNTAX_OK 					0
@@ -48,7 +48,7 @@ typedef struct {
     tDLList expression_list; //list of tokens that form expression
 
     tSymdata *current_fun_data;
-    
+
 } prog_data;
 
 /**

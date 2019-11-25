@@ -23,7 +23,7 @@ void DLInitList (tDLList *L) {
 void DLDisposeList (tDLList *L) {
 /*
 ** Zruší všechny prvky seznamu L a uvede seznam do stavu, v jakém
-** se nacházel po inicializaci. 
+** se nacházel po inicializaci.
 **/
 
     //pomocny ukazatel
@@ -53,14 +53,14 @@ void DLInsertLast(tDLList *L, Token *token_in, int *err_code) {
 
     tDLElemPtr vkladany;
     if ((vkladany = (tDLElemPtr) malloc(sizeof(struct tDLElem))) == NULL)
-        err_code = 99;
+        *err_code = 99;
 
     //inicializujeme token
     init_token(&vkladany->token, err_code);
     //zkopirujeme tokenu typ a atribut
     vkladany->token.type = token_in->type;
-    if(string_copy(&vkladany->token.attribute, &token_in->attribute) != 0) {
-        err_code = 99;
+    if(string_copy(vkladany->token.attribute, token_in->attribute) != 0) {
+        *err_code = 99;
     }
 
 //pokud je seznam prazndy, vlozi se novy prvek na 1. misto a je zároveň i poslední
@@ -68,14 +68,11 @@ void DLInsertLast(tDLList *L, Token *token_in, int *err_code) {
         L->First = vkladany;
         L->Last = vkladany;
         vkladany->rptr = NULL;
-        vkladany->token = token;
     }
     else {
-//posledni prvek se stava predposlednim, ukazuje na nove vlozeny, nove vlozeny ukazuje na predposledni
         L->Last->rptr = vkladany;
         L->Last = vkladany;
         vkladany->rptr = NULL;
-        vkladany->token = token;
     }
 }
 

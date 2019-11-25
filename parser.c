@@ -28,6 +28,8 @@ int return_value(prog_data* data);
 int idwhat(prog_data* data);
 int assign(prog_data* data);
 
+void init_token(Token *token, int *error_code);
+
 //checking keywords
 #define DEF string_compare_char(data->token.attribute, "def")
 #define ELSE string_compare_char(data->token.attribute, "else")
@@ -134,7 +136,7 @@ int program(prog_data* data) {
 
 // <statement> rule
 int statement(prog_data* data)
-{   
+{
     int err = 0;
 
 //<statement> -> <expression> EOL <statement>
@@ -159,7 +161,7 @@ int statement(prog_data* data)
         }
 
         data->expression_list = expr;
-        err = expression(data);   //precedential analysis
+        //err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -190,7 +192,7 @@ int statement(prog_data* data)
     }
 
 //<statement> -> if <expression> : EOL INDENT <statement> DEDENT else : EOL INDENT <statement> DEDENT
-    if(IF) 
+    if(IF)
     {
         //EXPRESSION
         //we add the whole expression until colon is found into List
@@ -207,7 +209,7 @@ int statement(prog_data* data)
         }
 
         data->expression_list = expr;
-        err = expression(data);   //precedential analysis
+        //err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -241,7 +243,7 @@ int statement(prog_data* data)
         GET_TOKEN(data)
 
         CHECK_TOKEN_TYPE(data,TOKEN_COLON)
-         
+
         GET_TOKEN(data)
 
         CHECK_TOKEN_TYPE(data, TOKEN_EOL)
@@ -266,7 +268,7 @@ int statement(prog_data* data)
     }
 
     //<statement> -> while <expression> : EOL INDENT <statement> DEDENT <statement>
-    if(WHILE) 
+    if(WHILE)
     {
         //EXPRESSION
         //we add the whole expression until colon is found into List
@@ -283,7 +285,7 @@ int statement(prog_data* data)
         }
 
         data->expression_list = expr;
-        err = expression(data);   //precedential analysis
+        //err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -353,7 +355,7 @@ int statement_fun(prog_data* data)
         }
 
         data->expression_list = expr;
-        err = expression(data);   //precedential analysis
+        //err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -384,7 +386,7 @@ int statement_fun(prog_data* data)
     }
 
 //<statement_fun> -> if <expression> : EOL INDENT <statement_fun> DEDENT else : EOL INDENT <statement_fun> DEDENT
-    if(IF) 
+    if(IF)
     {
         //EXPRESSION
         //we add the whole expression until colon is found into List
@@ -401,7 +403,7 @@ int statement_fun(prog_data* data)
         }
 
         data->expression_list = expr;
-        err = expression(data);   //precedential analysis
+        //err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -434,7 +436,7 @@ int statement_fun(prog_data* data)
         GET_TOKEN(data)
 
         CHECK_TOKEN_TYPE(data,TOKEN_COLON)
-         
+
         GET_TOKEN(data)
 
         CHECK_TOKEN_TYPE(data, TOKEN_EOL)
@@ -458,7 +460,7 @@ int statement_fun(prog_data* data)
     }
 
     //<statement_fun> -> while <expression> : EOL INDENT <statement_fun> DEDENT <statement_fun>
-    if(WHILE) 
+    if(WHILE)
     {
         //EXPRESSION
         //we add the whole expression until colon is found into List
@@ -475,7 +477,7 @@ int statement_fun(prog_data* data)
         }
 
         data->expression_list = expr;
-        err = expression(data);   //precedential analysis
+        //err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -554,23 +556,23 @@ int def_function(prog_data* data)
     // sem control
 
     //function already defined - redefiniton is not allowed
-    if(!symtable_search_function(data->global_table, data->token.attribute, &symdataPtr))
+    if(!symtable_search_function(data->global_table, data->token.attribute->str, &symdataPtr))
     {
         return SEM_UNDEF_ERR;
     }
     //prom with same name already exist - fun name cant be the same
-    else if(!symtable_search_variable(data->global_table, data->token.attribute, &symdataPtr))
+    else if(!symtable_search_variable(data->global_table, data->token.attribute->str, &symdataPtr))
     {
         return SEM_UNDEF_ERR;
     }
     //add function to symtable
     else
-    {           
-        symtable_create_function(data->global_table, data->token.attribute);
+    {
+        symtable_create_function(data->global_table, data->token.attribute->str);
     }
     //saving pointer to symdata of this function for counting params
-    symtable_search_function(data->global_table, data->token.attribute, &data->current_fun_data);
-    
+    symtable_search_function(data->global_table, data->token.attribute->str, &data->current_fun_data);
+
 
     GET_TOKEN(data)
 
@@ -613,6 +615,8 @@ int def_function(prog_data* data)
 
     CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
     data->token_loaded = false;
+
+    return SYNTAX_OK;
 }
 
 //<idwhat> rule
@@ -629,7 +633,7 @@ int idwhat(prog_data* data)
     }
     //zkopirujeme tokenu typ a atribut
     temp.type = data->token.type;
-    if(string_copy(&temp.attribute, &data->token.attribute) != 0) {
+    if(string_copy(temp.attribute, data->token.attribute) != 0) {
         return ERROR_INTERNAL;
     }
     //token ulozen jako temp
@@ -663,7 +667,7 @@ int idwhat(prog_data* data)
         }
 
         data->expression_list = expr;
-        err = expression(data);   //precedential analysis
+        //err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -702,7 +706,7 @@ int idwhat(prog_data* data)
         //TODO sem control
         return SYNTAX_OK;
     }
-    
+
 }
 
 // <term> rule
@@ -760,19 +764,19 @@ int param(prog_data* data)
 
         //TODO sem control
         //look in global table if function with the same name exists
-       if(!symtable_search_function(data->global_table, data->token.attribute, &symdataPtr))
+       if(!symtable_search_function(data->global_table, data->token.attribute->str, &symdataPtr))
        {
            return SEM_UNDEF_ERR;
        }
        //look for var in local table (if previous param wasnt same name)
-       else if (!symtable_search_function(data->local_table, data->token.attribute, &symdataPtr))
+       else if (!symtable_search_function(data->local_table, data->token.attribute->str, &symdataPtr))
        {
            return SEM_UNDEF_ERR;
        }
        //add param to local table
        else
        {
-           symtable_create_variable(data->local_table, data->token.attribute);
+           symtable_create_variable(data->local_table, data->token.attribute->str);
        }
        //TODO param counter
        //data->current_fun_data->param_count++
@@ -813,7 +817,7 @@ int assign(prog_data* data) {
     GET_TOKEN(data)
 
     //temporary data pointer to symtable
-    tSymdata **tmp;
+    //tSymdata **tmp;
 
     //after '=' (assign token) we expect string, number, id, or l-bracket - expression
     if (!(IS_VALUE(data->token) || data->token.type == TOKEN_LBRACKET)) {
@@ -838,7 +842,7 @@ int assign(prog_data* data) {
         }
 
         data->expression_list = expr;
-        err = expression(data);   //precedential analysis
+        //err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -855,7 +859,7 @@ int assign(prog_data* data) {
     }
     //zkopirujeme tokenu typ a atribut
     temp.type = data->token.type;
-    if(string_copy(&temp.attribute, &data->token.attribute) != 0) {
+    if(string_copy(temp.attribute, data->token.attribute) != 0) {
         return ERROR_INTERNAL;
     }
     //token ulozen jako temp
@@ -909,7 +913,7 @@ int assign(prog_data* data) {
         }
 
         data->expression_list = expr;
-        err = expression(data);   //precedential analysis
+        //err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -918,6 +922,8 @@ int assign(prog_data* data) {
     else {
         return SYNTAX_ERR;
     }
+
+    return SYNTAX_OK;
 
 }
 
@@ -943,29 +949,29 @@ int return_value(prog_data* data)
         }
 
         data->expression_list = expr;
-        err = expression(data);   //precedential analysis
+        //err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
         DLDisposeList(&expr);
     }
     //<return_value> -> Ɛ
-    else {
-        return SYNTAX_OK;
-    }
+
+    return SYNTAX_OK;
+
 }
 
 //function to initialize new token
 void init_token(Token *token, int *error_code){
 
-        token.type = TOKEN_UNDEFINED;
-        token.attribute = (tString*) malloc(sizeof(tString));
-        if (token.attribute == NULL)
+        token->type = TOKEN_UNDEFINED;
+        token->attribute = (tString*) malloc(sizeof(tString));
+        if (token->attribute == NULL)
         {
-            error_code = ERROR_INTERNAL;
+            *error_code = ERROR_INTERNAL;
         }
-        if (string_init(token.attribute) != 0) {
-            error_code = ERROR_INTERNAL;
+        if (string_init(token->attribute) != 0) {
+            *error_code = ERROR_INTERNAL;
         }
 }
 
@@ -986,7 +992,7 @@ int analyse()
     stack_push(&indent_stack, 0);
 
     //initialize the global symtable
-    tBSTNodePtr *global_table;
+    tBSTNodePtr *global_table = NULL;
     symtable_init(global_table);
 
     //create the structure to store parser data
@@ -1014,7 +1020,7 @@ int analyse()
     file = fopen("test.txt", "r");
     // TESTING WITH FILE
 
-    //****************************************************************TEST START
+    //TEST START
 
     // Test prints the first 150 tokens from test.txt
     for (int i = 0; i < 150; i++)
@@ -1036,7 +1042,7 @@ int analyse()
         }
     }
 
-    //*****************************************************************TEST END
+    //TEST END
 
     // TESTING WITH FILE
     fclose(file);
