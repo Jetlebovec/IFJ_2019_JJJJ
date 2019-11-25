@@ -18,11 +18,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "scanner.h"
-#include "custom_string.h"
 #include "symtable.h"
 #include "token_list.h"
-//#include "precedential_analysis.h"
+#include "precedential_analysis.h"
 
 #define LEX_OK			            0
 #define SYNTAX_OK 					0
@@ -56,5 +54,7 @@ typedef struct {
  * @return Returns error code
  */
 int analyse();
+
+int expression(prog_data* data);
 
 #endif // PARSER_H_INCLUDED

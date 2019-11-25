@@ -159,7 +159,7 @@ int statement(prog_data* data)
         }
 
         data->expression_list = expr;
-        //err = expression(data);   //precedential analysis
+        err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -207,7 +207,7 @@ int statement(prog_data* data)
         }
 
         data->expression_list = expr;
-        //err = expression(data);   //precedential analysis
+        err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -283,7 +283,7 @@ int statement(prog_data* data)
         }
 
         data->expression_list = expr;
-        //err = expression(data);   //precedential analysis
+        err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -353,7 +353,7 @@ int statement_fun(prog_data* data)
         }
 
         data->expression_list = expr;
-        //err = expression(data);   //precedential analysis
+        err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -401,7 +401,7 @@ int statement_fun(prog_data* data)
         }
 
         data->expression_list = expr;
-        //err = expression(data);   //precedential analysis
+        err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -475,7 +475,7 @@ int statement_fun(prog_data* data)
         }
 
         data->expression_list = expr;
-        //err = expression(data);   //precedential analysis
+        err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -665,7 +665,7 @@ int idwhat(prog_data* data)
         }
 
         data->expression_list = expr;
-        //err = expression(data);   //precedential analysis
+        err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -840,7 +840,7 @@ int assign(prog_data* data) {
         }
 
         data->expression_list = expr;
-        //err = expression(data);   //precedential analysis
+        err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -911,7 +911,7 @@ int assign(prog_data* data) {
         }
 
         data->expression_list = expr;
-        //err = expression(data);   //precedential analysis
+        err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }
@@ -947,7 +947,7 @@ int return_value(prog_data* data)
         }
 
         data->expression_list = expr;
-        //err = expression(data);   //precedential analysis
+        err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
         }

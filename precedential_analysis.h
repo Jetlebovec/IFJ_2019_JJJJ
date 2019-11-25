@@ -15,4 +15,3 @@
 #include <stdlib.h>
 #include "parser.h"
 
-int expression(prog_data* data);
