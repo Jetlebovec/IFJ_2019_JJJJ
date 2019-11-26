@@ -29,13 +29,13 @@ int idwhat(prog_data* data);
 int assign(prog_data* data);
 
 //checking keywords
-#define DEF string_compare_char(data->token.attribute, "def")
-#define ELSE string_compare_char(data->token.attribute, "else")
-#define IF string_compare_char(data->token.attribute, "if")
-#define NONE string_compare_char(data->token.attribute, "None")
-#define PASS string_compare_char(data->token.attribute, "pass")
-#define RETURN string_compare_char(data->token.attribute, "return")
-#define WHILE string_compare_char(data->token.attribute, "while")
+#define DEF string_compare_char(data->token.attribute, "def") == 0
+#define ELSE string_compare_char(data->token.attribute, "else") == 0
+#define IF string_compare_char(data->token.attribute, "if") == 0
+#define NONE string_compare_char(data->token.attribute, "None") == 0
+#define PASS string_compare_char(data->token.attribute, "pass") == 0
+#define RETURN string_compare_char(data->token.attribute, "return") == 0
+#define WHILE string_compare_char(data->token.attribute, "while") == 0
 
 //macro to check if the token is value
 #define IS_VALUE(token)                 \
@@ -990,26 +990,27 @@ int analyse()
     stack_push(&indent_stack, 0);
 
     //create the structure to store parser data
-    prog_data Data;
+    prog_data* Data;
+    Data = malloc(sizeof(prog_data));
 
     //initialize the structure to store parser data
-    init_token(&(Data.token), &err_code);
+    init_token(&(Data->token), &err_code);
     if (err_code != 0)
         return err_code;
 
-    DLInitList(&Data.expression_list);
+    DLInitList(&Data->expression_list);
 
-    Data.token_loaded = false;
-    Data.current_fun_data = NULL;
+    Data->token_loaded = false;
+    Data->current_fun_data = NULL;
 
-    symtable_init(Data.global_table);
-    symtable_init(Data.local_table);
+    symtable_init(Data->global_table);
+    symtable_init(Data->local_table);
 
-    Data.file = stdin;
+    Data->file = stdin;
 
     //STARTING FOR REAL
     //starting the recursive descent
-    err_code = program(&Data);
+    err_code = program(Data);
 
 
     /*
@@ -1049,20 +1050,25 @@ int analyse()
 
      */
 
-    //free list
-    DLDisposeList(&Data.expression_list);
-
-    //free symtables
-    symtable_dispose(Data.global_table);
-    symtable_dispose(Data.local_table);
-
-    // Free token
-    string_free(Data.token.attribute);
-    free(Data.token.attribute);
-
     //test print
-    printf("%d", err_code);
+    printf("%d\n", err_code);
+
+    free(Data);
 
     return err_code;
+
+    //ODSUD SEGFAULT XD
+
+    //free list
+    DLDisposeList(&Data->expression_list);
+
+    //free symtables
+    symtable_dispose(Data->global_table);
+    symtable_dispose(Data->local_table);
+
+    // Free token
+    string_free(Data->token.attribute);
+    free(Data->token.attribute);
+
 }
 
