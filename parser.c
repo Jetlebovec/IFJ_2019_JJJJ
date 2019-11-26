@@ -735,9 +735,7 @@ int idwhat(prog_data* data)
     else {
         string_free(temp.attribute);
         free(temp.attribute);
-
-        GET_TOKEN(data)
-
+        
         //TODO sem control
         return SYNTAX_OK;
     }
