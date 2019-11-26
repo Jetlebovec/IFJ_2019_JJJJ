@@ -337,6 +337,8 @@ int statement(prog_data* data)
 
         CHECK_TOKEN_TYPE(data, TOKEN_EOL)
 
+        GET_TOKEN(data)
+
         return statement(data);
     }
 
