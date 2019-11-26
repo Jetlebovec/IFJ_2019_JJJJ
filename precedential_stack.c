@@ -11,16 +11,12 @@
  *      File: precedential_stack.c
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdbool.h>
-#include "precedential_analysis.h"
-#include "precedential_analysis.c"
+#include "parser.h"
 
 typedef struct stack_item
 {
     int symbol;
-    int type;
     struct stack_item *next;
 }stack_item_t;
 
@@ -35,23 +31,18 @@ void init(stack_top_t* stack)
     stack->top = NULL;
 }
 
-void push(int symbol, int type, stack_top_t* stack)
+int push(int symbol, stack_top_t* stack)
 {
     stack_item_t *tmp = malloc(sizeof(stack_item_t));
 
     if (tmp == NULL)
     {
-        return;
+        return 1;
     }
-
-    if(tmp != NULL)
-    {
-        tmp->symbol = symbol;
-        tmp->type = type;
-        tmp->next = stack->top;
-
-        stack->top = tmp;
-    }
+        
+    tmp->symbol = symbol;
+    tmp->next = stack->top;
+    stack->top = tmp;
 }
 
 void pop(stack_top_t* stack) 
@@ -72,33 +63,52 @@ void pop_n_times(int n, stack_top_t* stack)
     }
 }
 
-int top(stack_top_t* stack)
-{
-    if (stack->top != NULL)
-        return stack.top->symbol;
-    else
-        return DOLLAR;
-}
+
 // okopírované.. moc teď nevím.. pokecáme o těch nontermech.. jsem teď v úzkých.. ráno kouknu na to video ještě si radši!
-/*Symbol_stack_item* symbol_stack_top_terminal(Symbol_stack* stack)
+stack_item_t* stack_top_terminal(stack_top_t* stack)
 {
-	for (Symbol_stack_item* tmp = stack->top; tmp != NULL; tmp = tmp->next)
+	for (stack_item_t* tmp = stack->top; tmp != NULL; tmp = tmp->next)
 	{
-		if (tmp->symbol < STOP)
+		if (tmp->symbol < S_STOP)
 			return tmp;
 	}
 
 	return NULL;
-}*/
-// STOP symbol used when reducing!
-
-stack_item_t* symbol_stack_top(stack_top_t* stack)
-{
-	return stack->top;
 }
 
-
-void symbol_stack_free(stack_top_t* stack)
+bool push_stop_symbol(stack_top_t* stack, symbols symbol)
 {
-	while (symbol_stack_pop(stack));
+	stack_item_t* prev = NULL;
+    stack_item_t* tmp = stack->top;
+
+	while (tmp != NULL)
+	{
+		if (tmp->symbol < S_STOP)
+		{
+			stack_item_t* new_item = (stack_item_t*)malloc(sizeof(stack_item_t));
+
+			if (new_item == NULL)
+				return false;
+
+			new_item->symbol = symbol;
+
+			if (prev == NULL)
+			{
+				new_item->next = stack->top;
+				stack->top = new_item;
+			}
+			else
+			{
+				new_item->next = prev->next;
+				prev->next = new_item;
+			}
+
+			return true;
+		}
+
+		prev = tmp;
+        tmp = tmp->next;
+	}
+
+	return false;
 }
