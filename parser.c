@@ -189,12 +189,14 @@ int statement(prog_data* data)
     {
         //EXPRESSION
         //we add the whole expression until colon is found into List
-        GET_TOKEN(data);
+        GET_TOKEN(data)
         if (!(IS_VALUE(data->token) || IS_EXPR(data->token)))
             return SYNTAX_ERR;
 
-        while(data->token.type != TOKEN_COLON || data->token.type != TOKEN_EOL)
+        while(data->token.type != TOKEN_COLON)
         {
+            if(data->token.type == TOKEN_EOL)
+                break;
             DLInsertLast(&data->expression_list, &data->token, &err);
             if (err != 0) {
                 return err;
@@ -279,12 +281,14 @@ int statement(prog_data* data)
     {
         //EXPRESSION
         //we add the whole expression until colon is found into List
-        GET_TOKEN(data);
+        GET_TOKEN(data)
         if (!(IS_VALUE(data->token) || IS_EXPR(data->token)))
             return SYNTAX_ERR;
 
-        while(data->token.type != TOKEN_COLON || data->token.type != TOKEN_EOL)
+        while(data->token.type != TOKEN_COLON)
         {
+            if(data->token.type == TOKEN_EOL)
+                break;
             DLInsertLast(&data->expression_list, &data->token, &err);
             if (err != 0) {
                 return err;
@@ -400,12 +404,14 @@ int statement_fun(prog_data* data)
     {
         //EXPRESSION
         //we add the whole expression until colon is found into List
-        GET_TOKEN(data);
+        GET_TOKEN(data)
         if (!(IS_VALUE(data->token) || IS_EXPR(data->token)))
             return SYNTAX_ERR;
 
-        while(data->token.type != TOKEN_COLON || data->token.type != TOKEN_EOL)
+        while(data->token.type != TOKEN_COLON)
         {
+            if(data->token.type == TOKEN_EOL)
+                break;
             DLInsertLast(&data->expression_list, &data->token, &err);
             if (err != 0) {
                 return err;
@@ -488,12 +494,14 @@ int statement_fun(prog_data* data)
     {
         //EXPRESSION
         //we add the whole expression until colon is found into List
-        GET_TOKEN(data);
+        GET_TOKEN(data)
         if (!(IS_VALUE(data->token) || IS_EXPR(data->token)))
             return SYNTAX_ERR;
 
-        while(data->token.type != TOKEN_COLON || data->token.type != TOKEN_EOL)
+        while(data->token.type != TOKEN_COLON)
         {
+            if(data->token.type == TOKEN_EOL)
+                break;
             DLInsertLast(&data->expression_list, &data->token, &err);
             if (err != 0) {
                 return err;
