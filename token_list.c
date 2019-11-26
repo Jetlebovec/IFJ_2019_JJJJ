@@ -67,7 +67,7 @@ void DLInsertLast(tDLList *L, Token *token_in, int *err_code) {
     }
     //zkopirujeme tokenu typ a atribut
     vkladany->token.type = token_in->type;
-    if(string_copy(vkladany->token.attribute, token_in->attribute) != 0) {
+    if(string_copy(token_in->attribute, vkladany->token.attribute) != 0) {
         *err_code = 99;
         return;
     }
