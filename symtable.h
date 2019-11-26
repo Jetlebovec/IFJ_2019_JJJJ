@@ -29,10 +29,8 @@
 */
 typedef struct symdata
 {
-    char *key;
-    bool defined;
-    tString *parameters; // null if variable
-
+    int param_count; // -1 by default
+    bool defined; // false by default
 } tSymdata;
 
 typedef struct tBSTNode {
@@ -89,6 +87,13 @@ int symtable_search_variable(tBSTNodePtr *symtable, char *key, tSymdata **foundV
  * @param key Name of the symbol
  */
 void symtable_delete_symbol(tBSTNodePtr *symtable, char *key);
+
+/**
+ * @brief Checks for undefined functions in the symtable
+ * @param symtable Pointer to the symtable
+ * @return 0 if all defined, 1 if not defined
+ */
+int symtable_contains_undefined(tBSTNodePtr *symtable);
 
 /**
  * @brief Frees and destroys the symtable

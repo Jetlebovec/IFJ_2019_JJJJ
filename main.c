@@ -81,8 +81,8 @@
     printf("Hello World\n");
     return 0;
 */
-/*  SYMTABLE TEST
-
+//  SYMTABLE TEST
+/*
     tBSTNodePtr symtable;
     tSymdata *data;
     symtable_init(&symtable);
@@ -140,6 +140,43 @@
 
     symtable_delete_symbol(&symtable, "555");
     BST_print(&symtable, 0);
+
+    symtable_dispose(&symtable);
+    BST_print(&symtable, 0);
+    printf("Hello World\n");
+    return 0;
+*/
+/* Symtable undefined test
+    tBSTNodePtr symtable;
+    tSymdata *data;
+    symtable_init(&symtable);
+    symtable_create_variable(&symtable, "555");
+    symtable_create_function(&symtable, "222");
+    BST_print(&symtable, 0);
+
+    symtable_create_variable(&symtable, "777");
+    BST_print(&symtable, 0);
+    printf("Contains undefined: %d \n", symtable_contains_undefined(&symtable));
+
+    tSymdata *symd = NULL;
+    if (symtable_search_function(&symtable, "222", &symd) == 0)
+    {
+        printf("Function 222 found\n");
+    }
+    symd->defined = true;
+    printf("Contains undefined: %d \n", symtable_contains_undefined(&symtable));
+
+    symtable_create_function(&symtable, "111");
+    BST_print(&symtable, 0);
+    printf("Contains undefined: %d \n", symtable_contains_undefined(&symtable));
+
+    if (symtable_search_function(&symtable, "111", &symd) == 0)
+    {
+        printf("Function 111 found\n");
+    }
+    symd->defined = true;
+    printf("Contains undefined: %d \n", symtable_contains_undefined(&symtable));
+
 
     symtable_dispose(&symtable);
     BST_print(&symtable, 0);

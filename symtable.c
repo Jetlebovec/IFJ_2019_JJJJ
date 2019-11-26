@@ -19,12 +19,6 @@ void BST_free_data(tSymdata *data)
 {
     if (data != NULL)
     {
-        free(data->key);
-        if (data->parameters != NULL)
-        {
-            free(data->parameters->str);
-            free(data->parameters);
-        }
         free(data);
     }
 }
@@ -300,8 +294,8 @@ int symtable_create_function(tBSTNodePtr *symtable, char *key)
     {
         return 99;
     }
-    data->key = NULL;
-    data->parameters = NULL;
+    data->defined = false;
+    data->param_count = -1;
     BST_insert(symtable, key, 0, data);
     return 0;
 }
@@ -313,6 +307,8 @@ int symtable_create_variable(tBSTNodePtr *symtable, char *key)
     {
         return 99;
     }
+    data->defined = false;
+    data->param_count = -1;
     BST_insert(symtable, key, 1, data);
     return 0;
 }
@@ -350,6 +346,36 @@ int symtable_search_variable(tBSTNodePtr *symtable, char *key, tSymdata **foundV
 void symtable_delete_symbol(tBSTNodePtr *symtable, char *key)
 {
     BST_delete(symtable, key);
+}
+
+int symtable_contains_undefined(tBSTNodePtr *symtable)
+{
+    if ((*symtable) != NULL)
+    {
+        // Recursively search both sub-trees for undefined functions
+        int left = symtable_contains_undefined(&((*symtable)->LPtr));
+        int right = symtable_contains_undefined(&((*symtable)->RPtr));
+        if (left == 1 || right == 1)
+        {
+            return 1;
+        }
+        if ((*symtable)->isVariable == 0)
+        {
+            if ((*symtable)->data->defined == false)
+            {
+                return 1;
+            } else
+            {
+                return 0;
+            }
+        } else
+        {
+            return 0;
+        }
+    } else
+    {
+        return 0;
+    }
 }
 
 void symtable_dispose(tBSTNodePtr *symtable)
