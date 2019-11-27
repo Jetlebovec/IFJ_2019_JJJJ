@@ -594,24 +594,24 @@ int def_function(prog_data* data)
     // sem control
 
     //function already defined - redefiniton is not allowed
-    if(symtable_search_function(data->global_table, data->token.attribute->str, &symdataPtr) == 0)
+    if(symtable_search_function(&data->global_table, data->token.attribute->str, &symdataPtr) == 0)
     {
         return SEM_UNDEF_ERR;
     }
     //prom with same name already exist - fun name cant be the same
-    else if(symtable_search_variable(data->global_table, data->token.attribute->str, &symdataPtr) == 0)
+    else if(symtable_search_variable(&data->global_table, data->token.attribute->str, &symdataPtr) == 0)
     {
         return SEM_UNDEF_ERR;
     }
     //add function to symtable
     else
     {
-        err = symtable_create_function(data->global_table, data->token.attribute->str);
+        err = symtable_create_function(&data->global_table, data->token.attribute->str);
         if (err != 0)
             return err;
     }
     //saving pointer to symdata of this function for counting params
-    symtable_search_function(data->global_table, data->token.attribute->str, &data->current_fun_data);
+    symtable_search_function(&data->global_table, data->token.attribute->str, &data->current_fun_data);
 
 
     GET_TOKEN(data)
@@ -743,7 +743,7 @@ int idwhat(prog_data* data)
     else {
         string_free(temp.attribute);
         free(temp.attribute);
-        
+
         //TODO sem control
         return SYNTAX_OK;
     }
@@ -805,19 +805,19 @@ int param(prog_data* data)
 
         //TODO sem control
         //look in global table if function with the same name exists
-       if(symtable_search_function(data->global_table, data->token.attribute->str, &symdataPtr) == 0)
+       if(symtable_search_function(&data->global_table, data->token.attribute->str, &symdataPtr) == 0)
        {
            return SEM_UNDEF_ERR;
        }
        //look for var in local table (if previous param wasnt same name)
-       else if (symtable_search_function(data->local_table, data->token.attribute->str, &symdataPtr) == 0)
+       else if (symtable_search_function(&data->local_table, data->token.attribute->str, &symdataPtr) == 0)
        {
            return SEM_UNDEF_ERR;
        }
        //add param to local table
        else
        {
-           err = symtable_create_variable(data->local_table, data->token.attribute->str);
+           err = symtable_create_variable(&data->local_table, data->token.attribute->str);
            if (err != 0)
                return err;
        }
@@ -1009,10 +1009,10 @@ int analyse()
     DLInitList(&Data->expression_list);
 
     Data->token_loaded = false;
-    Data->current_fun_data = NULL;
+    Data->current_fun_data = malloc(sizeof(tSymdata));
 
-    symtable_init(Data->global_table);
-    symtable_init(Data->local_table);
+    symtable_init(&Data->global_table);
+    symtable_init(&Data->local_table);
 
     Data->file = stdin;
 
@@ -1071,8 +1071,8 @@ int analyse()
     DLDisposeList(&Data->expression_list);
 
     //free symtables
-    symtable_dispose(Data->global_table);
-    symtable_dispose(Data->local_table);
+    symtable_dispose(&Data->global_table);
+    symtable_dispose(&Data->local_table);
 
     // Free token
     string_free(Data->token.attribute);

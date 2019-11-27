@@ -35,8 +35,8 @@
 #define ERROR_INTERNAL             99   //internal compiler error
 
 typedef struct {
-    tBSTNodePtr *global_table;        // Global symbol table
-    tBSTNodePtr *local_table;        // Local symbol table
+    tBSTNodePtr global_table;        // Global symbol table
+    tBSTNodePtr local_table;        // Local symbol table
 
     FILE *file; //soubor, ze kterého čte scanner
 
