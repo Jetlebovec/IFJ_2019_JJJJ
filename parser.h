@@ -21,6 +21,7 @@
 #include "symtable.h"
 #include "token_list.h"
 #include "precedential_analysis.h"
+#include "precedential_stack.h"
 
 #define LEX_OK			            0
 #define SYNTAX_OK 					0
@@ -48,6 +49,28 @@ typedef struct {
     tSymdata *current_fun_data;
 
 } prog_data;
+
+//enum of symbol indexes for prec. table
+typedef enum
+{
+    LS,     //1
+    GT,     //2
+    LSEQ,   //3
+    GTEQ,   //4
+    EQ,     //5
+    NEQ,    //6
+    PLUS,   //7
+    MINUS,  //8
+    MUL,    //9
+    DIV,    //10
+    IDIV,   //11
+    LBR,    //12
+    RBR,    //13
+	ASSIGN, //14
+	TERM,	//15
+    DOLLAR  //16
+
+} Prec_table_symbol;
 
 /**
  * @brief Main parser function

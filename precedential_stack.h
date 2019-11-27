@@ -8,12 +8,37 @@
  *          Pojsl Jakub	    xpojsl00
  *          Sasín Jonáš	    xsasin05
  *
- *      File: precedential_stack.c
+ *      File: precedential_stack.h
  */
 
 #include <stdbool.h>
 
-#include "precedential_analysis.h"
+//enum of symbols for stack and analysis
+typedef enum
+{
+    S_LS,     	//1
+    S_GT,     	//2
+    S_LSEQ,   	//3
+    S_GTEQ,   	//4
+    S_EQ,     	//5
+    S_NEQ,    	//6
+    S_PLUS,   	//7
+    S_MINUS,  	//8
+    S_MUL,    	//9
+    S_DIV,    	//10
+    S_IDIV,   	//11
+    S_LBR,    	//12
+    S_RBR,    	//13
+	S_ASSIGN, 	//14
+	S_ID,		//15
+	S_INT,		//16
+	S_STR,		//17
+	S_FLOAT,	//18
+	S_NONE,		//19
+    S_DOLLAR,  	//20
+	S_STOP,		//21
+	S_NONTERM	//22
+} symbols;
 
 /**
  * @struct stack item represetation.
@@ -24,7 +49,7 @@ typedef struct stack_item
 	int type;
 /*****************************************************************************/
 /*************************** Data_type data_type;*****************************/  /*Data type used for semantic analysis.*/
-/*****************************************************************************/ 
+/*****************************************************************************/
 	struct stack_item *next; // Pointer to next stack item.
 } stack_item_t;
 
@@ -77,7 +102,7 @@ void pop_n_times(int n, stack_top_t* stack);
  * @return Returns pointer to top symbol.
  * @return Returns S_DOLLAR in else.
  */
-int top(stack_top_t* stack); 
+int top(stack_top_t* stack);
 
 /**
  * Function push/insert symbol after top term.

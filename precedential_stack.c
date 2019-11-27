@@ -13,9 +13,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include<stdbool.h>
+#include <stdbool.h>
 
 #include "precedential_stack.h"
+
 
 /*typedef struct stack_item
 {
@@ -56,7 +57,7 @@ void push(stack_top_t* stack, symbols symbol, int type)  // Function pushes symb
 
 bool pop(stack_top_t* stack)  // Function pops top symbol from stack.
 {
-    if (stack->top != NULL) 
+    if (stack->top != NULL)
     {
         stack_item_t *tmp = stack->top;
         stack->top = tmp->next;
@@ -69,7 +70,7 @@ bool pop(stack_top_t* stack)  // Function pops top symbol from stack.
 
 void pop_n_times(int n, stack_top_t* stack)  // Function pops stack more times.
 {
-    for (int i = 0; i < n; i++) 
+    for (int i = 0; i < n; i++)
     {
         pop(stack);
     }
@@ -85,14 +86,14 @@ int top(stack_top_t* stack)  // Function returns top termial.
     }
 }
 
-void insert_after_top_term(stack_top_t* stack, symbols symbol) 
+void insert_after_top_term(stack_top_t* stack, symbols symbol)
 {
     stack_item_t *tmp = stack->top;
     stack_item_t *prev = NULL;
 
-    while (tmp != NULL) 
+    while (tmp != NULL)
     {
-        if (tmp->symbol < S_STOP) 
+        if (tmp->symbol < S_STOP)
         {
             stack_item_t *new_item = malloc(sizeof(stack_item_t));
 
@@ -103,9 +104,9 @@ void insert_after_top_term(stack_top_t* stack, symbols symbol)
 
             new_item->symbol = symbol;
             new_item->next = tmp;
-            
+
             if (prev == NULL)
-            {   
+            {
                 new_item->next = stack->top;
                 stack->top = new_item;
             } else {

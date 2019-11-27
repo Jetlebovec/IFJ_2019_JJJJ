@@ -14,10 +14,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "precedential_stack.c"
+#include "precedential_analysis.h"
 
 #define TABLE_SIZE 16
 
+int reduce(prog_data* data);
+Prec_table_symbol get_symbol_index(symbols symbol);
+symbols get_symbol(Token* token);
+int symbol_count();
+int reduce(prog_data* data);
 
 //precedence table
 char prec_table[TABLE_SIZE][TABLE_SIZE] = { /*
@@ -145,7 +150,7 @@ stack_top_t symbol_stack;
 
 int symbol_count()
 {
-	stack_item_t* tmp = symbol_stack.top; 
+	stack_item_t* tmp = symbol_stack.top;
 	int count = 0;
 
 //counting symbols before stop symbol
@@ -158,21 +163,21 @@ int symbol_count()
 		else
 		{
 			count++;
-		}			
-		tmp = tmp->next;	
-	} 
-	return count;	
+		}
+		tmp = tmp->next;
+	}
+	return count;
 }
 
 //reduce 1 or 3 terms to nonterm based on rules and do all required actions
 int reduce(prog_data* data)
 {
-	int err;	
+	int err;
 	int count = 0; //number of symbols loaded from stack before stop symbol (<)
-	
-	stack_item_t* symbol1 = NULL; 
+
+	stack_item_t* symbol1 = NULL;
 	stack_item_t* symbol2 = NULL; //symbols loaded from stack
-	stack_item_t* symbol3 = NULL; 
+	stack_item_t* symbol3 = NULL;
 
 //count symbols on stack before stop symbol, it could be 1 or 3 (i or E?E)
 	count = symbol_count();
@@ -183,9 +188,9 @@ int reduce(prog_data* data)
 	{
 		//E->i rule
 		symbol1 = symbol_stack.top;
-		
+
 		if(symbol1->symbol == S_ID || symbol1->symbol == S_INT || symbol1->symbol == S_FLOAT || symbol1->symbol == S_STR)
-		{			
+		{
 			//pop first symbol and stop symbol and replace it by nonterm symbol
 			pop_n_times(2, &symbol_stack);
 			if(push(S_NONTERM, &symbol_stack))
@@ -197,11 +202,11 @@ int reduce(prog_data* data)
 		else
 		{
 			return SYNTAX_ERR;
-		}		
+		}
 
 	}
 
-//if there are three symbols, it will be some kind of operations between two nonterms E?E or E->(E) 
+//if there are three symbols, it will be some kind of operations between two nonterms E?E or E->(E)
 //aka operation between two operands we already have on stack in real code
 
 	else if (count == 3)
@@ -289,7 +294,7 @@ int reduce(prog_data* data)
 	}
 
 //pop 3 symbols and the stop symbol and replace it by nonterm symbol - operation with two operands
-//was done 
+//was done
 
 	pop_n_times(4, &symbol_stack);
 	if(push(S_NONTERM, &symbol_stack))
@@ -302,7 +307,7 @@ int reduce(prog_data* data)
 //main function for expression handle
 int expression(prog_data* data)
 {
-    
+
 	int err;
 	init(&symbol_stack);
 
@@ -315,7 +320,7 @@ int expression(prog_data* data)
 	//star parsing expression untill list is empty
 	while(!(IS_END))
 	{
-		//get index of token type 
+		//get index of token type
 		actual_symbol = get_symbol(&TOKEN);
 		top_terminal = stack_top_terminal(&symbol_stack);
 
@@ -325,7 +330,7 @@ int expression(prog_data* data)
 		case '=':
 				push(actual_symbol,&symbol_stack);
 				break;
-		
+
 		case '<':
 				push_stop_symbol(&symbol_stack, S_STOP);
 				push(actual_symbol,&symbol_stack);
@@ -345,7 +350,7 @@ int expression(prog_data* data)
 
 				break;
 
-		//empty space in precedence table -> syntax err 
+		//empty space in precedence table -> syntax err
 		case ' ':
 				return SYNTAX_ERR;
 				break;
