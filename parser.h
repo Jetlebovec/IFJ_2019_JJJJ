@@ -65,9 +65,9 @@ typedef enum
     DIV,    //10
     IDIV,   //11
     LBR,    //12
-    RBR,    //13
-	ASSIGN, //14
-	TERM,	//15
+    RBR,    //13    
+	TERM,	//14
+	ASSIGN, //15
     DOLLAR  //16
 
 } Prec_table_symbol;

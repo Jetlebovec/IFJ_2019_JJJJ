@@ -52,42 +52,62 @@ Prec_table_symbol get_symbol_index(symbols symbol)
 {
     switch (symbol)
 	{
-	case S_PLUS:
+		case S_PLUS:
 		return PLUS;
+		break;
 	case S_MINUS:
 		return MINUS;
+		break;
 	case S_MUL:
 		return MUL;
+		break;
 	case S_IDIV :
 		return IDIV;
+		break;
 	case S_DIV:
 		return DIV;
+		break;
 	case S_EQ:
 		return EQ;
+		break;
 	case S_NEQ:
 		return NEQ;
+		break;
 	case S_LSEQ:
 		return LSEQ;
+		break;
 	case S_GTEQ:
 		return GTEQ;
+		break;
 	case S_LS:
 		return LS;
+		break;
 	case S_GT:
 		return GT;
+		break;
 	case S_LBR:
 		return LBR;
+		break;
 	case S_RBR:
 		return RBR;
+		break;
 	case S_ID:
     case S_INT:
 	case S_FLOAT:
+	case S_STR:
     case S_NONE:
 		return TERM;
+		break;
 	case S_ASSIGN:
 		return ASSIGN;
+		break;
+	case S_DOLLAR:
+		return DOLLAR;
+		break;
 
 	default:
 		return DOLLAR;
+		break;
 	}
 }
 
@@ -98,44 +118,67 @@ symbols get_symbol(Token* token)
 {
     switch (token->type)
 	{
-	case TOKEN_PLUS:
+		case TOKEN_PLUS:
 		return S_PLUS;
+		break;
 	case TOKEN_MINUS:
 		return S_MINUS;
+		break;
 	case TOKEN_MULTI:
 		return S_MUL;
+		break;
 	case TOKEN_INT_DIV :
 		return S_IDIV;
+		break;
 	case TOKEN_FLOAT_DIV:
 		return S_DIV;
-	case TOKEN_ASSIGN:
+		break;
+	case TOKEN_EQUAL:
 		return S_EQ;
+		break;
 	case TOKEN_NOT_EQUAL:
 		return S_NEQ;
+		break;
 	case TOKEN_LESSER_EQUAL:
 		return S_LSEQ;
+		break;
 	case TOKEN_GREATER_EQUAL:
 		return S_GTEQ;
+		break;
 	case TOKEN_LESSER:
 		return S_LS;
+		break;
 	case TOKEN_GREATER:
 		return S_GT;
+		break;
 	case TOKEN_LBRACKET:
 		return S_LBR;
+		break;
 	case TOKEN_RBRACKET:
 		return S_RBR;
+		break;
 	case TOKEN_IDENTIFIER:
 		return S_ID;
+		break;
     case TOKEN_NUM:
 		return S_INT;
+		break;
 	case TOKEN_NUM_DEC:
 		return S_FLOAT;
+		break;
     case TOKEN_NUM_EXP:
 		return S_FLOAT;
+		break;
 	case TOKEN_STRING:
 		return S_STR;
+		break;
+	case TOKEN_ASSIGN:
+		return S_ASSIGN;
+		break;
+
 	default:
-		return DOLLAR;
+		return S_DOLLAR;
+		break;
 	}
 }
 
@@ -148,6 +191,8 @@ stack_top_t symbol_stack;
 //end of exp
 #define IS_END data->expression_list.First == NULL
 
+
+//count symbols on stack before stop symbol
 int symbol_count()
 {
 	stack_item_t* tmp = symbol_stack.top;
@@ -169,10 +214,19 @@ int symbol_count()
 	return count;
 }
 
+// Function pops stack n times.
+void pop_n(int n, stack_top_t* stack) 
+{
+    for (int i = 0; i < n; i++)
+    {
+        pop(stack);
+    }
+}
+
 //reduce 1 or 3 terms to nonterm based on rules and do all required actions
 int reduce(prog_data* data)
 {
-	int err;
+	int err = 0;
 	int count = 0; //number of symbols loaded from stack before stop symbol (<)
 
 	stack_item_t* symbol1 = NULL;
@@ -192,7 +246,7 @@ int reduce(prog_data* data)
 		if(symbol1->symbol == S_ID || symbol1->symbol == S_INT || symbol1->symbol == S_FLOAT || symbol1->symbol == S_STR)
 		{
 			//pop first symbol and stop symbol and replace it by nonterm symbol
-			pop_n_times(2, &symbol_stack);
+			pop_n(2, &symbol_stack);
 			if(push(&symbol_stack, S_NONTERM) == false)
 			{
 				return ERROR_INTERNAL;
@@ -229,6 +283,8 @@ int reduce(prog_data* data)
 	//E->E?E
 	if (count == 3 && symbol1->symbol == S_NONTERM &&symbol3->symbol == S_NONTERM)
 	{
+//switch according to operation between two operands, instructions for type control and for 
+//coresponding stack operation will be generated 
 		switch (symbol2->symbol)
 		{
 		//E->E<E
@@ -286,22 +342,23 @@ int reduce(prog_data* data)
 				//sem control
 				//code gen
 			break;
-		//any allowed operation
+		//any of allowed operations -> syntax err
 		default:
 				return SYNTAX_ERR;
 			break;
 		}
+
 	}
 
 //pop 3 symbols and the stop symbol and replace it by nonterm symbol - operation with two operands
 //was done
 
-	pop_n_times(4, &symbol_stack);
+	pop_n(4, &symbol_stack);
 	if(push(&symbol_stack, S_NONTERM) == false)
 	{
 		return ERROR_INTERNAL;
 	}
-	return SYNTAX_OK;
+	return err;
 }
 
 //main function for expression handle
@@ -309,37 +366,69 @@ int expression(prog_data* data)
 {
 
 	int err;
+	
+	//init stack
 	init(&symbol_stack);
 
+	//token for imputing in the end of list when all input tokens are parsed, until everything from stack is parsed 
+	//(weird solution but works)
+	Token token;	
+	init_token(&token, &err);
+	token.attribute = NULL;
+	token.type = TOKEN_UNDEFINED;
+
+	//input symbol readed from token
 	symbols actual_symbol;
+	//terminal symbol nearest to the stack top
 	stack_item_t* top_terminal;
 
-	//bottom of stack
+	//$ bottom of stack
 	push(&symbol_stack, S_DOLLAR);
 
 	//star parsing expression untill list is empty
-	while(!(IS_END))
+	while(!(IS_END  || symbol_stack.top->next != NULL))
 	{
 		//get index of token type
 		actual_symbol = get_symbol(&TOKEN);
-		top_terminal = stack_top_terminal(&symbol_stack);
+		top_terminal = find_terminal(&symbol_stack);
+
+		//if there is no terminal on stack
+		if(top_terminal == NULL)
+		{
+			return SYNTAX_ERR;
+		}
+
+		//TODO sem control when token is identifier
 
 		//get rule from precedence table for two terminals
 		switch (prec_table[get_symbol_index(top_terminal->symbol)][get_symbol_index(actual_symbol)])
 		{
+
+		//just push symbol on stack
 		case '=':
-				push(&symbol_stack,actual_symbol);
+				if(push(&symbol_stack,actual_symbol) == false)
+				{
+					return ERROR_INTERNAL;
+				}
+								
+				//move forward in list - get next symbol
+				NEXT_TOKEN;
 				break;
 
-		case '<':
-				insert_after_top_term(&symbol_stack, S_STOP);
-				push(&symbol_stack, actual_symbol);
 
+		//inserting stop symbol after first terminal on stack (changing priority), pushing input symbol
+		case '<':
+				insert_stop_symbol(&symbol_stack);
+				push(&symbol_stack, actual_symbol);
+				
 				//if it is value/id generate push instruction (operand on stack)
 
+				//move forward in list - get next symbol
+				NEXT_TOKEN;
+			
 				break;
 
-		//symbol(s) on stack can be handled and reduced to neterminal (when <y is on top)
+		//symbol(s) on stack can be handled and reduced to nonterminal according to reducing rules (when <y is on top) 
 		case '>':
 
 				err = reduce(data);
@@ -350,14 +439,27 @@ int expression(prog_data* data)
 
 				break;
 
-		//empty space in precedence table -> syntax err
+		//empty space in precedence table -> end of parsing if stack is empty and input list is empty or syntax err
 		case ' ':
-				return SYNTAX_ERR;
+				if (actual_symbol == S_DOLLAR && top_terminal->symbol == S_DOLLAR )
+				{
+					return err;
+				}
+				else
+				{
+					return SYNTAX_ERR;
+				}
+				
 				break;
 
 		}
-		//move forward in list
-		NEXT_TOKEN;
+		//when list is empty but stack not, we have to first handle all remaining symbols on stack till it is empty
+		//we keep adding new token in list with unkown type which will be seen as $ - ending symbol
+		if(data->expression_list.First == NULL && symbol_stack.top->next != NULL)
+		{
+			DLInsertLast(&data->expression_list, &token, &err);
+		}
+		
 	}
 
     return err;

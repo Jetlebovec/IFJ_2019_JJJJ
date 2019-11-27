@@ -66,37 +66,7 @@ bool pop(stack_top_t* stack)  // Function pops top symbol from stack.
     return false;
 }
 
-void pop_n_times(int n, stack_top_t* stack)  // Function pops stack more times.
-{
-    for (int i = 0; i < n; i++)
-    {
-        pop(stack);
-    }
-}
-
-int top(stack_top_t* stack)  // Function returns top termial.
-{
-    if (stack->top != NULL)
-    {
-        return stack->top->symbol;
-    } else {
-        return S_DOLLAR;
-    }
-}
-
-stack_item_t* stack_top_terminal(stack_top_t* stack)
-{
-	for (stack_item_t* tmp = stack->top; tmp != NULL; tmp = tmp->next)
-	{
-		if (tmp->symbol < S_STOP)
-			return tmp;
-	}
-	return NULL;
-}
-
-
-
-bool insert_after_top_term(stack_top_t* stack, symbols symbol)
+bool insert_stop_symbol(stack_top_t* stack)
 {
     stack_item_t *tmp = stack->top;
     stack_item_t *prev = NULL;
@@ -112,7 +82,7 @@ bool insert_after_top_term(stack_top_t* stack, symbols symbol)
                 return false;
             }
 
-            new_item->symbol = symbol;
+            new_item->symbol = S_STOP;
             new_item->next = tmp;
 
             if (prev == NULL)
@@ -133,13 +103,19 @@ bool insert_after_top_term(stack_top_t* stack, symbols symbol)
     return true;
 }
 
-stack_item_t* symbol_stack_top(stack_top_t* stack)  // Function returns top symbol.
+stack_item_t* find_terminal(stack_top_t* stack)
 {
-	return stack->top;
+	for (stack_item_t* tmp = stack->top; tmp != NULL; tmp = tmp->next)
+	{
+		if (tmp->symbol < S_STOP)
+			return tmp;
+	}
+	return NULL;
 }
 
 
-void symbol_stack_free(stack_top_t* stack)  // Function frees resources used for stack.
+
+void stack_free(stack_top_t* stack)  // Function frees resources used for stack.
 {
 	while (pop(stack));
 }

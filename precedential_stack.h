@@ -70,7 +70,7 @@ void init(stack_top_t* stack);
  *
  * @param stack Pointer to stack.
  */
-stack_item_t* stack_top_terminal(stack_top_t* stack);
+stack_item_t* find_terminal(stack_top_t* stack);
 
 /**
  * Function pushes symbol to stack and sets its data type.
@@ -90,40 +90,16 @@ bool push(stack_top_t* stack, symbols symbol);
 bool pop(stack_top_t* stack);
 
 /**
- * Function pops stack N times.
- *
- * @param stack Pointer to stack.
- * @param n How many times stack will be popped.
- */
-void pop_n_times(int n, stack_top_t* stack);
-
-/**
- * Function returns top.
- *
- * @param stack Pointer to stack.
- * @return Returns pointer to top symbol.
- * @return Returns S_DOLLAR in else.
- */
-int top(stack_top_t* stack);
-
-/**
  * Function push/insert symbol after top term.
  *
  * @param stack Pointer to stack.
  * @param symbol Symbol to be push/insert.
  */
-bool insert_after_top_term(stack_top_t* stack, symbols symbol);
-
-/**
- * Function returns top symbol.
- * @param stack Pointer to stack.
- * @return Pointer to symbol on the top.
- */
-stack_item_t* symbol_stack_top(stack_top_t* stack);
+bool insert_stop_symbol(stack_top_t* stack);
 
 /**
  * Function frees resources used for stack.
  *
  * @param stack Pointer to stack.
  */
-void symbol_stack_free(stack_top_t* stack);
+void stack_free(stack_top_t* stack);
