@@ -80,7 +80,8 @@ int BST_insert(tBSTNodePtr *RootPtr, char *key, int isVar, tSymdata *content)
         {
             return 1;
         }
-        (*RootPtr)->key = key;
+        (*RootPtr)->key = malloc(strlen(key) * sizeof(char));
+        strcpy((*RootPtr)->key, key);
         (*RootPtr)->isVariable = isVar;
         (*RootPtr)->data = content;
         (*RootPtr)->LPtr = NULL;
@@ -99,7 +100,9 @@ int BST_insert(tBSTNodePtr *RootPtr, char *key, int isVar, tSymdata *content)
             BST_free_data(current->data);
             free(current->key);
             current->data = content;
-            current->key = key;
+            //current->key = key;
+            current->key = malloc(strlen(key) * sizeof(char));
+            strcpy(current->key, key);
             current->isVariable = isVar;
             return 0;
         }
@@ -120,7 +123,9 @@ int BST_insert(tBSTNodePtr *RootPtr, char *key, int isVar, tSymdata *content)
     {
         return 1;
     }
-    current->key = key;
+    //current->key = key;
+    current->key = malloc(strlen(key) * sizeof(char));
+    strcpy(current->key, key);
     current->isVariable = isVar;
     current->data = content;
     current->LPtr = NULL;
