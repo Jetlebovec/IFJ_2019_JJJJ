@@ -46,10 +46,6 @@ typedef enum
 typedef struct stack_item
 {
 	symbols symbol; // Symbol of stack item.
-	int type;
-/*****************************************************************************/
-/*************************** Data_type data_type;*****************************/  /*Data type used for semantic analysis.*/
-/*****************************************************************************/
 	struct stack_item *next; // Pointer to next stack item.
 } stack_item_t;
 
@@ -74,9 +70,8 @@ void init(stack_top_t* stack);
  *
  * @param stack Pointer to stack.
  * @param symbol Symbol to be pushed.
- * @param type Type to be set.
  */
-void push(stack_top_t* stack, symbols symbol, int type);
+bool push(stack_top_t* stack, symbols symbol);
 
 /**
  * Function pops top from stack.
@@ -110,7 +105,7 @@ int top(stack_top_t* stack);
  * @param stack Pointer to stack.
  * @param symbol Symbol to be push/insert.
  */
-void insert_after_top_term(stack_top_t* stack, symbols symbol);
+bool insert_after_top_term(stack_top_t* stack, symbols symbol);
 
 /**
  * Function returns top symbol.

@@ -36,23 +36,21 @@ void init(stack_top_t* stack)   // Function initializes stack.
     stack->top = NULL;
 }
 
-void push(stack_top_t* stack, symbols symbol, int type)  // Function pushes symbol to stack and sets its data type.
+bool push(stack_top_t* stack, symbols symbol)  // Function pushes symbol to stack and sets its data type.
 {
     stack_item_t *tmp = malloc(sizeof(stack_item_t));
 
     if (tmp == NULL)
     {
-        return;
+        return false;
     }
 
-    if(tmp != NULL)
-    {
-        tmp->symbol = symbol;
-        tmp->type = type;
-        tmp->next = stack->top;
+    tmp->symbol = symbol;
+    tmp->next = stack->top;
 
-        stack->top = tmp;
-    }
+    stack->top = tmp;
+    return true;
+
 }
 
 bool pop(stack_top_t* stack)  // Function pops top symbol from stack.
@@ -86,7 +84,7 @@ int top(stack_top_t* stack)  // Function returns top termial.
     }
 }
 
-void insert_after_top_term(stack_top_t* stack, symbols symbol)
+bool insert_after_top_term(stack_top_t* stack, symbols symbol)
 {
     stack_item_t *tmp = stack->top;
     stack_item_t *prev = NULL;
@@ -99,7 +97,7 @@ void insert_after_top_term(stack_top_t* stack, symbols symbol)
 
             if (new_item == NULL)
             {
-                return;
+                return false;
             }
 
             new_item->symbol = symbol;
@@ -113,13 +111,14 @@ void insert_after_top_term(stack_top_t* stack, symbols symbol)
                 new_item->next = prev->next;
                 prev->next = new_item;
             }
-            return;
+            return true;
         }
         else {
             prev = tmp;
             tmp = tmp->next;
         }
     }
+    return true;
 }
 
 stack_item_t* symbol_stack_top(stack_top_t* stack)  // Function returns top symbol.

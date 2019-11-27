@@ -193,7 +193,7 @@ int reduce(prog_data* data)
 		{
 			//pop first symbol and stop symbol and replace it by nonterm symbol
 			pop_n_times(2, &symbol_stack);
-			if(push(S_NONTERM, &symbol_stack))
+			if(push(&symbol_stack, S_NONTERM) == false)
 			{
 				return ERROR_INTERNAL;
 			}
@@ -297,7 +297,7 @@ int reduce(prog_data* data)
 //was done
 
 	pop_n_times(4, &symbol_stack);
-	if(push(S_NONTERM, &symbol_stack))
+	if(push(&symbol_stack, S_NONTERM) == false)
 	{
 		return ERROR_INTERNAL;
 	}
@@ -315,7 +315,7 @@ int expression(prog_data* data)
 	stack_item_t* top_terminal;
 
 	//bottom of stack
-	push(S_DOLLAR, &symbol_stack);
+	push(&symbol_stack, S_DOLLAR);
 
 	//star parsing expression untill list is empty
 	while(!(IS_END))
@@ -328,12 +328,12 @@ int expression(prog_data* data)
 		switch (prec_table[get_symbol_index(top_terminal->symbol)][get_symbol_index(actual_symbol)])
 		{
 		case '=':
-				push(actual_symbol,&symbol_stack);
+				push(&symbol_stack,actual_symbol);
 				break;
 
 		case '<':
 				push_stop_symbol(&symbol_stack, S_STOP);
-				push(actual_symbol,&symbol_stack);
+				push(&symbol_stack, actual_symbol);
 
 				//if it is value/id generate push instruction (operand on stack)
 
