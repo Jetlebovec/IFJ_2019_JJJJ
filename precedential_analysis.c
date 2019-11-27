@@ -332,7 +332,7 @@ int expression(prog_data* data)
 				break;
 
 		case '<':
-				push_stop_symbol(&symbol_stack, S_STOP);
+				insert_after_top_term(&symbol_stack, S_STOP);
 				push(&symbol_stack, actual_symbol);
 
 				//if it is value/id generate push instruction (operand on stack)

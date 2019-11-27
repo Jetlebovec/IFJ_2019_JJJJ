@@ -66,6 +66,13 @@ typedef struct stack_top
 void init(stack_top_t* stack);
 
 /**
+ * Function returns first terminal from stack.
+ *
+ * @param stack Pointer to stack.
+ */
+stack_item_t* stack_top_terminal(stack_top_t* stack);
+
+/**
  * Function pushes symbol to stack and sets its data type.
  *
  * @param stack Pointer to stack.

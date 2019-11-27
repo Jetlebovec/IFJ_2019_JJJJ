@@ -84,6 +84,18 @@ int top(stack_top_t* stack)  // Function returns top termial.
     }
 }
 
+stack_item_t* stack_top_terminal(stack_top_t* stack)
+{
+	for (stack_item_t* tmp = stack->top; tmp != NULL; tmp = tmp->next)
+	{
+		if (tmp->symbol < S_STOP)
+			return tmp;
+	}
+	return NULL;
+}
+
+
+
 bool insert_after_top_term(stack_top_t* stack, symbols symbol)
 {
     stack_item_t *tmp = stack->top;
