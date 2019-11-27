@@ -810,7 +810,7 @@ int param(prog_data* data)
            return SEM_UNDEF_ERR;
        }
        //look for var in local table (if previous param wasnt same name)
-       else if (symtable_search_function(&data->local_table, data->token.attribute->str, &symdataPtr) == 0)
+       else if (symtable_search_variable(&data->local_table, data->token.attribute->str, &symdataPtr) == 0)
        {
            return SEM_UNDEF_ERR;
        }

@@ -236,6 +236,10 @@ int get_token(Token *token, FILE *file)
                             token->type = TOKEN_EOL;
                             return finalize(token);
                         }
+                        else {
+                            state = stINDENTATION_COUNT;
+                            continue;
+                        }
                     }
                     state = stSTART;
                 }
