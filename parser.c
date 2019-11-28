@@ -1173,6 +1173,9 @@ int analyse()
     //starting the recursive descent
     err_code = program(Data);
 
+    if (symtable_contains_undefined(&Data->global_table) != 0) {
+        err_code = SEM_UNDEF_ERR;
+    }
 
     /*
 
