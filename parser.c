@@ -682,7 +682,7 @@ int idwhat(prog_data* data)
     }
     //zkopirujeme tokenu typ a atribut
     temp.type = data->token.type;
-    if(string_copy(temp.attribute, data->token.attribute) != 0) {
+    if(string_copy(data->token.attribute, temp.attribute) != 0) {
         return ERROR_INTERNAL;
     }
     //token ulozen jako temp
@@ -903,7 +903,7 @@ int assign(prog_data* data) {
     }
     //zkopirujeme tokenu typ a atribut
     temp.type = data->token.type;
-    if(string_copy(temp.attribute, data->token.attribute) != 0) {
+    if(string_copy(data->token.attribute, temp.attribute) != 0) {
         return ERROR_INTERNAL;
     }
     //token ulozen jako temp
