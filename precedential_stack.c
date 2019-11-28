@@ -17,27 +17,14 @@
 
 #include "precedential_stack.h"
 
-
-/*typedef struct stack_item
-{
-    int symbol;
-    int type;
-    struct stack_item *next;
-}stack_item_t;
-
-typedef struct stack_top
-{
-    stack_item_t *top;  // Pointer to stack item on top of stack.
-}stack_top_t;
-*/
-
-void init(stack_top_t* stack)   // Function initializes stack.
+void init(stack_top_t* stack)
 {
     stack->top = NULL;
 }
 
-bool push(stack_top_t* stack, symbols symbol)  // Function pushes symbol to stack and sets its data type.
+bool push(stack_top_t* stack, symbols symbol)
 {
+    /*
     stack_item_t *tmp = malloc(sizeof(stack_item_t));
 
     if (tmp == NULL)
@@ -50,17 +37,27 @@ bool push(stack_top_t* stack, symbols symbol)  // Function pushes symbol to stac
 
     stack->top = tmp;
     return true;
+*/
+    stack_item_t *tmp = stack->top;
 
+    stack->top = malloc(sizeof(stack_item_t));
+    if (stack->top == NULL)
+    {
+        return false;
+    }
+    stack->top->symbol = symbol;
+    stack->top->next = tmp;
+    return true;
 }
 
-bool pop(stack_top_t* stack)  // Function pops top symbol from stack.
+bool pop(stack_top_t* stack)
 {
     if (stack->top != NULL)
     {
         stack_item_t *tmp = stack->top;
         stack->top = tmp->next;
-        free(tmp);
 
+        free(tmp);
         return true;
     }
     return false;
@@ -71,28 +68,32 @@ bool insert_stop_symbol(stack_top_t* stack)
     stack_item_t *tmp = stack->top;
     stack_item_t *prev = NULL;
 
+    //Cycles through the stack
     while (tmp != NULL)
     {
+        //If the correct placement is found
         if (tmp->symbol < S_STOP)
         {
-            stack_item_t *new_item = malloc(sizeof(stack_item_t));
-
-            if (new_item == NULL)
+            //inserts a new stop symbol
+            stack_item_t *stop_symbol = malloc(sizeof(stack_item_t));
+            if (stop_symbol == NULL)
             {
                 return false;
             }
 
-            new_item->symbol = S_STOP;
-            new_item->next = tmp;
-
+            //If the correct placement is at the top of the stack
             if (prev == NULL)
             {
-                new_item->next = stack->top;
-                stack->top = new_item;
+                //corrects pointers
+                stop_symbol->next = stack->top;
+                stack->top = stop_symbol;
             } else {
-                new_item->next = prev->next;
-                prev->next = new_item;
+                //otherwise corrects pointers on the previous symbol
+                stop_symbol->next = prev->next;
+                prev->next = stop_symbol;
             }
+            stop_symbol->symbol = S_STOP;
+
             return true;
         }
         else {
@@ -100,22 +101,39 @@ bool insert_stop_symbol(stack_top_t* stack)
             tmp = tmp->next;
         }
     }
-    return true;
+    return false;
 }
 
 stack_item_t* find_terminal(stack_top_t* stack)
 {
+    stack_item_t *tmp = stack->top;
+
+    //Cycles through the stack
+    while (tmp != NULL)
+    {
+        //If the correct symbol is found, returns it
+        if (tmp->symbol < S_STOP)
+        {
+            break;
+        }
+        tmp = tmp->next;
+    }
+    return tmp;
+
+    /*
 	for (stack_item_t* tmp = stack->top; tmp != NULL; tmp = tmp->next)
 	{
 		if (tmp->symbol < S_STOP)
 			return tmp;
 	}
 	return NULL;
+	*/
 }
 
-
-
-void stack_free(stack_top_t* stack)  // Function frees resources used for stack.
+void stack_free(stack_top_t* stack)
 {
-	while (pop(stack));
+    while (stack->top != NULL)
+    {
+        pop(stack);
+    }
 }

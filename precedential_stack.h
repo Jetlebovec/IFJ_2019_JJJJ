@@ -40,66 +40,33 @@ typedef enum
 	S_NONTERM	//22
 } symbols;
 
-/**
- * @struct stack item represetation.
- */
+// More like list item
 typedef struct stack_item
 {
-	symbols symbol; // Symbol of stack item.
-	struct stack_item *next; // Pointer to next stack item.
+	symbols symbol; // Symbol enum
+	struct stack_item *next;
 } stack_item_t;
 
-/**
- * @struct stack top representation.
- */
+// Top of the stack, basically pointer to the end of dynamic list
 typedef struct stack_top
 {
-	stack_item_t *top; // Pointer to stack item on top of stack.
+	stack_item_t *top;
 } stack_top_t;
 
-
-/**
- * Function initializes stack.
- *
- * @param stack Pointer to stack.
- */
+// Stack init
 void init(stack_top_t* stack);
 
-/**
- * Function returns first terminal from stack.
- *
- * @param stack Pointer to stack.
- */
-stack_item_t* find_terminal(stack_top_t* stack);
-
-/**
- * Function pushes symbol to stack and sets its data type.
- *
- * @param stack Pointer to stack.
- * @param symbol Symbol to be pushed.
- */
+// Stack push
 bool push(stack_top_t* stack, symbols symbol);
 
-/**
- * Function pops top from stack.
- *
- * @param stack Pointer to stack.
- * @return True if successfull.
- * @return False else not successfull.
- */
+// Stack pop
 bool pop(stack_top_t* stack);
 
-/**
- * Function push/insert symbol after top term.
- *
- * @param stack Pointer to stack.
- * @param symbol Symbol to be push/insert.
- */
+// Inserts new stop symbol in the stack
 bool insert_stop_symbol(stack_top_t* stack);
 
-/**
- * Function frees resources used for stack.
- *
- * @param stack Pointer to stack.
- */
+// Returns first terminal from the stack
+stack_item_t* find_terminal(stack_top_t* stack);
+
+// Frees the stack
 void stack_free(stack_top_t* stack);
