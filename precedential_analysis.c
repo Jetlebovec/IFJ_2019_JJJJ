@@ -401,19 +401,14 @@ int expression(prog_data* data)
 			return SYNTAX_ERR;
 		}
 
-		//sem control when token is identifier
-		if(TOKEN.type == TOKEN_IDENTIFIER)
-		{	
-			//look in local table, if id is undefined here, look in global table, if it is nor here - err
-			if(symtable_search_variable(&data->local_table,TOKEN.attribute->str, &data->current_fun_data) == 0 )
-			{
-				break;
-			}
-			else if(symtable_search_variable(&data->global_table,TOKEN.attribute->str, &data->current_fun_data) != 0 )
-			{
-				return SEM_UNDEF_ERR;
-			}
-		}
+        tSymdata *pom;
+        //if variable is not defined
+        if (TOKEN.type == TOKEN_IDENTIFIER) {
+            if ((symtable_search_variable(&data->local_table, TOKEN.attribute->str, &pom) != 0) &&
+                (symtable_search_variable(&data->global_table, TOKEN.attribute->str, &pom) != 0)) {
+                return SEM_UNDEF_ERR;
+            }
+        }
 
 		//get rule from precedence table for two terminals
 		switch (prec_table[get_symbol_index(top_terminal->symbol)][get_symbol_index(actual_symbol)])
