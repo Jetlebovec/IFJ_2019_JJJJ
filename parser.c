@@ -586,8 +586,9 @@ int def_function(prog_data* data)
     int err = 0;
     //entering the function body
     data->in_function = true;
-    //to store data from sym_search
-    tSymdata *symdataPtr;
+
+    //if the function was used before, we need to check the param count is the same
+    bool used_before = false;
 
     GET_TOKEN(data)
 
@@ -596,34 +597,58 @@ int def_function(prog_data* data)
     // sem control
 
     //function already defined - redefiniton is not allowed
-    if(symtable_search_function(&data->global_table, data->token.attribute->str, &symdataPtr) == 0)
+    if(symtable_search_function(&data->global_table, data->token.attribute->str, &data->current_fun_data) == 0)
     {
-        return SEM_UNDEF_ERR;
+        //the fun is in symtable because it was used before its definition -> its defined now
+        if (data->current_fun_data->defined == false) {
+            data->current_fun_data->defined = true;
+
+            used_before = true;
+        }
+        //if it was defined before, its forbidden
+        else {
+            return SEM_UNDEF_ERR;
+        }
     }
     //prom with same name already exist - fun name cant be the same
-    else if(symtable_search_variable(&data->global_table, data->token.attribute->str, &symdataPtr) == 0)
+    else if(symtable_search_variable(&data->global_table, data->token.attribute->str, &data->current_fun_data) == 0)
     {
         return SEM_UNDEF_ERR;
     }
     //add function to symtable
-    else
-    {
+    else {
         err = symtable_create_function(&data->global_table, data->token.attribute->str);
         if (err != 0)
             return err;
+
+        //saving pointer to symdata of this function for counting params
+        symtable_search_function(&data->global_table, data->token.attribute->str, &data->current_fun_data);
+        //function has just been defined, hurá
+        data->current_fun_data->defined = true;
     }
-    //saving pointer to symdata of this function for counting params
-    symtable_search_function(&data->global_table, data->token.attribute->str, &data->current_fun_data);
 
 
     GET_TOKEN(data)
 
     CHECK_TOKEN_TYPE(data, TOKEN_LBRACKET)
 
-    err = param(data);
+    //saving the old param count
+    int paramCountBefore = data->current_fun_data->param_count;
 
+    //set the current param count to 0
+    data->current_fun_data->param_count = 0;
+
+    //count params
+    err = param(data);
     if (err != 0) {
         return err;
+    }
+
+    //if the function was called/defined before, check if the param count is the same
+    if(used_before == true) {
+        if (paramCountBefore != data->current_fun_data->param_count) {
+            return SEM_PARAM_ERR;
+        }
     }
 
     CHECK_TOKEN_TYPE(data, TOKEN_RBRACKET)
@@ -733,17 +758,62 @@ int idwhat(prog_data* data)
 
     //<idwhat> -> ( <term> )
     else if (data->token.type == TOKEN_LBRACKET) {
+
+        //if the function was used before, we need to check the param count is the same
+        bool used_before = false;
+
+        //variable with the same name exists
+        if (symtable_search_variable(&data->global_table, temp.attribute->str, &data->current_fun_data) == 0)
+        {
+            return SEM_UNDEF_ERR;
+        }
+        //function with the same name was used
+        if (symtable_search_function(&data->global_table, temp.attribute->str, &data->current_fun_data) == 0)
+        {
+            used_before = true;
+        }
+        else {
+            //1st use of func, we add it to symtable
+            err = symtable_create_function(&data->global_table, temp.attribute->str);
+            if (err != 0)
+                return err;
+            //saving pointer to symdata of this function for counting params
+            symtable_search_function(&data->global_table, temp.attribute->str, &data->current_fun_data);
+        }
+
+        //if func is a func that has unlimited paramCount like "print", we set used_before to false
+        //so it doesnt check the previous number of params
+        if (strcmp(temp.attribute->str, "print") == 0) {
+            used_before = false;
+        }
+
+        //we no longer need the temp token
         string_free(temp.attribute);
         free(temp.attribute);
 
+        //saving the old param count
+        int paramCountBefore = data->current_fun_data->param_count;
+
+        //set the current param count to 0
+        data->current_fun_data->param_count = 0;
+
+        //count and check the param count
         err = term(data);
         if (err != 0) {
             return err;
         }
 
+        //if the function was called/defined before, check if the param count is the same
+        if(used_before == true) {
+            if (paramCountBefore != data->current_fun_data->param_count) {
+                return SEM_PARAM_ERR;
+            }
+        }
+
         CHECK_TOKEN_TYPE(data, TOKEN_RBRACKET)
 
         GET_TOKEN(data)
+
         return SYNTAX_OK;
 
     }
@@ -773,6 +843,7 @@ int term(prog_data* data)
     if (IS_VALUE(data->token) || NONE)
     {
         //TODO sem control
+        data->current_fun_data->param_count++;
 
         return term_n(data);
     }
@@ -805,21 +876,22 @@ int param(prog_data* data)
 {
     //error number stored
     int err = 0;
-    tSymdata *symdataPtr;
 
     GET_TOKEN(data)
+
+    tSymdata *pom;
 
     //<param> -> id
     if(data->token.type == TOKEN_IDENTIFIER) {
 
         //TODO sem control
         //look in global table if function with the same name exists
-       if(symtable_search_function(&data->global_table, data->token.attribute->str, &symdataPtr) == 0)
+       if(symtable_search_function(&data->global_table, data->token.attribute->str, &pom) == 0)
        {
            return SEM_UNDEF_ERR;
        }
        //look for var in local table (if previous param wasnt same name)
-       else if (symtable_search_variable(&data->local_table, data->token.attribute->str, &symdataPtr) == 0)
+       else if (symtable_search_variable(&data->local_table, data->token.attribute->str, &pom) == 0)
        {
            return SEM_UNDEF_ERR;
        }
@@ -829,9 +901,8 @@ int param(prog_data* data)
            err = symtable_create_variable(&data->local_table, data->token.attribute->str);
            if (err != 0)
                return err;
+           data->current_fun_data->param_count++;
        }
-       //TODO param counter
-       //data->current_fun_data->param_count++
 
         return param_n(data);
     }
@@ -914,15 +985,55 @@ int assign(prog_data* data) {
     //ID is a function
     if (data->token.type == TOKEN_LBRACKET) {
 
-        //TODO sem action
+        //if the function was used before, we need to check the param count is the same
+        bool used_before = false;
 
+        //variable with the same name exists
+        if (symtable_search_variable(&data->global_table, temp.attribute->str, &data->current_fun_data) == 0)
+        {
+            return SEM_UNDEF_ERR;
+        }
+        //function with the same name was used
+        if (symtable_search_function(&data->global_table, temp.attribute->str, &data->current_fun_data) == 0)
+        {
+            used_before = true;
+        }
+        else {
+            //1st use of func, we add it to symtable
+            err = symtable_create_function(&data->global_table, temp.attribute->str);
+            if (err != 0)
+                return err;
+            //saving pointer to symdata of this function for counting params
+            symtable_search_function(&data->global_table, temp.attribute->str, &data->current_fun_data);
+        }
+
+        //if func is a func that has unlimited paramCount like "print", we set used_before to false
+        //so it doesnt check the previous number of params
+        if (strcmp(temp.attribute->str, "print") == 0) {
+            used_before = false;
+        }
+
+        //we no longer need the temp token
         string_free(temp.attribute);
         free(temp.attribute);
 
-        err = term(data);
+        //saving the old param count
+        int paramCountBefore = data->current_fun_data->param_count;
 
+        //set the current param count to 0
+        data->current_fun_data->param_count = 0;
+
+        //count and check the param count
+        err = term(data);
         if (err != 0) {
             return err;
+        }
+
+        //if the function was called/defined before, check if the param count is the same
+        if(used_before == true) {
+            if (paramCountBefore != data->current_fun_data->param_count) {
+                return SEM_PARAM_ERR;
+            }
         }
 
         CHECK_TOKEN_TYPE(data, TOKEN_RBRACKET)
