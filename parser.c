@@ -844,10 +844,15 @@ int idwhat(prog_data* data)
 
     //<idwhat> -> Ɛ (id muze byt samotne na radku pokud bylo definovano)
     else {
-        string_free(temp.attribute);
-        free(temp.attribute);
+        tSymdata *pom;
+        if ((symtable_search_variable(&data->local_table, temp.attribute->str, &pom) != 0) &&
+            (symtable_search_variable(&data->global_table, temp.attribute->str, &pom) != 0)) {
 
-        //TODO sem control
+            string_free(temp.attribute);
+            free(temp.attribute);
+            return SEM_UNDEF_ERR;
+        }
+
         return SYNTAX_OK;
     }
 
@@ -915,8 +920,6 @@ int param(prog_data* data)
 
     //<param> -> id
     if(data->token.type == TOKEN_IDENTIFIER) {
-
-        //TODO sem control
         //look in global table if function with the same name exists
        if(symtable_search_function(&data->global_table, data->token.attribute->str, &pom) == 0)
        {
