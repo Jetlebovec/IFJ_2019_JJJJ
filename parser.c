@@ -750,10 +750,34 @@ int idwhat(prog_data* data)
     //<idwhat> -> = <assign>
     if (data->token.type == TOKEN_ASSIGN) {
 
+        //we cant define a variable with a same name as function
+        if (symtable_search_function(&data->global_table, temp.attribute->str, &data->current_fun_data) == 0)
+        {
+            return SEM_UNDEF_ERR;
+        }
+
+        //we check the right side
+        err = assign(data);
+        if (err != 0) {
+            return err;
+        }
+
+        //we add the new defined variable to local table if in function or to global table if in main body
+        if (data->in_function == true) {
+            err = symtable_create_variable(&data->local_table, temp.attribute->str);
+            if (err != 0)
+                return err;
+        }
+        else {
+            err = symtable_create_variable(&data->global_table, temp.attribute->str);
+            if (err != 0)
+                return err;
+        }
+
         string_free(temp.attribute);
         free(temp.attribute);
 
-        return assign(data);
+        return SYNTAX_OK;
     }
 
     //<idwhat> -> ( <term> )
@@ -837,12 +861,20 @@ int term(prog_data* data)
 
     GET_TOKEN(data)
 
+    tSymdata *pom;
+
     //<term> -> value <term_n>
     //<term> -> id <term_n>
     //<term> -> None <term_n>
     if (IS_VALUE(data->token) || NONE)
     {
-        //TODO sem control
+        //if variable is not defined
+        if (data->token.type == TOKEN_IDENTIFIER) {
+            if ((symtable_search_variable(&data->local_table, data->token.attribute->str, &pom) != 0) &&
+                    (symtable_search_variable(&data->global_table, data->token.attribute->str, &pom) != 0)) {
+                return SEM_UNDEF_ERR;
+            }
+        }
         data->current_fun_data->param_count++;
 
         return term_n(data);
