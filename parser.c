@@ -1140,6 +1140,78 @@ int return_value(prog_data* data)
 
 }
 
+int add_predefined(prog_data* data) {
+
+    char* fce;
+    int err = 0;
+
+    fce = "inputs";
+    err = symtable_create_function(&data->global_table, fce);
+    if (err != 0)
+        return err;
+    symtable_search_function(&data->global_table, fce, &data->current_fun_data);
+    data->current_fun_data->param_count = 0;
+    data->current_fun_data->defined = true;
+
+    fce = "inputi";
+    err = symtable_create_function(&data->global_table, fce);
+    if (err != 0)
+        return err;
+    symtable_search_function(&data->global_table, fce, &data->current_fun_data);
+    data->current_fun_data->param_count = 0;
+    data->current_fun_data->defined = true;
+
+    fce = "inputf";
+    err = symtable_create_function(&data->global_table, fce);
+    if (err != 0)
+        return err;
+    symtable_search_function(&data->global_table, fce, &data->current_fun_data);
+    data->current_fun_data->param_count = 0;
+    data->current_fun_data->defined = true;
+
+    fce = "print";
+    err = symtable_create_function(&data->global_table, fce);
+    if (err != 0)
+        return err;
+    symtable_search_function(&data->global_table, fce, &data->current_fun_data);
+    data->current_fun_data->param_count = 0;
+    data->current_fun_data->defined = true;
+
+    fce = "len";
+    err = symtable_create_function(&data->global_table, fce);
+    if (err != 0)
+        return err;
+    symtable_search_function(&data->global_table, fce, &data->current_fun_data);
+    data->current_fun_data->param_count = 1;
+    data->current_fun_data->defined = true;
+
+    fce = "substr";
+    err = symtable_create_function(&data->global_table, fce);
+    if (err != 0)
+        return err;
+    symtable_search_function(&data->global_table, fce, &data->current_fun_data);
+    data->current_fun_data->param_count = 3;
+    data->current_fun_data->defined = true;
+
+    fce = "ord";
+    err = symtable_create_function(&data->global_table, fce);
+    if (err != 0)
+        return err;
+    symtable_search_function(&data->global_table, fce, &data->current_fun_data);
+    data->current_fun_data->param_count = 2;
+    data->current_fun_data->defined = true;
+
+    fce = "chr";
+    err = symtable_create_function(&data->global_table, fce);
+    if (err != 0)
+        return err;
+    symtable_search_function(&data->global_table, fce, &data->current_fun_data);
+    data->current_fun_data->param_count = 1;
+    data->current_fun_data->defined = true;
+
+    return err;
+}
+
 //starts the analysis
 int analyse()
 {
@@ -1168,6 +1240,11 @@ int analyse()
     symtable_init(&Data->local_table);
 
     Data->file = stdin;
+
+    err_code = add_predefined(Data);
+    if (err_code != 0) {
+        return err_code;
+    }
 
     //STARTING FOR REAL
     //starting the recursive descent
