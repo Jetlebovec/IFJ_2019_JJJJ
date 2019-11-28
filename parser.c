@@ -584,7 +584,9 @@ int def_function(prog_data* data)
 {
     //error number stored
     int err = 0;
-    //init of local symbol table
+    //entering the function body
+    data->in_function = true;
+    //to store data from sym_search
     tSymdata *symdataPtr;
 
     GET_TOKEN(data)
@@ -654,6 +656,13 @@ int def_function(prog_data* data)
     }
 
     CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
+
+    //dispose the local table - local variables can no longer be used
+    symtable_dispose(&data->local_table);
+
+    //leaving the function body
+    data->in_function = false;
+
     data->token_loaded = false;
 
     return SYNTAX_OK;
@@ -1009,6 +1018,7 @@ int analyse()
     DLInitList(&Data->expression_list);
 
     Data->token_loaded = false;
+    Data->in_function = false;
     Data->current_fun_data = malloc(sizeof(tSymdata));
 
     symtable_init(&Data->global_table);

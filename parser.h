@@ -44,6 +44,8 @@ typedef struct {
 
     bool token_loaded;  //overeni, zda nacitat novy token
 
+    bool in_function;
+
     tDLList expression_list; //list of tokens that form expression
 
     tSymdata *current_fun_data;
