@@ -54,60 +54,60 @@ Prec_table_symbol get_symbol_index(symbols symbol)
 	{
 		case S_PLUS:
 		return PLUS;
-		break;
+		 
 	case S_MINUS:
 		return MINUS;
-		break;
+		 
 	case S_MUL:
 		return MUL;
-		break;
+		 
 	case S_IDIV :
 		return IDIV;
-		break;
+		 
 	case S_DIV:
 		return DIV;
-		break;
+		 
 	case S_EQ:
 		return EQ;
-		break;
+		 
 	case S_NEQ:
 		return NEQ;
-		break;
+		 
 	case S_LSEQ:
 		return LSEQ;
-		break;
+		 
 	case S_GTEQ:
 		return GTEQ;
-		break;
+		 
 	case S_LS:
 		return LS;
-		break;
+		 
 	case S_GT:
 		return GT;
-		break;
+		 
 	case S_LBR:
 		return LBR;
-		break;
+		 
 	case S_RBR:
 		return RBR;
-		break;
+		 
 	case S_ID:
     case S_INT:
 	case S_FLOAT:
 	case S_STR:
     case S_NONE:
 		return TERM;
-		break;
+		 
 	case S_ASSIGN:
 		return ASSIGN;
-		break;
+		 
 	case S_DOLLAR:
 		return DOLLAR;
-		break;
+		 
 
 	default:
 		return DOLLAR;
-		break;
+		 
 	}
 }
 
@@ -120,65 +120,65 @@ symbols get_symbol(Token* token)
 	{
 		case TOKEN_PLUS:
 		return S_PLUS;
-		break;
+		 
 	case TOKEN_MINUS:
 		return S_MINUS;
-		break;
+		 
 	case TOKEN_MULTI:
 		return S_MUL;
-		break;
+		 
 	case TOKEN_INT_DIV :
 		return S_IDIV;
-		break;
+		 
 	case TOKEN_FLOAT_DIV:
 		return S_DIV;
-		break;
+		 
 	case TOKEN_EQUAL:
 		return S_EQ;
-		break;
+		 
 	case TOKEN_NOT_EQUAL:
 		return S_NEQ;
-		break;
+		 
 	case TOKEN_LESSER_EQUAL:
 		return S_LSEQ;
-		break;
+		 
 	case TOKEN_GREATER_EQUAL:
 		return S_GTEQ;
-		break;
+		 
 	case TOKEN_LESSER:
 		return S_LS;
-		break;
+		 
 	case TOKEN_GREATER:
 		return S_GT;
-		break;
+		 
 	case TOKEN_LBRACKET:
 		return S_LBR;
-		break;
+		 
 	case TOKEN_RBRACKET:
 		return S_RBR;
-		break;
+		 
 	case TOKEN_IDENTIFIER:
 		return S_ID;
-		break;
+		 
     case TOKEN_NUM:
 		return S_INT;
-		break;
+		 
 	case TOKEN_NUM_DEC:
 		return S_FLOAT;
-		break;
+		 
     case TOKEN_NUM_EXP:
 		return S_FLOAT;
-		break;
+		 
 	case TOKEN_STRING:
 		return S_STR;
-		break;
+		 
 	case TOKEN_ASSIGN:
 		return S_ASSIGN;
-		break;
+		 
 
 	default:
 		return S_DOLLAR;
-		break;
+		 
 	}
 }
 
@@ -275,13 +275,13 @@ int reduce(prog_data* data)
 	}
 
 	//E->(E)
-	if (count == 3 && symbol1->symbol == S_LBR &&symbol2->symbol == S_NONTERM && symbol3->symbol == RBR)
+	if (symbol1->symbol == S_LBR && symbol2->symbol == S_NONTERM && symbol3->symbol == RBR)
 	{
 		err = SYNTAX_OK;
 	}
 
 	//E->E?E
-	if (count == 3 && symbol1->symbol == S_NONTERM &&symbol3->symbol == S_NONTERM)
+	if (symbol1->symbol == S_NONTERM && symbol3->symbol == S_NONTERM)
 	{
 //switch according to operation between two operands, instructions for type control and for 
 //coresponding stack operation will be generated 
@@ -365,16 +365,19 @@ int reduce(prog_data* data)
 int expression(prog_data* data)
 {
 
-	int err;
+	int err = 0;
 	
 	//init stack
 	init(&symbol_stack);
 
-	//token for imputing in the end of list when all input tokens are parsed, until everything from stack is parsed 
+	//init of token for imputing in the end of list when all input tokens are parsed, until everything from stack is parsed 
 	//(weird solution but works)
+	tString string;
+	string_init(&string);
+	string_append_char(&string,'X');
 	Token token;	
 	init_token(&token, &err);
-	token.attribute = NULL;
+	token.attribute = &string;
 	token.type = TOKEN_UNDEFINED;
 
 	//input symbol readed from token
@@ -386,7 +389,7 @@ int expression(prog_data* data)
 	push(&symbol_stack, S_DOLLAR);
 
 	//star parsing expression untill list is empty
-	while(!(IS_END  || symbol_stack.top->next != NULL))
+	while(!(IS_END)  || symbol_stack.top->next != NULL)
 	{
 		//get index of token type
 		actual_symbol = get_symbol(&TOKEN);
@@ -398,7 +401,19 @@ int expression(prog_data* data)
 			return SYNTAX_ERR;
 		}
 
-		//TODO sem control when token is identifier
+		//sem control when token is identifier
+		if(TOKEN.type == TOKEN_IDENTIFIER)
+		{	
+			//look in local table, if id is undefined here, look in global table, if it is nor here - err
+			if(symtable_search_variable(&data->local_table,TOKEN.attribute->str, &data->current_fun_data) == 0 )
+			{
+				break;
+			}
+			else if(symtable_search_variable(&data->global_table,TOKEN.attribute->str, &data->current_fun_data) != 0 )
+			{
+				return SEM_UNDEF_ERR;
+			}
+		}
 
 		//get rule from precedence table for two terminals
 		switch (prec_table[get_symbol_index(top_terminal->symbol)][get_symbol_index(actual_symbol)])
