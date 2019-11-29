@@ -3,10 +3,8 @@
  *      Team 65, variant 1
  *
  *      Authors:
- *          Diviš Jan	    xdivis12
- *          Kopáček Jiří	xkopac06
+ *          Kopáček Jiří    xkopac06
  *          Pojsl Jakub	    xpojsl00
- *          Sasín Jonáš	    xsasin05
  *
  *      File: custom_string.c
  */
@@ -57,11 +55,10 @@ int string_append_char(tString *s, char c)
 		{
 			return 1;
 		}
-		//printf("Realocc, from %d to %d\n", s->allocSize, s->allocSize + STRINGLEN);
 		s->allocSize = s->allocSize + STRINGLEN;
 	}
-	//s->allocSize = s->length + STRINGLEN;
-	s->str[s->length++] = c;
+	s->str[s->length] = c;
+	s->length += 1;
 	s->str[s->length] = '\0';
 	return 0;
 }

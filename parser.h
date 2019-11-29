@@ -3,8 +3,7 @@
  *      Team 65, variant 1
  *
  *      Authors:
- *          Diviš Jan	    xdivis12
- *          Kopáček Jiří	xkopac06
+ *          Kopáček Jiří    xkopac06
  *          Pojsl Jakub	    xpojsl00
  *          Sasín Jonáš	    xsasin05
  *
@@ -67,7 +66,7 @@ typedef enum
     DIV,    //10
     IDIV,   //11
     LBR,    //12
-    RBR,    //13    
+    RBR,    //13
 	TERM,	//14
 	ASSIGN, //15
     DOLLAR  //16

@@ -3,8 +3,6 @@
  *      Team 65, variant 1
  *
  *      Authors:
- *          Diviš Jan	    xdivis12
- *          Kopáček Jiří	xkopac06
  *          Pojsl Jakub	    xpojsl00
  *          Sasín Jonáš	    xsasin05
  *
@@ -14,21 +12,12 @@
 #include "token_list.h"
 
 void DLInitList (tDLList *L) {
-/*
-** Provede inicializaci seznamu L před jeho prvním použitím (tzn. žádná
-** z následujících funkcí nebude volána nad neinicializovaným seznamem).
-**/
-
-//list je prazny tudiz vsechny ukazatele jsou nastaveny na NULL
+    //list je prazny tudiz vsechny ukazatele jsou nastaveny na NULL
     L->First = NULL;
     L->Last = NULL;
 }
 
 void DLDisposeList (tDLList *L) {
-/*
-** Zruší všechny prvky seznamu L a uvede seznam do stavu, v jakém
-** se nacházel po inicializaci.
-**/
 
     //pomocny ukazatel
     tDLElemPtr pom = L->First;
@@ -50,9 +39,6 @@ void DLDisposeList (tDLList *L) {
 }
 
 void DLInsertLast(tDLList *L, Token *token_in, int *err_code) {
-/*
-** Vloží nový prvek na konec seznamu L (symetrická operace k DLInsertFirst).
-**/
 
     tDLElemPtr vkladany;
     if ((vkladany = (tDLElemPtr) malloc(sizeof(struct tDLElem))) == NULL) {
@@ -72,7 +58,7 @@ void DLInsertLast(tDLList *L, Token *token_in, int *err_code) {
         return;
     }
 
-//pokud je seznam prazndy, vlozi se novy prvek na 1. misto a je zároveň i poslední
+    //pokud je seznam prazndy, vlozi se novy prvek na 1. misto a je zároveň i poslední
     if (L->First == NULL) {
         L->First = vkladany;
         L->Last = vkladany;
@@ -86,21 +72,16 @@ void DLInsertLast(tDLList *L, Token *token_in, int *err_code) {
 }
 
 void DLDeleteFirst (tDLList *L) {
-/*
-** Zruší první prvek seznamu L. Pokud byl první prvek aktivní, aktivita
-** se ztrácí. Pokud byl seznam L prázdný, nic se neděje.
-**/
-
-//overeni prazdnosti seznamu
+    //overeni prazdnosti seznamu
     if (L->First == NULL)
         return;
-//ulozeni ukazatele na druhy prvek
+    //ulozeni ukazatele na druhy prvek
     tDLElemPtr druhy = L->First->rptr;
-//uvolneni prvniho prvku z pameti
+    //uvolneni prvniho prvku z pameti
     string_free(L->First->token.attribute);
     free(L->First->token.attribute);
     free(L->First);
-//druhy prvek se stava prvnim
+    //druhy prvek se stava prvnim
     L->First = druhy;
 }
 

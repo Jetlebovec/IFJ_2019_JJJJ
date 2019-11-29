@@ -3,8 +3,7 @@
  *      Team 65, variant 1
  *
  *      Authors:
- *          Diviš Jan	    xdivis12
- *          Kopáček Jiří	xkopac06
+ *          Kopáček Jiří    xkopac06
  *          Pojsl Jakub	    xpojsl00
  *          Sasín Jonáš	    xsasin05
  *
@@ -15,7 +14,7 @@
 #include <stdlib.h>
 #include "parser.h"
 
-//function prototypes
+//function prototypes TODO: put in header
 int program(prog_data* data);
 int statement(prog_data* data);
 int def_function(prog_data* data);
@@ -38,7 +37,7 @@ int assign(prog_data* data);
 #define WHILE string_compare_char(data->token.attribute, "while") == 0
 
 //macro to check if the token is value
-#define IS_VALUE(token)                 \
+#define IS_VALUE(token)             \
 token.type == TOKEN_STRING ||       \
 token.type == TOKEN_NUM ||          \
 token.type == TOKEN_NUM_DEC ||      \
@@ -46,7 +45,7 @@ token.type == TOKEN_NUM_EXP ||      \
 token.type == TOKEN_IDENTIFIER
 
 //macro to check if token could be beginning of expression
-#define IS_EXPR(token)                 \
+#define IS_EXPR(token)              \
 token.type == TOKEN_STRING ||       \
 token.type == TOKEN_NUM ||          \
 token.type == TOKEN_NUM_DEC ||      \
@@ -54,9 +53,9 @@ token.type == TOKEN_NUM_EXP ||      \
 token.type == TOKEN_LBRACKET
 
 //macro to check if token is operator
-#define IS_OP(token)                 \
-token.type == TOKEN_PLUS ||          \
-token.type == TOKEN_MINUS ||         \
+#define IS_OP(token)                \
+token.type == TOKEN_PLUS ||         \
+token.type == TOKEN_MINUS ||        \
 token.type == TOKEN_MULTI ||        \
 token.type == TOKEN_INT_DIV ||      \
 token.type == TOKEN_FLOAT_DIV ||    \
@@ -1257,45 +1256,9 @@ int analyse()
         err_code = SEM_UNDEF_ERR;
     }
 
-    /*
-
-    // TESTING WITH FILE
-    FILE *file;
-    file = fopen("test.txt", "r");
-    // TESTING WITH FILE
-
-    //TEST START
-
-    // Test prints the first 150 tokens from test.txt
-    for (int i = 0; i < 150; i++)
-    {
-        if ((err_code = get_token(&newToken, file)) != 0)
-        {
-            break;
-        } else
-        {
-            printf("Token %d:\n", i);
-            printf("Token type: %d\n", newToken.type);
-            printf("Token attribute: ");
-            string_print(newToken.attribute);
-            printf("\n");
-            if (newToken.type == TOKEN_EOF)
-            {
-                break;
-            }
-        }
-    }
-
-    //TEST END
-
-    // TESTING WITH FILE
-    fclose(file);
-    // TESTING WITH FILE
-
-     */
 
     //test print
-    printf("%d\n", err_code);
+    //printf("%d\n", err_code);
 
     free(Data);
 

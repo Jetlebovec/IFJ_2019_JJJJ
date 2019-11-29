@@ -3,10 +3,8 @@
  *      Team 65, variant 1
  *
  *      Authors:
- *          Diviš Jan	    xdivis12
- *          Kopáček Jiří	xkopac06
+ *          Diviš Jan       xdivis12
  *          Pojsl Jakub	    xpojsl00
- *          Sasín Jonáš	    xsasin05
  *
  *      File: precedential_analysis.c
  */
@@ -54,60 +52,60 @@ Prec_table_symbol get_symbol_index(symbols symbol)
 	{
 		case S_PLUS:
 		return PLUS;
-		 
+
 	case S_MINUS:
 		return MINUS;
-		 
+
 	case S_MUL:
 		return MUL;
-		 
+
 	case S_IDIV :
 		return IDIV;
-		 
+
 	case S_DIV:
 		return DIV;
-		 
+
 	case S_EQ:
 		return EQ;
-		 
+
 	case S_NEQ:
 		return NEQ;
-		 
+
 	case S_LSEQ:
 		return LSEQ;
-		 
+
 	case S_GTEQ:
 		return GTEQ;
-		 
+
 	case S_LS:
 		return LS;
-		 
+
 	case S_GT:
 		return GT;
-		 
+
 	case S_LBR:
 		return LBR;
-		 
+
 	case S_RBR:
 		return RBR;
-		 
+
 	case S_ID:
     case S_INT:
 	case S_FLOAT:
 	case S_STR:
     case S_NONE:
 		return TERM;
-		 
+
 	case S_ASSIGN:
 		return ASSIGN;
-		 
+
 	case S_DOLLAR:
 		return DOLLAR;
-		 
+
 
 	default:
 		return DOLLAR;
-		 
+
 	}
 }
 
@@ -120,65 +118,65 @@ symbols get_symbol(Token* token)
 	{
 		case TOKEN_PLUS:
 		return S_PLUS;
-		 
+
 	case TOKEN_MINUS:
 		return S_MINUS;
-		 
+
 	case TOKEN_MULTI:
 		return S_MUL;
-		 
+
 	case TOKEN_INT_DIV :
 		return S_IDIV;
-		 
+
 	case TOKEN_FLOAT_DIV:
 		return S_DIV;
-		 
+
 	case TOKEN_EQUAL:
 		return S_EQ;
-		 
+
 	case TOKEN_NOT_EQUAL:
 		return S_NEQ;
-		 
+
 	case TOKEN_LESSER_EQUAL:
 		return S_LSEQ;
-		 
+
 	case TOKEN_GREATER_EQUAL:
 		return S_GTEQ;
-		 
+
 	case TOKEN_LESSER:
 		return S_LS;
-		 
+
 	case TOKEN_GREATER:
 		return S_GT;
-		 
+
 	case TOKEN_LBRACKET:
 		return S_LBR;
-		 
+
 	case TOKEN_RBRACKET:
 		return S_RBR;
-		 
+
 	case TOKEN_IDENTIFIER:
 		return S_ID;
-		 
+
     case TOKEN_NUM:
 		return S_INT;
-		 
+
 	case TOKEN_NUM_DEC:
 		return S_FLOAT;
-		 
+
     case TOKEN_NUM_EXP:
 		return S_FLOAT;
-		 
+
 	case TOKEN_STRING:
 		return S_STR;
-		 
+
 	case TOKEN_ASSIGN:
 		return S_ASSIGN;
-		 
+
 
 	default:
 		return S_DOLLAR;
-		 
+
 	}
 }
 
@@ -215,7 +213,7 @@ int symbol_count()
 }
 
 // Function pops stack n times.
-void pop_n(int n, stack_top_t* stack) 
+void pop_n(int n, stack_top_t* stack)
 {
     for (int i = 0; i < n; i++)
     {
@@ -233,11 +231,11 @@ int reduce(prog_data* data)
 	stack_item_t* symbol2 = NULL; //symbols loaded from stack
 	stack_item_t* symbol3 = NULL;
 
-//count symbols on stack before stop symbol, it could be 1 or 3 (i or E?E)
+    //count symbols on stack before stop symbol, it could be 1 or 3 (i or E?E)
 	count = symbol_count();
 
-//if there was 1 symbol, it should be id/value and it could be replaced by nonterm
-//in final code it means operand were pushed on stack
+    //if there was 1 symbol, it should be id/value and it could be replaced by nonterm
+    //in final code it means operand were pushed on stack
 	if(count == 1)
 	{
 		//E->i rule
@@ -260,8 +258,8 @@ int reduce(prog_data* data)
 
 	}
 
-//if there are three symbols, it will be some kind of operations between two nonterms E?E or E->(E)
-//aka operation between two operands we already have on stack in real code
+    //if there are three symbols, it will be some kind of operations between two nonterms E?E or E->(E)
+    //aka operation between two operands we already have on stack in real code
 
 	else if (count == 3)
 	{
@@ -283,8 +281,8 @@ int reduce(prog_data* data)
 	//E->E?E
 	if (symbol1->symbol == S_NONTERM && symbol3->symbol == S_NONTERM)
 	{
-//switch according to operation between two operands, instructions for type control and for 
-//coresponding stack operation will be generated 
+        //switch according to operation between two operands, instructions for type control and for
+        //coresponding stack operation will be generated
 		switch (symbol2->symbol)
 		{
 		//E->E<E
@@ -350,8 +348,8 @@ int reduce(prog_data* data)
 
 	}
 
-//pop 3 symbols and the stop symbol and replace it by nonterm symbol - operation with two operands
-//was done
+    //pop 3 symbols and the stop symbol and replace it by nonterm symbol - operation with two operands
+    //was done
 
 	pop_n(4, &symbol_stack);
 	if(push(&symbol_stack, S_NONTERM) == false)
@@ -364,18 +362,17 @@ int reduce(prog_data* data)
 //main function for expression handle
 int expression(prog_data* data)
 {
-
 	int err = 0;
-	
+
 	//init stack
 	init(&symbol_stack);
 
-	//init of token for imputing in the end of list when all input tokens are parsed, until everything from stack is parsed 
+	//init of token for imputing in the end of list when all input tokens are parsed, until everything from stack is parsed
 	//(weird solution but works)
 	tString string;
 	string_init(&string);
 	string_append_char(&string,'X');
-	Token token;	
+	Token token;
 	init_token(&token, &err);
 	token.attribute = &string;
 	token.type = TOKEN_UNDEFINED;
@@ -420,7 +417,7 @@ int expression(prog_data* data)
 				{
 					return ERROR_INTERNAL;
 				}
-								
+
 				//move forward in list - get next symbol
 				NEXT_TOKEN;
 				break;
@@ -430,15 +427,15 @@ int expression(prog_data* data)
 		case '<':
 				insert_stop_symbol(&symbol_stack);
 				push(&symbol_stack, actual_symbol);
-				
+
 				//if it is value/id generate push instruction (operand on stack)
 
 				//move forward in list - get next symbol
 				NEXT_TOKEN;
-			
+
 				break;
 
-		//symbol(s) on stack can be handled and reduced to nonterminal according to reducing rules (when <y is on top) 
+		//symbol(s) on stack can be handled and reduced to nonterminal according to reducing rules (when <y is on top)
 		case '>':
 
 				err = reduce(data);
@@ -459,7 +456,7 @@ int expression(prog_data* data)
 				{
 					return SYNTAX_ERR;
 				}
-				
+
 				break;
 
 		}
@@ -469,9 +466,8 @@ int expression(prog_data* data)
 		{
 			DLInsertLast(&data->expression_list, &token, &err);
 		}
-		
+
 	}
 
     return err;
-
 }

@@ -3,10 +3,7 @@
  *      Team 65, variant 1
  *
  *      Authors:
- *          Diviš Jan	    xdivis12
- *          Kopáček Jiří	xkopac06
- *          Pojsl Jakub	    xpojsl00
- *          Sasín Jonáš	    xsasin05
+ *          Kopáček Jiří    xkopac06
  *
  *      File: scanner.c
  */
@@ -125,7 +122,6 @@ int empty_stack(Token *token)
     }
 }
 
-// TODO ERASE FILE INPUT
 int get_token(Token *token, FILE *file)
 {
     // Initializes all required variables
@@ -169,7 +165,6 @@ int get_token(Token *token, FILE *file)
         }
     }
 
-    //  TODO REWRITE FOR STDIN TODO REWRITE FOR STDIN TODO REWRITE FOR STDIN TODO REWRITE FOR STDIN TODO REWRITE FOR STDIN
     // Reads the input
     while (file)
     {
