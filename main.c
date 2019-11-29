@@ -15,14 +15,8 @@
  #include <stdlib.h>
  #include "parser.h"
 
- int main (int argc, char* argv[])
+ int main ()
  {
-    if (argc > 1)
-    {
-        fprintf(stderr, "Invalid arguments\n");
-        return 99;
-    }
-
     //TODO Initialize stuff we dont have yet
 
     // Complete analysis
