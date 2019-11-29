@@ -1225,7 +1225,9 @@ int analyse()
 
     //create the structure to store parser data
     prog_data* Data;
-    Data = malloc(sizeof(prog_data));
+    if ((Data = malloc(sizeof(prog_data))) == NULL) {
+        return ERROR_INTERNAL;
+    }
 
     //initialize the structure to store parser data
     init_token(&(Data->token), &err_code);
@@ -1236,7 +1238,9 @@ int analyse()
 
     Data->token_loaded = false;
     Data->in_function = false;
-    Data->current_fun_data = malloc(sizeof(tSymdata));
+    if ((Data->current_fun_data = malloc(sizeof(tSymdata))) == NULL) {
+        return ERROR_INTERNAL;
+    }
 
     symtable_init(&Data->global_table);
     symtable_init(&Data->local_table);
@@ -1264,6 +1268,7 @@ int analyse()
 
     return err_code;
 
+    /*
     //ODSUD SEGFAULT XD
 
     //free list
@@ -1276,6 +1281,6 @@ int analyse()
     // Free token
     string_free(Data->token.attribute);
     free(Data->token.attribute);
-
+    */
 }
 
