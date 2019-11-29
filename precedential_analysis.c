@@ -16,11 +16,10 @@
 
 #define TABLE_SIZE 16
 
-int reduce(prog_data* data);
+int reduce();
 Prec_table_symbol get_symbol_index(symbols symbol);
 symbols get_symbol(Token* token);
 int symbol_count();
-int reduce(prog_data* data);
 
 //precedence table
 char prec_table[TABLE_SIZE][TABLE_SIZE] = { /*
@@ -222,14 +221,15 @@ void pop_n(int n, stack_top_t* stack)
 }
 
 //reduce 1 or 3 terms to nonterm based on rules and do all required actions
-int reduce(prog_data* data)
+int reduce()
 {
 	int err = 0;
 	int count = 0; //number of symbols loaded from stack before stop symbol (<)
 
-	stack_item_t* symbol1 = NULL;
-	stack_item_t* symbol2 = NULL; //symbols loaded from stack
-	stack_item_t* symbol3 = NULL;
+//symbols loaded from stack
+	int symbol1;
+	int symbol2;
+	int symbol3;
 
     //count symbols on stack before stop symbol, it could be 1 or 3 (i or E?E)
 	count = symbol_count();
@@ -239,9 +239,9 @@ int reduce(prog_data* data)
 	if(count == 1)
 	{
 		//E->i rule
-		symbol1 = symbol_stack.top;
+		symbol1 = symbol_stack.top->symbol;
 
-		if(symbol1->symbol == S_ID || symbol1->symbol == S_INT || symbol1->symbol == S_FLOAT || symbol1->symbol == S_STR)
+		if(symbol1 == S_ID || symbol1 == S_INT || symbol1 == S_FLOAT || symbol1 == S_STR)
 		{
 			//pop first symbol and stop symbol and replace it by nonterm symbol
 			pop_n(2, &symbol_stack);
@@ -263,9 +263,9 @@ int reduce(prog_data* data)
 
 	else if (count == 3)
 	{
-		symbol3 = symbol_stack.top;
-		symbol2 = symbol_stack.top->next;
-		symbol1 = symbol2->next;
+		symbol3 = symbol_stack.top->symbol;
+		symbol2 = symbol_stack.top->next->symbol;
+		symbol1 = symbol_stack.top->next->next->symbol;
 	}
 	else
 	{
@@ -273,17 +273,17 @@ int reduce(prog_data* data)
 	}
 
 	//E->(E)
-	if (symbol1->symbol == S_LBR && symbol2->symbol == S_NONTERM && symbol3->symbol == RBR)
+	if (symbol1 == S_LBR && symbol2 == S_NONTERM && symbol3 == RBR)
 	{
 		err = SYNTAX_OK;
 	}
 
 	//E->E?E
-	if (symbol1->symbol == S_NONTERM && symbol3->symbol == S_NONTERM)
+	if (symbol1 == S_NONTERM && symbol3 == S_NONTERM)
 	{
         //switch according to operation between two operands, instructions for type control and for
         //coresponding stack operation will be generated
-		switch (symbol2->symbol)
+		switch (symbol2)
 		{
 		//E->E<E
 		case S_LS:
@@ -347,6 +347,7 @@ int reduce(prog_data* data)
 		}
 
 	}
+
 
     //pop 3 symbols and the stop symbol and replace it by nonterm symbol - operation with two operands
     //was done
@@ -446,7 +447,7 @@ int expression(prog_data* data)
 		//symbol(s) on stack can be handled and reduced to nonterminal according to reducing rules (when <y is on top)
 		case '>':
 
-				err = reduce(data);
+				err = reduce();
 				if (err != 0)
 				{
 					return err;
