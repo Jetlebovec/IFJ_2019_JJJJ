@@ -19,35 +19,21 @@ void init(stack_top_t* stack)
     stack->top = NULL;
 }
 
-bool push(stack_top_t* stack, symbols symbol)
+int push(stack_top_t* stack, symbols symbol)
 {
-    /*
-    stack_item_t *tmp = malloc(sizeof(stack_item_t));
-
-    if (tmp == NULL)
-    {
-        return false;
-    }
-
-    tmp->symbol = symbol;
-    tmp->next = stack->top;
-
-    stack->top = tmp;
-    return true;
-*/
     stack_item_t *tmp = stack->top;
 
     stack->top = malloc(sizeof(stack_item_t));
     if (stack->top == NULL)
     {
-        return false;
+        return 1;
     }
     stack->top->symbol = symbol;
     stack->top->next = tmp;
-    return true;
+    return 0;
 }
 
-bool pop(stack_top_t* stack)
+void pop(stack_top_t* stack)
 {
     if (stack->top != NULL)
     {
@@ -55,15 +41,14 @@ bool pop(stack_top_t* stack)
         stack->top = tmp->next;
 
         free(tmp);
-        return true;
     }
-    return false;
+    return;
 }
 
-bool insert_stop_symbol(stack_top_t* stack)
+int insert_stop_symbol(stack_top_t* stack)
 {
     stack_item_t *tmp = stack->top;
-    stack_item_t *prev = NULL;
+    stack_item_t *prev_symbol = NULL;
 
     //Cycles through the stack
     while (tmp != NULL)
@@ -75,30 +60,30 @@ bool insert_stop_symbol(stack_top_t* stack)
             stack_item_t *stop_symbol = malloc(sizeof(stack_item_t));
             if (stop_symbol == NULL)
             {
-                return false;
+                return 1;
             }
 
-            //If the correct placement is at the top of the stack
-            if (prev == NULL)
+            //If the correct placement is inside the stack
+            if (prev_symbol != NULL)
             {
-                //corrects pointers
+                //corrects pointers on the previous symbol
+                stop_symbol->next = prev_symbol->next;
+                prev_symbol->next = stop_symbol;
+            } else {
+                //otherwise corrects pointers to the top
                 stop_symbol->next = stack->top;
                 stack->top = stop_symbol;
-            } else {
-                //otherwise corrects pointers on the previous symbol
-                stop_symbol->next = prev->next;
-                prev->next = stop_symbol;
             }
             stop_symbol->symbol = S_STOP;
 
-            return true;
+            return 0;
         }
         else {
-            prev = tmp;
+            prev_symbol = tmp;
             tmp = tmp->next;
         }
     }
-    return false;
+    return 1;
 }
 
 stack_item_t* find_terminal(stack_top_t* stack)
@@ -116,15 +101,6 @@ stack_item_t* find_terminal(stack_top_t* stack)
         tmp = tmp->next;
     }
     return tmp;
-
-    /*
-	for (stack_item_t* tmp = stack->top; tmp != NULL; tmp = tmp->next)
-	{
-		if (tmp->symbol < S_STOP)
-			return tmp;
-	}
-	return NULL;
-	*/
 }
 
 void stack_free(stack_top_t* stack)

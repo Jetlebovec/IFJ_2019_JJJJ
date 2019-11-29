@@ -245,7 +245,7 @@ int reduce(prog_data* data)
 		{
 			//pop first symbol and stop symbol and replace it by nonterm symbol
 			pop_n(2, &symbol_stack);
-			if(push(&symbol_stack, S_NONTERM) == false)
+			if(push(&symbol_stack, S_NONTERM) == 1)
 			{
 				return ERROR_INTERNAL;
 			}
@@ -352,7 +352,7 @@ int reduce(prog_data* data)
     //was done
 
 	pop_n(4, &symbol_stack);
-	if(push(&symbol_stack, S_NONTERM) == false)
+	if(push(&symbol_stack, S_NONTERM) == 1)
 	{
 		return ERROR_INTERNAL;
 	}
@@ -383,7 +383,10 @@ int expression(prog_data* data)
 	stack_item_t* top_terminal;
 
 	//$ bottom of stack
-	push(&symbol_stack, S_DOLLAR);
+	if (push(&symbol_stack, S_DOLLAR) == 1)
+    {
+        return ERROR_INTERNAL;
+    }
 
 	//star parsing expression untill list is empty
 	while(!(IS_END)  || symbol_stack.top->next != NULL)
@@ -413,7 +416,7 @@ int expression(prog_data* data)
 
 		//just push symbol on stack
 		case '=':
-				if(push(&symbol_stack,actual_symbol) == false)
+				if(push(&symbol_stack,actual_symbol) == 1)
 				{
 					return ERROR_INTERNAL;
 				}
@@ -425,9 +428,14 @@ int expression(prog_data* data)
 
 		//inserting stop symbol after first terminal on stack (changing priority), pushing input symbol
 		case '<':
-				insert_stop_symbol(&symbol_stack);
-				push(&symbol_stack, actual_symbol);
-
+				if (insert_stop_symbol(&symbol_stack) == 1)
+                {
+                    return ERROR_INTERNAL;
+                }
+				if (push(&symbol_stack, actual_symbol) == 1)
+                {
+                    return ERROR_INTERNAL;
+                }
 				//if it is value/id generate push instruction (operand on stack)
 
 				//move forward in list - get next symbol

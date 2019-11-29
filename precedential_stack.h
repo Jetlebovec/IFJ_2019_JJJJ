@@ -54,13 +54,13 @@ typedef struct stack_top
 void init(stack_top_t* stack);
 
 // Stack push
-bool push(stack_top_t* stack, symbols symbol);
+int push(stack_top_t* stack, symbols symbol);
 
 // Stack pop
-bool pop(stack_top_t* stack);
+void pop(stack_top_t* stack);
 
 // Inserts new stop symbol in the stack
-bool insert_stop_symbol(stack_top_t* stack);
+int insert_stop_symbol(stack_top_t* stack);
 
 // Returns first terminal from the stack
 stack_item_t* find_terminal(stack_top_t* stack);
