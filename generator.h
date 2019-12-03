@@ -5,7 +5,7 @@
  *      Authors:
  *          Sasín Jonáš     xsasin05
  *
- *      File: generator.c
+ *      File: generator.h
  */
 
 #include <stdio.h>
@@ -28,10 +28,4 @@ void add_if_end(int cond_id);
 
 void add_while(int cycle_id);
 void add_while_end(int cycle_id);
-
-
-
-
-
-
 

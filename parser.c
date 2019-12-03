@@ -186,6 +186,7 @@ int statement(prog_data* data)
 //<statement> -> if <expression> : EOL INDENT <statement> DEDENT else : EOL INDENT <statement> DEDENT
     if(IF)
     {
+        data->if_count++;
         //EXPRESSION
         //we add the whole expression until colon is found into List
         GET_TOKEN(data)
@@ -278,6 +279,7 @@ int statement(prog_data* data)
     //<statement> -> while <expression> : EOL INDENT <statement> DEDENT <statement>
     if(WHILE)
     {
+        data->while_count++;
         //EXPRESSION
         //we add the whole expression until colon is found into List
         GET_TOKEN(data)
@@ -401,6 +403,7 @@ int statement_fun(prog_data* data)
 //<statement_fun> -> if <expression> : EOL INDENT <statement_fun> DEDENT else : EOL INDENT <statement_fun> DEDENT
     if(IF)
     {
+        data->if_count++;
         //EXPRESSION
         //we add the whole expression until colon is found into List
         GET_TOKEN(data)
@@ -491,6 +494,7 @@ int statement_fun(prog_data* data)
     //<statement_fun> -> while <expression> : EOL INDENT <statement_fun> DEDENT <statement_fun>
     if(WHILE)
     {
+        data->while_count++;
         //EXPRESSION
         //we add the whole expression until colon is found into List
         GET_TOKEN(data)
@@ -1235,6 +1239,9 @@ int analyse()
         return err_code;
 
     DLInitList(&Data->expression_list);
+
+    Data->if_count=0;
+    Data->while_count=0;
 
     Data->token_loaded = false;
     Data->in_function = false;

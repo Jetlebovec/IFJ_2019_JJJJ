@@ -73,7 +73,6 @@ void add_function_end(bool end_of_fun_body, char* fun_name)
     }
 }
 
-//TODO v parseru indexovat ify, def "exp_result" na začátku
 void add_if(int cond_id)
 {
     printf("\nPOPS GF@exp_result");
@@ -92,7 +91,6 @@ void add_if_end(int cond_id)
     printf("\nLABEL $if_end_%d", cond_id);
 }
 
-//TODO v parseru indexovat whily
 void add_while(int cycle_id)
 {
     printf("\nLABEL $while_%d", cycle_id);
@@ -106,9 +104,4 @@ void add_while_end(int cycle_id)
     printf("\nJUMP $while_%d", cycle_id);
     printf("\nLABEL $while_end_%d", cycle_id);
 }
-
-
-
-
-
 
