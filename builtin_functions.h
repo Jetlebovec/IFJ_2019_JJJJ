@@ -15,6 +15,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Generates the head and the built-in functions
+void generate_main_body();
+
+// Generates the appropriate built-in function
 void add_inputs();
 void add_inputf();
 void add_inputi();
