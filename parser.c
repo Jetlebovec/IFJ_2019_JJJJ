@@ -131,7 +131,6 @@ int program(prog_data* data) {
 
 }
 
-
 // <statement> rule
 int statement(prog_data* data)
 {
@@ -161,6 +160,9 @@ int statement(prog_data* data)
         }
         DLDisposeList(&data->expression_list);
 
+        //GENERATE
+        gen_move_exp_res("exp_result", false);
+
         CHECK_TOKEN_TYPE(data, TOKEN_EOL)
         GET_TOKEN(data)
         return statement(data);
@@ -187,6 +189,8 @@ int statement(prog_data* data)
     if(IF)
     {
         data->if_count++;
+        int if_count = data->if_count;
+
         //EXPRESSION
         //we add the whole expression until colon is found into List
         GET_TOKEN(data)
@@ -209,6 +213,9 @@ int statement(prog_data* data)
             return err;
         }
         DLDisposeList(&data->expression_list);
+
+        //GENERATE
+        gen_if(if_count);
 
         CHECK_TOKEN_TYPE(data, TOKEN_COLON)
 
@@ -242,6 +249,9 @@ int statement(prog_data* data)
 
         CHECK_KEYWORD(data, "else")
 
+        //GENERATE
+        gen_else(if_count);
+
         GET_TOKEN(data)
 
         CHECK_TOKEN_TYPE(data,TOKEN_COLON)
@@ -272,6 +282,9 @@ int statement(prog_data* data)
 
         CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
 
+        //GENERATE
+        gen_if_end(if_count);
+
         GET_TOKEN(data)
         return statement(data);
     }
@@ -279,7 +292,10 @@ int statement(prog_data* data)
     //<statement> -> while <expression> : EOL INDENT <statement> DEDENT <statement>
     if(WHILE)
     {
+
         data->while_count++;
+        int while_count = data->while_count;
+
         //EXPRESSION
         //we add the whole expression until colon is found into List
         GET_TOKEN(data)
@@ -302,6 +318,9 @@ int statement(prog_data* data)
             return err;
         }
         DLDisposeList(&data->expression_list);
+
+        //GENERATE
+        gen_while(while_count);
 
         CHECK_TOKEN_TYPE(data, TOKEN_COLON)
 
@@ -330,6 +349,9 @@ int statement(prog_data* data)
         }
 
         CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
+
+        //GENERATE
+        gen_while_end(while_count);
 
         GET_TOKEN(data)
         return statement(data);
@@ -378,6 +400,9 @@ int statement_fun(prog_data* data)
         }
         DLDisposeList(&data->expression_list);
 
+        //GENERATE
+        gen_move_exp_res("exp_result", false);
+
         CHECK_TOKEN_TYPE(data, TOKEN_EOL)
         GET_TOKEN(data)
         return statement_fun(data);
@@ -403,7 +428,10 @@ int statement_fun(prog_data* data)
 //<statement_fun> -> if <expression> : EOL INDENT <statement_fun> DEDENT else : EOL INDENT <statement_fun> DEDENT
     if(IF)
     {
+
         data->if_count++;
+        int if_count = data->if_count;
+
         //EXPRESSION
         //we add the whole expression until colon is found into List
         GET_TOKEN(data)
@@ -426,6 +454,9 @@ int statement_fun(prog_data* data)
             return err;
         }
         DLDisposeList(&data->expression_list);
+
+        //GENERATE
+        gen_if(if_count);
 
         CHECK_TOKEN_TYPE(data, TOKEN_COLON)
 
@@ -458,6 +489,9 @@ int statement_fun(prog_data* data)
 
         CHECK_KEYWORD(data, "else")
 
+        //GENERATE
+        gen_else(if_count);
+
         GET_TOKEN(data)
 
         CHECK_TOKEN_TYPE(data,TOKEN_COLON)
@@ -487,6 +521,9 @@ int statement_fun(prog_data* data)
 
         CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
 
+        //GENERATE
+        gen_if_end(if_count);
+
         GET_TOKEN(data)
         return statement_fun(data);
     }
@@ -495,6 +532,7 @@ int statement_fun(prog_data* data)
     if(WHILE)
     {
         data->while_count++;
+        int while_count = data->while_count;
         //EXPRESSION
         //we add the whole expression until colon is found into List
         GET_TOKEN(data)
@@ -517,6 +555,9 @@ int statement_fun(prog_data* data)
             return err;
         }
         DLDisposeList(&data->expression_list);
+
+        //GENERATE
+        gen_while(while_count);
 
         CHECK_TOKEN_TYPE(data, TOKEN_COLON)
 
@@ -545,6 +586,9 @@ int statement_fun(prog_data* data)
 
         CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
 
+        //GENERATE
+        gen_while_end(while_count);
+
         GET_TOKEN(data)
         return statement_fun(data);
     }
@@ -566,10 +610,15 @@ int statement_fun(prog_data* data)
         GET_TOKEN(data)
 
         err = return_value(data);
+        //return expression is the top of the stack
 
         if(err != 0) {
             return err;
         }
+
+        //GENERATE
+        //we dont need to know the fun name cause we dont generate the jump-over-fun LABEL
+        gen_function_end(false, "none");
 
         CHECK_TOKEN_TYPE(data, TOKEN_EOL)
 
@@ -630,6 +679,9 @@ int def_function(prog_data* data)
         data->current_fun_data->defined = true;
     }
 
+    //GENERATE
+    char* fun_name = data->token.attribute->str;
+    gen_function_start(fun_name);
 
     GET_TOKEN(data)
 
@@ -684,6 +736,9 @@ int def_function(prog_data* data)
     }
 
     CHECK_TOKEN_TYPE(data, TOKEN_DEDENT)
+
+    //GENERATE
+    gen_function_end(true, fun_name);
 
     //dispose the local table - local variables can no longer be used
     symtable_dispose(&data->local_table);
@@ -747,6 +802,9 @@ int idwhat(prog_data* data)
         }
         DLDisposeList(&data->expression_list);
 
+        //GENERATE
+        gen_move_exp_res("exp_result", false);
+
         return SYNTAX_OK;
     }
 
@@ -764,17 +822,40 @@ int idwhat(prog_data* data)
         if (err != 0) {
             return err;
         }
+        //EXP RESULT SHOULD BE THE TOP OF THE STACK
+
+        tSymdata *pom;
 
         //we add the new defined variable to local table if in function or to global table if in main body
         if (data->in_function == true) {
-            err = symtable_create_variable(&data->local_table, temp.attribute->str);
-            if (err != 0)
-                return err;
+
+            if (symtable_search_variable(&data->local_table, temp.attribute->str, &pom) != 0) {
+
+                err = symtable_create_variable(&data->local_table, temp.attribute->str);
+                if (err != 0)
+                    return err;
+
+                //GENERATE
+                gen_defvar(temp.attribute->str, data->in_function);
+            }
+            //TODO after assign rule, GF@exp_result needs to be top of the stack
+            //GENERATE
+            gen_move_exp_res(temp.attribute->str, true);
+
         }
         else {
-            err = symtable_create_variable(&data->global_table, temp.attribute->str);
-            if (err != 0)
-                return err;
+            if (symtable_search_variable(&data->global_table, temp.attribute->str, &pom) != 0) {
+
+                err = symtable_create_variable(&data->global_table, temp.attribute->str);
+                if (err != 0)
+                    return err;
+
+                //GENERATE
+                gen_defvar(temp.attribute->str, data->in_function);
+            }
+
+            //GENERATE
+            gen_move_exp_res(temp.attribute->str, false);
         }
 
         string_free(temp.attribute);
@@ -788,6 +869,8 @@ int idwhat(prog_data* data)
 
         //if the function was used before, we need to check the param count is the same
         bool used_before = false;
+
+        char* fun_name = temp.attribute->str;
 
         //variable with the same name exists
         if (symtable_search_variable(&data->global_table, temp.attribute->str, &data->current_fun_data) == 0)
@@ -824,6 +907,9 @@ int idwhat(prog_data* data)
         //set the current param count to 0
         data->current_fun_data->param_count = 0;
 
+        //GENERATE
+        printf("CREATEFRAME");
+
         //count and check the param count
         err = term(data);
         if (err != 0) {
@@ -836,6 +922,9 @@ int idwhat(prog_data* data)
                 return SEM_PARAM_ERR;
             }
         }
+
+        //GENERATE
+        gen_call_fun(fun_name);
 
         CHECK_TOKEN_TYPE(data, TOKEN_RBRACKET)
 
@@ -856,12 +945,16 @@ int idwhat(prog_data* data)
             return SEM_UNDEF_ERR;
         }
 
+        string_free(temp.attribute);
+        free(temp.attribute);
+
         return SYNTAX_OK;
     }
 
 }
 
 // <term> rule
+//TODO generates
 int term(prog_data* data)
 {
     //error number stored
@@ -940,6 +1033,9 @@ int param(prog_data* data)
            if (err != 0)
                return err;
            data->current_fun_data->param_count++;
+
+           //GENERATE
+           gen_def_move_param(data->token.attribute->str, data->current_fun_data->param_count);
        }
 
         return param_n(data);
@@ -969,6 +1065,7 @@ int param_n(prog_data* data)
 }
 
 //<assign> rule
+//TODO generate
 int assign(prog_data* data) {
 
     //error number stored
@@ -1141,6 +1238,8 @@ int return_value(prog_data* data)
         return SYNTAX_OK;
     }
 
+    //GENERATE
+    printf("PUSHS nil@nil");
     //<return_value> -> Ɛ
     return SYNTAX_OK;
 

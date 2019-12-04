@@ -65,7 +65,7 @@ void gen_move_arg_print(int param_id, char* source)
     printf("\nMOVE TF@%%%d %s", param_id, source);
 }
 
-void gen_def_move_param (int param_name, int param_id)
+void gen_def_move_param (char* param_name, int param_id)
 {
     printf("\nDEFVAR LF@%s", param_name);
     printf("\nMOVE LF@%s LF@%%%d", param_name, param_id);
@@ -94,6 +94,11 @@ void gen_function_end(bool end_of_fun_body, char* fun_name)
     if (end_of_fun_body) {
         printf("\nLABEL $jump_fun_%s", fun_name);
     }
+}
+
+void gen_call_fun(char* fun_name) {
+    printf("CALL $%s", fun_name);
+    printf("MOVE GF@exp_result TF@%%retval");
 }
 
 void gen_if(int cond_id)

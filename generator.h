@@ -19,10 +19,11 @@ void gen_move_exp_res (char* dest, bool in_function);
 
 void gen_move_arg(int param_id, char* attribute, bool local, bool id);
 void gen_move_arg_print(int param_id, char* source);
-void gen_def_move_param (int param_name, int param_id);
+void gen_def_move_param (char* param_name, int param_id);
 
 void gen_function_start(char* fun_name);
 void gen_function_end(bool end_of_fun_body, char* fun_name);
+void gen_call_fun(char* fun_name);
 
 void gen_if(int cond_id);
 void gen_else(int cond_id);
