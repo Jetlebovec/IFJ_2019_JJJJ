@@ -52,7 +52,6 @@ typedef struct {
 
     int if_count;
     int while_count;
-
 } prog_data;
 
 //enum of symbol indexes for prec. table

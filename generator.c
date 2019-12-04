@@ -12,7 +12,9 @@
 #include <stdlib.h>
 #include "generator.h"
 
-#define GEN_TF_DEFVAR(param_id) printf("\nDEFVAR TF@%%%d", param_id);
+void gen_tf_defvar(int param_id) {
+    printf("\nDEFVAR TF@%%%d", param_id);
+}
 
 void gen_defvar(char* var_name, bool in_function)
 {
@@ -36,7 +38,7 @@ void gen_move_exp_res (char* dest, bool in_function)
     }
 }
 
-void gen_move_arg(int param_id, char* attribute, bool local, bool id)
+int gen_move_arg(int param_id, char* attribute, char* type, bool local, bool id)
 {
     char* source;
 
@@ -53,11 +55,32 @@ void gen_move_arg(int param_id, char* attribute, bool local, bool id)
 
     }
     else {
-        source = "?@";  //TODO kontrola dat. typu
-        strcat(source, attribute);
+
+        if (strcmp(type, "nil")) {
+            source = "nil@nil";
+            gen_move_arg_print(param_id, source);
+        }
+        else if (strcmp(type, "int")) {
+            printf("\nMOVE TF@%%%d int@%s", param_id, attribute);
+        }
+        else if (strcmp(type, "float")) {
+            printf("\nMOVE TF@%%%d float@%a", param_id, strtod(attribute, NULL));
+        }
+        else {
+            //convert the string to the retarded format
+            // TODO strToIFJcode(&attribute);
+
+            if (attribute == NULL) {
+                return 99;
+            }
+            printf("\nMOVE TF@%%%d string@%s", param_id, attribute);
+        }
+
+        return 0;
     }
 
     gen_move_arg_print(param_id, source);
+    return 0;
 }
 
 void gen_move_arg_print(int param_id, char* source)

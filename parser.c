@@ -954,7 +954,6 @@ int idwhat(prog_data* data)
 }
 
 // <term> rule
-//TODO generates
 int term(prog_data* data)
 {
     //error number stored
@@ -969,14 +968,47 @@ int term(prog_data* data)
     //<term> -> None <term_n>
     if (IS_VALUE(data->token) || NONE)
     {
+
+        bool identifier = true;
+        bool local = true;
+        char* type;
+
+        if (data->token.type != TOKEN_IDENTIFIER) {
+            identifier = false;
+
+            if (data->token.type == TOKEN_STRING) {
+                type = "string";
+            }
+            else if (data->token.type == TOKEN_NUM) {
+                type = "int";
+            }
+            else if (strcmp(data->token.attribute->str, "None")) {
+                type = "nil";
+            }
+            else {
+                type = "float";
+            }
+        }
+
         //if variable is not defined
         if (data->token.type == TOKEN_IDENTIFIER) {
-            if ((symtable_search_variable(&data->local_table, data->token.attribute->str, &pom) != 0) &&
-                    (symtable_search_variable(&data->global_table, data->token.attribute->str, &pom) != 0)) {
+            if (symtable_search_variable(&data->local_table, data->token.attribute->str, &pom) == 0) {
+                local = true;
+            }
+            else if (symtable_search_variable(&data->global_table, data->token.attribute->str, &pom) == 0) {
+                local = false;
+            }
+            else {
                 return SEM_UNDEF_ERR;
             }
         }
         data->current_fun_data->param_count++;
+
+        gen_tf_defvar(data->current_fun_data->param_count);
+        err = gen_move_arg(data->current_fun_data->param_count, data->token.attribute->str, type, local, identifier);
+        if (err != 0) {
+            return err;
+        }
 
         return term_n(data);
     }
