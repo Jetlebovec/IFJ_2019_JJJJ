@@ -89,10 +89,8 @@ if(string_compare_char(data->token.attribute, keyword) != 0) {   \
 
 // <program> rule
 int program(prog_data* data) {
-
     //error number stored
     int err = 0;
-
     //if there is no loaded token, get one
     if(data->token_loaded != true) {
         GET_TOKEN(data)

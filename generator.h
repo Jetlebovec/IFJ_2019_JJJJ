@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include "parser.h"
+
 
 //function prototypes
 void gen_defvar(char* var_name, bool in_function);
@@ -32,3 +34,5 @@ void gen_if_end(int cond_id);
 void gen_while(int cycle_id);
 void gen_while_end(int cycle_id);
 
+void gen_push_operand(Token token, int is_global);
+void gen_operation(symbols symbol);

@@ -133,3 +133,124 @@ void gen_while_end(int cycle_id)
     printf("\nLABEL $while_end_%d", cycle_id);
 }
 
+void gen_push_operand(Token token, int is_global)
+{
+    if(token.type == TOKEN_IDENTIFIER)
+    {
+        if(is_global == 1)
+        {
+            printf("\nPUSHS GF@%s", token.attribute->str);
+        }
+        else
+        {
+             printf("\nPUSHS LF@%s", token.attribute->str);
+        }
+    }  
+    else
+    {
+        double number;
+        switch (token.type)
+        {
+        case TOKEN_NUM:
+            printf("\nPUSHS int@%s", token.attribute->str);
+            break;
+        
+        case TOKEN_NUM_DEC:
+            number = strtod(token.attribute->str,NULL);
+            printf("\nPUSHS float@%a", number);
+            break;
+        
+        case TOKEN_NUM_EXP:
+            number = strtod(token.attribute->str,NULL);
+            printf("\nPUSHS float@%a", number);
+            break;
+
+        case TOKEN_STRING:
+            //TODO
+            break;
+                
+        default:
+            break;
+        }
+    }
+    
+    
+    
+}
+
+void gen_operation(symbols symbol)
+{
+    //switch according to operation
+    switch (symbol)
+    {
+    case S_LS:
+        printf("LTS\n");
+        break;
+    
+    case S_GT:
+        printf("GTS\n");
+        break;
+    
+    case S_LSEQ:
+    //TODO DEF global var %%operand_1,2 in the beginning
+
+        printf("\nPOPS GF@%%operand_1");
+		printf("\nPOPS GF@%%operand_2");
+		printf("\nPUSHS GF@%%operand_2");
+		printf("\nPUSHS GF@%%operand_1");
+		printf("\nLTS");
+		printf("\nPUSHS GF@%%operand_2");
+		printf("\nPUSHS GF@%%operand_1");
+		printf("\nEQS");
+		printf("\nORS");
+		break;
+
+    case S_GTEQ:
+        printf("\nPOPS GF@%%operand_1");
+		printf("\nPOPS GF@%%operand_2");
+		printf("\nPUSHS GF@%%operand_2");
+		printf("\nPUSHS GF@%%operan1");
+		printf("\nGTS");
+		printf("\nPUSHS GF@%%operan2");
+		printf("\nPUSHS GF@%%operan1");
+		printf("\nEQS");
+		printf("\nORS");
+		break;
+    
+    case S_EQ:
+        printf("\nEQS");
+        break;
+
+    case S_NEQ:
+        printf("\nEQS");
+        printf("\nNOTS");
+        break;
+
+    case S_PLUS:
+        printf("\nADDS");
+        break;
+
+    case S_MINUS:
+        printf("\nSUBS");
+        break;
+
+    case S_MUL:
+        printf("\nMULS");
+        break;
+    
+    case S_DIV:
+        printf("\nDIVS");
+        break;
+
+    case S_IDIV:
+        printf("\nIDIVS");
+        break;
+        
+    default:
+        break;
+    }
+    
+}
+
+
+
