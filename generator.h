@@ -37,3 +37,10 @@ void gen_while_end(int cycle_id);
 
 void gen_push_operand(Token token, int is_global);
 void gen_operation(symbols symbol);
+
+/**
+ * @brief Converts token to a string compatible with ifjcode variables, FREE THE CHAR* LATER
+ * @param token Token with a value that can be converted
+ * @return Pointer to a string if successful, NULL if error or token type is ID or non-value type
+ */
+char* token_to_ifjcode_val(Token *token);
