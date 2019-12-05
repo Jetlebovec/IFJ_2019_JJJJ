@@ -121,7 +121,6 @@ void gen_call_fun(char* fun_name) {
 void gen_if(int cond_id)
 {
     printf("\nPOPS GF@exp_result");
-    printf("\nJUMPIFEQ $else_label_%d GF@exp_result int@0", cond_id);
     printf("\nJUMPIFEQ $else_label_%d GF@exp_result bool@false", cond_id);
 }
 
@@ -140,7 +139,6 @@ void gen_while(int cycle_id)
 {
     printf("\nLABEL $while_%d", cycle_id);
     printf("\nPOPS GF@exp_result");
-    printf("\nJUMPIFEQ $while_end_%d GF@exp_result int@0", cycle_id);
     printf("\nJUMPIFEQ $while_end_%d GF@exp_result bool@false", cycle_id);
 }
 
