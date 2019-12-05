@@ -909,7 +909,7 @@ int idwhat(prog_data* data)
         data->current_fun_data->param_count = 0;
 
         //GENERATE
-        printf("CREATEFRAME");
+        printf("\nCREATEFRAME");
 
         //count and check the param count
         err = term(data);
@@ -969,29 +969,12 @@ int term(prog_data* data)
     //<term> -> None <term_n>
     if (IS_VALUE(data->token) || NONE)
     {
-
+        //if term is id
         bool identifier = true;
+        //if term is in local frame
         bool local = true;
-        char* type;
 
-        if (data->token.type != TOKEN_IDENTIFIER) {
-            identifier = false;
-
-            if (data->token.type == TOKEN_STRING) {
-                type = "string";
-            }
-            else if (data->token.type == TOKEN_NUM) {
-                type = "int";
-            }
-            else if (strcmp(data->token.attribute->str, "None")) {
-                type = "nil";
-            }
-            else {
-                type = "float";
-            }
-        }
-
-        //if variable is not defined
+        //check if token is ID adn check where it was defined, if local or global or not defined
         if (data->token.type == TOKEN_IDENTIFIER) {
             if (symtable_search_variable(&data->local_table, data->token.attribute->str, &pom) == 0) {
                 local = true;
@@ -1003,10 +986,16 @@ int term(prog_data* data)
                 return SEM_UNDEF_ERR;
             }
         }
+        else {
+            identifier = false;
+        }
+        //increment param count
         data->current_fun_data->param_count++;
 
+        //push the param into temporary frame
         gen_tf_defvar(data->current_fun_data->param_count);
-        err = gen_move_arg(data->current_fun_data->param_count, data->token.attribute->str, type, local, identifier);
+
+        err = gen_move_arg(data->current_fun_data->param_count, &(data->token), local, identifier);
         if (err != 0) {
             return err;
         }
@@ -1195,7 +1184,7 @@ int assign(prog_data* data) {
         data->current_fun_data->param_count = 0;
 
         //GENERATE
-        printf("CREATEFRAME");
+        printf("\nCREATEFRAME");
 
         //count and check the param count
         err = term(data);
@@ -1217,7 +1206,7 @@ int assign(prog_data* data) {
         /*after exiting <assign>, we want to have the result
          * of the right side on the top of the stack
          */
-        printf("PUSH GF@exp_result");
+        printf("\nPUSHS GF@exp_result");
 
         CHECK_TOKEN_TYPE(data, TOKEN_RBRACKET)
 
@@ -1417,6 +1406,7 @@ int analyse()
 
     //test print
     //printf("%d\n", err_code);
+    printf("\n");
 
     free(Data);
 

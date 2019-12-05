@@ -20,7 +20,7 @@ void gen_defvar(char* var_name, bool in_function);
 void gen_move_exp_res (char* dest, bool in_function);
 void gen_tf_defvar(int param_id);
 
-int gen_move_arg(int param_id, char* attribute, char* type, bool local, bool id);
+int gen_move_arg(int param_id, Token *token, bool local, bool id);
 void gen_move_arg_print(int param_id, char* source);
 void gen_def_move_param (char* param_name, int param_id);
 

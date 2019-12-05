@@ -38,48 +38,42 @@ void gen_move_exp_res (char* dest, bool in_function)
     }
 }
 
-int gen_move_arg(int param_id, char* attribute, char* type, bool local, bool id)
+int gen_move_arg(int param_id, Token *token, bool local, bool id)
 {
+    //string to store the adress of param
     char* source;
 
+    //if arg is id, we need to determinate if its local or global
     if (id) {
 
-        if (local) {
-            source = "LF@";
-            strcat(source, attribute);
-        }
-        else {
-            source = "GF@";
-            strcat(source, attribute);
+        source = malloc((32 + token->attribute->length) * sizeof(char));
+
+        if(source == NULL) {
+            return 99;
         }
 
+        if (local) {
+            sprintf(source, "LF@");
+            strcat(source, token->attribute->str);
+        }
+        else {
+            sprintf(source, "GF@");
+            strcat(source, token->attribute->str);
+        }
     }
+    //if arg is not id, we need to convert the constant to ifj format and state its type
     else {
 
-        if (strcmp(type, "nil")) {
-            source = "nil@nil";
-            gen_move_arg_print(param_id, source);
-        }
-        else if (strcmp(type, "int")) {
-            printf("\nMOVE TF@%%%d int@%s", param_id, attribute);
-        }
-        else if (strcmp(type, "float")) {
-            printf("\nMOVE TF@%%%d float@%a", param_id, strtod(attribute, NULL));
-        }
-        else {
-            //convert the string to the retarded format
-            // TODO strToIFJcode(&attribute);
-
-            if (attribute == NULL) {
-                return 99;
-            }
-            printf("\nMOVE TF@%%%d string@%s", param_id, attribute);
+        source = token_to_ifjcode_val(token);
+        if(source == NULL) {
+            return 99;
         }
 
-        return 0;
     }
-
+    //move arg to temporary frame
     gen_move_arg_print(param_id, source);
+    free(source);
+
     return 0;
 }
 
@@ -120,8 +114,8 @@ void gen_function_end(bool end_of_fun_body, char* fun_name)
 }
 
 void gen_call_fun(char* fun_name) {
-    printf("CALL $%s", fun_name);
-    printf("MOVE GF@exp_result TF@%%retval");
+    printf("\nCALL $%s", fun_name);
+    printf("\nMOVE GF@exp_result TF@%%retval");
 }
 
 void gen_if(int cond_id)
@@ -207,11 +201,11 @@ void gen_operation(symbols symbol)
     switch (symbol)
     {
     case S_LS:
-        printf("LTS\n");
+        printf("\nLTS");
         break;
 
     case S_GT:
-        printf("GTS\n");
+        printf("\nGTS");
         break;
 
     case S_LSEQ:
