@@ -16,6 +16,8 @@
 
 #define TABLE_SIZE 16
 
+#define IS_VALUE loaded_token.type == TOKEN_IDENTIFIER || loaded_token.type == TOKEN_NUM || loaded_token.type == TOKEN_NUM_DEC || loaded_token.type == TOKEN_NUM_EXP || loaded_token.type == TOKEN_STRING
+
 int reduce();
 Prec_table_symbol get_symbol_index(symbols symbol);
 symbols get_symbol(Token* token);
@@ -220,6 +222,13 @@ void pop_n(int n, stack_top_t* stack)
     }
 }
 
+/*
+int type_control(symbols operation)
+{
+	//TODO
+}
+*/
+
 //reduce 1 or 3 terms to nonterm based on rules and do all required actions
 int reduce()
 {
@@ -279,66 +288,58 @@ int reduce()
 	}
 
 	//E->E?E
-	if (symbol1 == S_NONTERM && symbol3 == S_NONTERM)
+	else if (symbol1 == S_NONTERM && symbol3 == S_NONTERM)
 	{
+		//TODO check compatibility of types
+		//type_control(symbol2);
+
         //switch according to operation between two operands, instructions for type control and for
         //coresponding stack operation will be generated
 		switch (symbol2)
 		{
 		//E->E<E
 		case S_LS:
-				//sem control
-				//code gen
+				gen_operation(S_LS);
 			break;
 		//E->E>E
 		case S_GT:
-				//sem control
-				//code gen
+				gen_operation(S_GT);
 			break;
 		//E->E<=E
 		case S_LSEQ:
-				//sem control
-				//code gen
+				gen_operation(S_LSEQ);
 			break;
 		//E->E>=E
 		case S_GTEQ:
-				//sem control
-				//code gen
+				gen_operation(S_GTEQ);
 			break;
 		//E->E==E
 		case S_EQ:
-				//sem control
-				//code gen
+				gen_operation(S_EQ);
 			break;
 		//E->E!=E
 		case S_NEQ:
-				//sem control
-				//code gen
+				gen_operation(S_NEQ);
 			break;
 		//E->E+E
 		case S_PLUS:
-				//sem control
-				//code gen
+				gen_operation(S_PLUS);
 			break;
 		//E->E-E
 		case S_MINUS:
-				//sem control
-				//code gen
+				gen_operation(S_MINUS);
 			break;
 		//E->E*E
 		case S_MUL:
-				//sem control
-				//code gen
+				gen_operation(S_MUL);
 			break;
 		//E->E/E
 		case S_DIV:
-				//sem control
-				//code gen
+				gen_operation(S_DIV);
 			break;
 		//E->E//E
 		case S_IDIV:
-				//sem control
-				//code gen
+				gen_operation(S_IDIV);
 			break;
 		//any of allowed operations -> syntax err
 		default:
@@ -346,6 +347,10 @@ int reduce()
 			break;
 		}
 
+	}
+	else
+	{
+		return SYNTAX_ERR;
 	}
 
 
@@ -365,6 +370,8 @@ int expression(prog_data* data)
 {
 	int err = 0;
 
+	int global_id = 0;
+
 	//init stack
 	init(&symbol_stack);
 
@@ -377,6 +384,9 @@ int expression(prog_data* data)
 	init_token(&token, &err);
 	token.attribute = &string;
 	token.type = TOKEN_UNDEFINED;
+
+	Token loaded_token;
+	init_token(&loaded_token, &err);
 
 	//input symbol readed from token
 	symbols actual_symbol;
@@ -395,6 +405,7 @@ int expression(prog_data* data)
 		//get index of token type
 		actual_symbol = get_symbol(&TOKEN);
 		top_terminal = find_terminal(&symbol_stack);
+		loaded_token = (TOKEN);
 
 		//if there is no terminal on stack
 		if(top_terminal == NULL)
@@ -405,10 +416,19 @@ int expression(prog_data* data)
         tSymdata *pom;
         //if variable is not defined
         if (TOKEN.type == TOKEN_IDENTIFIER) {
-            if ((symtable_search_variable(&data->local_table, TOKEN.attribute->str, &pom) != 0) &&
-                (symtable_search_variable(&data->global_table, TOKEN.attribute->str, &pom) != 0)) {
-                return SEM_UNDEF_ERR;
+            if (symtable_search_variable(&data->local_table, TOKEN.attribute->str, &pom) == 0)
+			{
+				global_id = 0;
+			}
+            else if (symtable_search_variable(&data->global_table, TOKEN.attribute->str, &pom) == 0) 
+			{
+                global_id = 1;
             }
+			else
+			{
+				return SEM_UNDEF_ERR;
+			}
+			
         }
 
 		//get rule from precedence table for two terminals
@@ -420,6 +440,12 @@ int expression(prog_data* data)
 				if(push(&symbol_stack,actual_symbol) == 1)
 				{
 					return ERROR_INTERNAL;
+				}
+					
+				//if it is value/id generate push instruction (operand on stack)
+				if(IS_VALUE)
+				{
+					gen_push_operand(loaded_token, global_id);
 				}
 
 				//move forward in list - get next symbol
@@ -438,6 +464,11 @@ int expression(prog_data* data)
                     return ERROR_INTERNAL;
                 }
 				//if it is value/id generate push instruction (operand on stack)
+				
+				if(IS_VALUE)
+				{
+					gen_push_operand(loaded_token, global_id);
+				}
 
 				//move forward in list - get next symbol
 				NEXT_TOKEN;
