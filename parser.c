@@ -1493,6 +1493,9 @@ int analyse()
         return err_code;
     }
 
+    //GENERATE
+    generate_main_body();
+
     //STARTING FOR REAL
     //starting the recursive descent
     err_code = program(Data);

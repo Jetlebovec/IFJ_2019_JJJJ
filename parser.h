@@ -21,6 +21,7 @@
 #include "token_list.h"
 #include "precedential_stack.h"
 #include "generator.h"
+#include "builtin_functions.h"
 
 #define LEX_OK			            0
 #define SYNTAX_OK 					0

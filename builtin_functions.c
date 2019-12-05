@@ -14,7 +14,7 @@
 
 void generate_main_body()
 {
-    printf("\n.IFJcode19");
+    printf(".IFJcode19");
     printf("\nDEFVAR GF@exp_result");
     printf("\nJUMP $$main");
     add_inputs();
