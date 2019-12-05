@@ -313,6 +313,8 @@ int statement(prog_data* data)
             GET_TOKEN(data)
         }
 
+        printf("\nLABEL $while_%d", while_count);
+
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
@@ -549,6 +551,8 @@ int statement_fun(prog_data* data)
             }
             GET_TOKEN(data)
         }
+
+        printf("\nLABEL $while_%d", while_count);
 
         err = expression(data);   //precedential analysis
         if (err != 0) {

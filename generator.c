@@ -137,7 +137,6 @@ void gen_if_end(int cond_id)
 
 void gen_while(int cycle_id)
 {
-    printf("\nLABEL $while_%d", cycle_id);
     printf("\nPOPS GF@exp_result");
     printf("\nJUMPIFEQ $while_end_%d GF@exp_result bool@false", cycle_id);
 }
