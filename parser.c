@@ -20,6 +20,8 @@ int statement(prog_data* data);
 int def_function(prog_data* data);
 int term(prog_data* data);
 int term_n(prog_data* data);
+int print(prog_data* data);
+int print_n(prog_data* data);
 int param(prog_data* data);
 int param_n(prog_data* data);
 int statement_fun(prog_data* data);
@@ -895,7 +897,16 @@ int idwhat(prog_data* data)
         //if func is a func that has unlimited paramCount like "print", we set used_before to false
         //so it doesnt check the previous number of params
         if (strcmp(temp.attribute->str, "print") == 0) {
-            used_before = false;
+            err = print(data);
+            if (err != 0) {
+                return err;
+            }
+
+            CHECK_TOKEN_TYPE(data, TOKEN_RBRACKET)
+
+            GET_TOKEN(data)
+
+            return SYNTAX_OK;
         }
 
         //we no longer need the temp token
@@ -1019,6 +1030,80 @@ int term_n(prog_data* data)
     //<term_n> -> , <term>
     if(data->token.type == TOKEN_COMMA) {
         return term(data);
+    }
+
+    //<term_n> -> Ɛ
+    return SYNTAX_OK;
+
+}
+
+// <term> rule
+int print(prog_data* data)
+{
+    //error number stored
+    int err = 0;
+
+    GET_TOKEN(data)
+
+    tSymdata *pom;
+
+    //GENERATE
+    printf("\nCREATEFRAME");
+
+    //<term> -> value <term_n>
+    //<term> -> id <term_n>
+    //<term> -> None <term_n>
+    if (IS_VALUE(data->token) || NONE)
+    {
+        //if term is id
+        bool identifier = true;
+        //if term is in local frame
+        bool local = true;
+
+        //check if token is ID adn check where it was defined, if local or global or not defined
+        if (data->token.type == TOKEN_IDENTIFIER) {
+            if (symtable_search_variable(&data->local_table, data->token.attribute->str, &pom) == 0) {
+                local = true;
+            }
+            else if (symtable_search_variable(&data->global_table, data->token.attribute->str, &pom) == 0) {
+                local = false;
+            }
+            else {
+                return SEM_UNDEF_ERR;
+            }
+        }
+        else {
+            identifier = false;
+        }
+
+        //push the param into temporary frame
+        gen_tf_defvar(1);
+        err = gen_move_arg(1, &(data->token), local, identifier);
+        if (err != 0) {
+            return err;
+        }
+
+        gen_call_fun("print");
+
+        return print_n(data);
+    }
+
+    //<term> -> Ɛ
+    return SYNTAX_OK;
+
+}
+
+// <term_n> rule
+int print_n(prog_data* data)
+{
+    //error number stored
+    int err = 0;
+
+    GET_TOKEN(data)
+
+    //<term_n> -> , <term>
+    if(data->token.type == TOKEN_COMMA) {
+        return print(data);
     }
 
     //<term_n> -> Ɛ
@@ -1170,7 +1255,11 @@ int assign(prog_data* data) {
         //if func is a func that has unlimited paramCount like "print", we set used_before to false
         //so it doesnt check the previous number of params
         if (strcmp(temp.attribute->str, "print") == 0) {
-            used_before = false;
+            err = print(data);
+            if (err != 0) {
+                return err;
+            }
+            return SYNTAX_OK;
         }
 
         //we no longer need the temp token
