@@ -286,7 +286,7 @@ char* token_to_ifjcode_val(Token *token)
     switch(token->type)
     {
         case TOKEN_NUM:
-            sprintf(new_var, "int@%d", strtol(token->attribute->str, NULL, 10));
+            sprintf(new_var, "int@%d", (int)strtol(token->attribute->str, NULL, 10));
             break;
         case TOKEN_NUM_DEC:
         case TOKEN_NUM_EXP:
@@ -321,7 +321,7 @@ char* token_to_ifjcode_val(Token *token)
                 // If one of the characters requires an escape sequence
                 if (c <= 32 || c == 35 || c == 92)
                 {
-                    char tmp[4];
+                    char tmp[6];
                     sprintf(tmp, "\\%03d", c);
                     new_var[pos] = tmp[0];
                     new_var[pos + 1] = tmp[1];
