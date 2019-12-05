@@ -12,6 +12,7 @@ OBJECTS = $(SOURCES:.c=.o)
 PROGRAMS = ifj2019
 
 all: ifj2019
+	rm *.o
 
 ifj2019: $(OBJECTS)
 	gcc $(CFLAGS) $^ -o $@
