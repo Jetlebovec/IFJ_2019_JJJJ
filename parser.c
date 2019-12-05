@@ -680,7 +680,9 @@ int def_function(prog_data* data)
     }
 
     //GENERATE
-    char* fun_name = data->token.attribute->str;
+    char* fun_name = malloc((32 + data->token.attribute->length) * sizeof(char));
+    strcpy(fun_name, data->token.attribute->str);
+
     gen_function_start(fun_name);
 
     GET_TOKEN(data)
@@ -870,7 +872,8 @@ int idwhat(prog_data* data)
         //if the function was used before, we need to check the param count is the same
         bool used_before = false;
 
-        char* fun_name = temp.attribute->str;
+        char* fun_name = malloc((32 + data->token.attribute->length) * sizeof(char));
+        strcpy(fun_name, temp.attribute->str);
 
         //variable with the same name exists
         if (symtable_search_variable(&data->global_table, temp.attribute->str, &data->current_fun_data) == 0)
@@ -1155,6 +1158,9 @@ int assign(prog_data* data) {
         //if the function was used before, we need to check the param count is the same
         bool used_before = false;
 
+        char* fun_name = malloc((32 + data->token.attribute->length) * sizeof(char));
+        strcpy(fun_name, temp.attribute->str);
+
         //variable with the same name exists
         if (symtable_search_variable(&data->global_table, temp.attribute->str, &data->current_fun_data) == 0)
         {
@@ -1190,6 +1196,9 @@ int assign(prog_data* data) {
         //set the current param count to 0
         data->current_fun_data->param_count = 0;
 
+        //GENERATE
+        printf("CREATEFRAME");
+
         //count and check the param count
         err = term(data);
         if (err != 0) {
@@ -1202,6 +1211,15 @@ int assign(prog_data* data) {
                 return SEM_PARAM_ERR;
             }
         }
+
+        //GENERATE
+        gen_call_fun(fun_name);
+
+        //GENERATE
+        /*after exiting <assign>, we want to have the result
+         * of the right side on the top of the stack
+         */
+        printf("PUSH GF@exp_result");
 
         CHECK_TOKEN_TYPE(data, TOKEN_RBRACKET)
 
