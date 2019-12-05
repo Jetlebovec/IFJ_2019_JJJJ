@@ -840,7 +840,6 @@ int idwhat(prog_data* data)
                 //GENERATE
                 gen_defvar(temp.attribute->str, data->in_function);
             }
-            //TODO after assign rule, GF@exp_result needs to be top of the stack
             //GENERATE
             gen_move_exp_res(temp.attribute->str, true);
 
@@ -1172,7 +1171,6 @@ int param_n(prog_data* data)
 }
 
 //<assign> rule
-//TODO generate
 int assign(prog_data* data) {
 
     //error number stored
@@ -1259,6 +1257,17 @@ int assign(prog_data* data) {
             if (err != 0) {
                 return err;
             }
+
+            //GENERATE
+            /*after exiting <assign>, we want to have the result
+             * of the right side on the top of the stack
+             */
+            printf("\nPUSHS GF@exp_result");
+
+            CHECK_TOKEN_TYPE(data, TOKEN_RBRACKET)
+
+            GET_TOKEN(data)
+
             return SYNTAX_OK;
         }
 
