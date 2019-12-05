@@ -900,6 +900,7 @@ int idwhat(prog_data* data)
             if (err != 0) {
                 return err;
             }
+            printf("\nWRITE string@\\010");
 
             CHECK_TOKEN_TYPE(data, TOKEN_RBRACKET)
 
@@ -1036,7 +1037,7 @@ int term_n(prog_data* data)
 
 }
 
-// <term> rule
+// <term> rule - print
 int print(prog_data* data)
 {
     //error number stored
@@ -1092,7 +1093,7 @@ int print(prog_data* data)
 
 }
 
-// <term_n> rule
+// <term_n> rule - print
 int print_n(prog_data* data)
 {
     //error number stored
@@ -1102,6 +1103,7 @@ int print_n(prog_data* data)
 
     //<term_n> -> , <term>
     if(data->token.type == TOKEN_COMMA) {
+        printf("\nWRITE string@\\032");
         return print(data);
     }
 
@@ -1257,6 +1259,7 @@ int assign(prog_data* data) {
             if (err != 0) {
                 return err;
             }
+            printf("\nWRITE string@\\010");
 
             //GENERATE
             /*after exiting <assign>, we want to have the result
