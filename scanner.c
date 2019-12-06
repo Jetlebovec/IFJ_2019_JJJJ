@@ -844,14 +844,14 @@ int get_token(Token *token, FILE *file)
             //
             // stINT_DIV
             case stINT_DIV:
-                if (c == '\\')
+                if (c == '/')
                 {
-                    token->type = TOKEN_FLOAT_DIV;
+                    token->type = TOKEN_INT_DIV;
                     return finalize(token);
                 } else
                 {
                     ungetc(c, file);
-                    token->type = TOKEN_INT_DIV;
+                    token->type = TOKEN_FLOAT_DIV;
                     return finalize(token);
                 }
                 break;

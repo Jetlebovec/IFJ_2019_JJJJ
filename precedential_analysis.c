@@ -401,12 +401,11 @@ int expression(prog_data* data)
 
 	//star parsing expression untill list is empty
 	while(!(IS_END)  || symbol_stack.top->next != NULL)
-	{
+	{		
 		//get index of token type
 		actual_symbol = get_symbol(&TOKEN);
 		top_terminal = find_terminal(&symbol_stack);
 		loaded_token = (TOKEN);
-
 		//if there is no terminal on stack
 		if(top_terminal == NULL)
 		{
@@ -459,12 +458,13 @@ int expression(prog_data* data)
                 {
                     return ERROR_INTERNAL;
                 }
+
 				if (push(&symbol_stack, actual_symbol) == 1)
                 {
                     return ERROR_INTERNAL;
                 }
 				//if it is value/id generate push instruction (operand on stack)
-				
+			
 				if(IS_VALUE)
 				{
 					gen_push_operand(loaded_token, global_id);
@@ -472,7 +472,7 @@ int expression(prog_data* data)
 
 				//move forward in list - get next symbol
 				NEXT_TOKEN;
-
+	
 				break;
 
 		//symbol(s) on stack can be handled and reduced to nonterminal according to reducing rules (when <y is on top)
