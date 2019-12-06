@@ -628,7 +628,7 @@ void gen_int_div()
 
 void gen_float_div()
 {
-    printf("\
+     printf("\
     \nLABEL $float$division$fun$\
     \nPOPS GF@%%operand_1\
 	\nPOPS GF@%%operand_2\
@@ -648,6 +648,19 @@ void gen_float_div()
     \nLABEL $operand$2$is$not$int$5$\
 	\nJUMPIFNEQ $uncompatible$unconvertable$types$5$ GF@%%type_o2 string@float\
     \nINT2FLOAT GF@%%operand_1 GF@%%operand_1\
+	\nPUSHS GF@%%operand_2\
+	\nPUSHS GF@%%operand_1\
+    \nDIVS\
+    \nRETURN\
+    \nLABEL $operand$1$is$float$5$\
+	\nJUMPIFNEQ $operand$2$is$not$float$5$ GF@%%type_o2 string@float\
+	\nPUSHS GF@%%operand_2\
+	\nPUSHS GF@%%operand_1\
+    \nDIVS\
+    \nRETURN\
+    \nLABEL $operand$2$is$not$float$5$\
+	\nJUMPIFNEQ $uncompatible$unconvertable$types$5$ GF@%%type_o2 string@int\
+    \nINT2FLOAT GF@%%operand_2 GF@%%operand_2\
 	\nPUSHS GF@%%operand_2\
 	\nPUSHS GF@%%operand_1\
     \nDIVS\
