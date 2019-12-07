@@ -63,6 +63,8 @@ void gen_type_check_relation();
 void gen_zero_div_check();
 void gen_int_div();
 void gen_float_div();
+void gen_stack_top_to_true_false();
+void gen_type_check_eq_neq();
 
 
 /**
