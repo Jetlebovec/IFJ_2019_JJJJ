@@ -7,7 +7,7 @@
  *
  *      File: precedential_stack.h
  */
-
+/*
 #include <stdbool.h>
 
 //enum of symbols for stack and analysis
@@ -67,3 +67,4 @@ stack_item_t* find_terminal(stack_top_t* stack);
 
 // Frees the stack
 void stack_free(stack_top_t* stack);
+*/

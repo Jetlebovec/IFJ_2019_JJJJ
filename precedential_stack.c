@@ -13,7 +13,7 @@
 #include <stdbool.h>
 
 #include "precedential_stack.h"
-
+/*
 void init(stack_top_t* stack)
 {
     stack->top = NULL;
@@ -110,3 +110,4 @@ void stack_free(stack_top_t* stack)
         pop(stack);
     }
 }
+*/
