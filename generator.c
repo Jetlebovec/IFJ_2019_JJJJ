@@ -38,6 +38,9 @@ void generate_main_body()
     gen_zero_div_check();
     gen_int_div();
     gen_float_div();
+    gen_stack_top_to_true_false();    
+    gen_type_check_eq_neq();
+    gen_code_compare_strings();
     printf("\nLABEL $$main");
 }
 
@@ -368,7 +371,8 @@ void gen_call_fun(char* fun_name) {
 }
 
 void gen_if(int cond_id)
-{
+{   
+    printf("\nCALL $stack$top$to$true$false$");
     printf("\nPOPS GF@exp_result");
     printf("\nJUMPIFEQ $else_label_%d GF@exp_result bool@false", cond_id);
 }
@@ -385,7 +389,8 @@ void gen_if_end(int cond_id)
 }
 
 void gen_while(int cycle_id)
-{
+{   
+    printf("\nCALL $stack$top$to$true$false$");
     printf("\nPOPS GF@exp_result");
     printf("\nJUMPIFEQ $while_end_%d GF@exp_result bool@false", cycle_id);
 }
@@ -468,12 +473,12 @@ void gen_operation(symbols symbol)
 		break;
 
     case S_EQ:
-        printf("\nCALL $type$control$relation$");
+        printf("\nCALL $type$control$eq$neq$");
         printf("\nEQS");
         break;
 
     case S_NEQ:
-        printf("\nCALL $type$control$relation$");
+        printf("\nCALL $type$control$eq$neq$");
         printf("\nEQS");
         printf("\nNOTS");
         break;
@@ -708,6 +713,95 @@ void gen_type_check_arithmetic()
     ");
 }
 
+void gen_type_check_eq_neq()
+{
+    printf("\
+    \nLABEL $type$control$eq$neq$\
+    \nPOPS GF@%%operand_1\
+	\nPOPS GF@%%operand_2\
+	\nTYPE GF@%%type_o1 GF@%%operand_1\
+	\nTYPE GF@%%type_o2 GF@%%operand_2\
+	\nJUMPIFEQ $operand$1$is$int$9$ GF@%%type_o1 string@int\
+	\nJUMPIFEQ $operand$1$is$float$9$ GF@%%type_o1 string@float\
+	\nJUMPIFEQ $operand$1$is$nil$9$ GF@%%type_o1 string@nil\
+	\nJUMPIFEQ $operand$1$is$string$9$ GF@%%type_o1 string@string\
+	\nJUMPIFEQ $operand$1$is$bool$9$ GF@%%type_o1 string@bool\
+    \nEXIT int@4\
+    \nLABEL $operand$1$is$int$9$\
+	\nJUMPIFNEQ $operand$2$is$not$int$9$ GF@%%type_o2 string@int\
+	\nPUSHS GF@%%operand_2\
+	\nPUSHS GF@%%operand_1\
+    \nRETURN\
+    \nLABEL $operand$2$is$not$int$9$\
+	\nJUMPIFNEQ $uncompatible$unconvertable$types$9$ GF@%%type_o2 string@float\
+    \nINT2FLOAT GF@%%operand_1 GF@%%operand_1\
+	\nPUSHS GF@%%operand_2\
+	\nPUSHS GF@%%operand_1\
+    \nRETURN\
+    \nLABEL $operand$1$is$float$9$\
+	\nJUMPIFNEQ $operand$2$is$not$float$9$ GF@%%type_o2 string@float\
+	\nPUSHS GF@%%operand_2\
+	\nPUSHS GF@%%operand_1\
+    \nRETURN\
+    \nLABEL $operand$2$is$not$float$9$\
+	\nJUMPIFNEQ $uncompatible$unconvertable$types$9$ GF@%%type_o2 string@int\
+    \nINT2FLOAT GF@%%operand_2 GF@%%operand_2\
+	\nPUSHS GF@%%operand_2\
+	\nPUSHS GF@%%operand_1\
+    \nRETURN\
+    \nLABEL $operand$1$is$string$9$\
+	\nJUMPIFNEQ $uncompatible$unconvertable$types$9$ GF@%%type_o2 string@string\
+	\nPUSHS GF@%%operand_2\
+	\nPUSHS GF@%%operand_1\
+    \nCALL $lexicographicall$string$value$\
+    \nRETURN\
+    \nLABEL $operand$1$is$bool$9$\
+	\nJUMPIFNEQ $uncompatible$unconvertable$types$9$ GF@%%type_o2 string@bool\
+	\nPUSHS GF@%%operand_2\
+	\nPUSHS GF@%%operand_1\
+    \nRETURN\
+    \nLABEL $operand$1$is$nil$9$\
+	\nJUMPIFNEQ $uncompatible$unconvertable$types$9$ GF@%%type_o2 string@nil\
+	\nPUSHS GF@%%operand_2\
+	\nPUSHS GF@%%operand_1\
+    \nRETURN\
+    \nLABEL $uncompatible$unconvertable$types$9$\
+	\nPUSHS int@0\
+	\nPUSHS int@1\
+    \nRETURN\
+    ");
+}
+
+void gen_stack_top_to_true_false()
+{
+    printf("\
+    \nLABEL $stack$top$to$true$false$\
+    \nPOPS GF@%%operand_1\
+	\nTYPE GF@%%type_o1 GF@%%operand_1\
+	\nJUMPIFEQ $operand$1$is$int$8$ GF@%%type_o1 string@int\
+	\nJUMPIFEQ $operand$1$is$float$8$ GF@%%type_o1 string@float\
+	\nJUMPIFEQ $operand$1$is$string$8$ GF@%%type_o1 string@string\
+	\nJUMPIFEQ $operand$1$is$false$ GF@%%type_o1 string@nil\
+    \nPUSHS GF@%%operand_1\
+    \nRETURN\
+    \nLABEL $operand$1$is$int$8$\
+	\nJUMPIFEQ $operand$1$is$false$ GF@%%operand_1 int@0\
+	\nPUSHS bool@true\
+    \nRETURN\
+    \nLABEL $operand$1$is$float$8$\
+	\nJUMPIFEQ $operand$1$is$false$ GF@%%operand_1 float@0x0p+0\
+	\nPUSHS bool@true\
+    \nRETURN\
+    \nLABEL $operand$1$is$string$8$\
+	\nJUMPIFEQ $operand$1$is$false$ GF@%%operand_1 string@nil\
+	\nPUSHS bool@true\
+    \nRETURN\
+	\nLABEL $operand$1$is$false$\
+	\nPUSHS bool@false\
+    \nRETURN\
+    ");
+}
+
 void gen_type_check_relation()
 {
     printf("\
@@ -798,5 +892,91 @@ void gen_type_check_arithmetic_plus()
     \nRETURN\
     \nLABEL $uncompatible$unconvertable$types$3$\
     \nEXIT int@4\
+    ");
+}
+
+void gen_code_compare_strings()
+{
+    printf("\
+    \nLABEL $lexicographicall$string$value$\
+    \nPUSHFRAME\
+    \nPOPS GF@%%operand_1\
+	\nPOPS GF@%%operand_2\
+    \nDEFVAR LF@%%len$str1\
+    \nDEFVAR LF@%%len$str2\
+    \nDEFVAR LF@%%char$1\
+    \nDEFVAR LF@%%char$2\
+    \nDEFVAR LF@%%counter\
+    \nMOVE LF@%%counter int@-1\
+    \nCREATEFRAME\
+    \nDEFVAR TF@%%1\
+    \nDEFVAR TF@%%2\
+    \nMOVE TF@%%1 GF@%%operand_1\
+    \nCALL $len\
+    \nMOVE LF@%%len$str1 TF@%%retval\
+    \nCLEARS\
+    \nCREATEFRAME\
+    \nDEFVAR TF@%%1\
+    \nDEFVAR TF@%%2\
+    \nMOVE TF@%%1 GF@%%operand_2\
+    \nCALL $len\
+    \nMOVE LF@%%len$str2 TF@%%retval\
+    \nCLEARS\
+    \nLABEL $start$of$cycle$\
+    \nADD LF@%%counter LF@%%counter int@1\
+    \nJUMPIFEQ $end$of$cycle$ LF@%%len$str1 LF@%%counter\
+    \nJUMPIFEQ $end$of$cycle$ LF@%%len$str2 LF@%%counter\
+    \nCREATEFRAME\
+    \nDEFVAR TF@%%1\
+    \nDEFVAR TF@%%2\
+    \nMOVE TF@%%1 GF@%%operand_1\
+    \nMOVE TF@%%2 LF@%%counter\
+    \nCALL $ord\
+    \nMOVE LF@%%char$1 TF@%%retval\
+    \nCLEARS\
+    \nCREATEFRAME\
+    \nDEFVAR TF@%%1\
+    \nDEFVAR TF@%%2\
+    \nMOVE TF@%%1 GF@%%operand_2\
+    \nMOVE TF@%%2 LF@%%counter\
+    \nCALL $ord\
+    \nMOVE LF@%%char$2 TF@%%retval\
+    \nCLEARS\
+    \nJUMPIFEQ $start$of$cycle$ LF@%%char$1 LF@%%char$2\
+    \nPUSHS LF@%%char$1\
+    \nPUSHS LF@%%char$2\
+    \nGTS\
+    \nPOPS GF@exp_result\
+    \nJUMPIFNEQ $char$2$is$GT$ GF@exp_result bool@true\
+    \nPUSHS int@1\
+    \nPUSHS int@0\
+    \nPOPFRAME\
+    \nRETURN\
+    \nLABEL $char$2$is$GT$\
+    \nPUSHS int@0\
+    \nPUSHS int@1\
+    \nPOPFRAME\
+    \nRETURN\
+    \nLABEL $end$of$cycle$\
+    \nJUMPIFNEQ $lens$are$not$same$ LF@%%len$str1 LF@%%len$str2\
+    \nPUSHS int@0\
+    \nPUSHS int@0\
+    \nPOPFRAME\
+    \nRETURN\
+    \nLABEL $lens$are$not$same$\
+    \nPUSHS LF@%%len$str1\
+    \nPUSHS LF@%%len$str2\
+    \nGTS\
+    \nPOPS GF@exp_result\
+    \nJUMPIFNEQ $len$2$is$GT$ GF@exp_result bool@true\
+    \nPUSHS int@1\
+    \nPUSHS int@0\
+    \nPOPFRAME\
+    \nRETURN\
+    \nLABEL $len$2$is$GT$\
+    \nPUSHS int@0\
+    \nPUSHS int@1\
+    \nPOPFRAME\
+    \nRETURN\
     ");
 }

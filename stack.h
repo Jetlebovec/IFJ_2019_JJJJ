@@ -42,7 +42,8 @@ typedef enum
 	S_NONE,		//19
     S_DOLLAR,  	//20
 	S_STOP,		//21
-	S_NONTERM	//22
+	S_NONTERM,	//22
+    S_UNDEF     //23
 } symbols;
 
 // Struct for int stack

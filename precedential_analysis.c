@@ -12,11 +12,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "precedential_analysis.h"
 
 #define TABLE_SIZE 16
 
-#define IS_VALUE loaded_token.type == TOKEN_IDENTIFIER || loaded_token.type == TOKEN_NUM || loaded_token.type == TOKEN_NUM_DEC || loaded_token.type == TOKEN_NUM_EXP || loaded_token.type == TOKEN_STRING
+#define IS_VALUE loaded_token.type == TOKEN_IDENTIFIER || (loaded_token.type == TOKEN_KEYWORD && !strcmp("None",loaded_token.attribute->str)) || loaded_token.type == TOKEN_NUM || loaded_token.type == TOKEN_NUM_DEC || loaded_token.type == TOKEN_NUM_EXP || loaded_token.type == TOKEN_STRING
 
 int reduce();
 Prec_table_symbol get_symbol_index(symbols symbol);
@@ -117,8 +118,8 @@ symbols get_symbol(Token* token)
 {
     switch (token->type)
 	{
-		case TOKEN_PLUS:
-		return S_PLUS;
+	case TOKEN_PLUS:
+	return S_PLUS;
 
 	case TOKEN_MINUS:
 		return S_MINUS;
@@ -170,13 +171,20 @@ symbols get_symbol(Token* token)
 
 	case TOKEN_STRING:
 		return S_STR;
+	
+	case TOKEN_KEYWORD:
+		 if(strcmp("None", token->attribute->str) == 0)
+		 	return S_NONE;
+		 return S_UNDEF;
 
 	case TOKEN_ASSIGN:
 		return S_ASSIGN;
-
+	
+	case TOKEN_EOL:
+		return S_DOLLAR;
 
 	default:
-		return S_DOLLAR;
+		return S_UNDEF;
 
 	}
 }
@@ -250,7 +258,7 @@ int reduce()
 		//E->i rule
 		symbol1 = symbol_stack.top->symbol;
 
-		if(symbol1 == S_ID || symbol1 == S_INT || symbol1 == S_FLOAT || symbol1 == S_STR)
+		if(symbol1 == S_ID || symbol1 == S_INT || symbol1 == S_FLOAT || symbol1 == S_STR || symbol1 == S_NONE)
 		{
 			//pop first symbol and stop symbol and replace it by nonterm symbol
 			pop_n(2, &symbol_stack);
@@ -383,7 +391,7 @@ int expression(prog_data* data)
 	Token token;
 	init_token(&token, &err);
 	token.attribute = &string;
-	token.type = TOKEN_UNDEFINED;
+	token.type = TOKEN_EOL;
 
 	Token loaded_token;
 	init_token(&loaded_token, &err);
@@ -403,9 +411,13 @@ int expression(prog_data* data)
 	while(!(IS_END)  || symbol_stack.top->next != NULL)
 	{		
 		//get index of token type
-		actual_symbol = get_symbol(&TOKEN);
+		actual_symbol = get_symbol(&TOKEN);		
 		top_terminal = find_terminal(&symbol_stack);
 		loaded_token = (TOKEN);
+		if(actual_symbol == S_UNDEF)
+		{
+			return SYNTAX_ERR;
+		}
 		//if there is no terminal on stack
 		if(top_terminal == NULL)
 		{
@@ -415,7 +427,12 @@ int expression(prog_data* data)
         tSymdata *pom;
         //if variable is not defined
         if (TOKEN.type == TOKEN_IDENTIFIER) {
-            if (symtable_search_variable(&data->local_table, TOKEN.attribute->str, &pom) == 0)
+
+			if (symtable_search_function(&data->global_table, TOKEN.attribute->str, &pom) == 0)
+			{
+				return SYNTAX_ERR;
+			}
+            else if (symtable_search_variable(&data->local_table, TOKEN.attribute->str, &pom) == 0)
 			{
 				global_id = 0;
 			}
@@ -436,6 +453,7 @@ int expression(prog_data* data)
 
 		//just push symbol on stack
 		case '=':
+		
 				if(push(&symbol_stack,actual_symbol) == 1)
 				{
 					return ERROR_INTERNAL;
@@ -477,7 +495,6 @@ int expression(prog_data* data)
 
 		//symbol(s) on stack can be handled and reduced to nonterminal according to reducing rules (when <y is on top)
 		case '>':
-
 				err = reduce();
 				if (err != 0)
 				{
@@ -508,6 +525,5 @@ int expression(prog_data* data)
 		}
 
 	}
-
     return err;
 }
