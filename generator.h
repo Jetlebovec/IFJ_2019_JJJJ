@@ -16,8 +16,6 @@
 #include <string.h>
 #include "parser.h"
 
-
-
 //function prototypes
 
 // Generates the head and the built-in functions
@@ -33,24 +31,23 @@ void add_substr();
 void add_ord();
 void add_chr();
 
-
-
+//generating variables
 void gen_defvar(char* var_name, bool in_function);
 void gen_move_exp_res (char* dest, bool in_function);
 void gen_tf_defvar(int param_id);
-
+//moving args from/to remporary frame
 int gen_move_arg(int param_id, Token *token, bool local, bool id);
 void gen_move_arg_print(int param_id, char* source);
 void gen_def_move_param (char* param_name, int param_id);
-
+//function work
 void gen_function_start(char* fun_name);
 void gen_function_end(bool end_of_fun_body, char* fun_name);
 void gen_call_fun(char* fun_name);
-
+//conditions
 void gen_if(int cond_id);
 void gen_else(int cond_id);
 void gen_if_end(int cond_id);
-
+//cycles
 void gen_while(int cycle_id);
 void gen_while_end(int cycle_id);
 

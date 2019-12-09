@@ -19,7 +19,6 @@
 #include <stdbool.h>
 #include "symtable.h"
 #include "token_list.h"
-#include "precedential_stack.h"
 #include "generator.h"
 
 ///various errors that can occur during the analysis
