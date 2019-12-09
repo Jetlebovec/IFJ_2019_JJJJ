@@ -12,58 +12,61 @@
 #include "token_list.h"
 
 void DLInitList (tDLList *L) {
-    //list je prazny tudiz vsechny ukazatele jsou nastaveny na NULL
+    //list is clear
     L->First = NULL;
     L->Last = NULL;
 }
 
 void DLDisposeList (tDLList *L) {
 
-    //pomocny ukazatel
+    //save the pointer to the first element
     tDLElemPtr pom = L->First;
 
-    //mazani prvniho prvku dokud neni seznam prazdny
+    //delete the first element until there are none
     while (L->First != NULL) {
-        //posunuti na dalsi prvek
+        //save the pointer to second
         L->First = L->First->rptr;
-        //uvolneni prvniho prvku
+        //free the first elem
         string_free(pom->token.attribute);
         free(pom->token.attribute);
         free(pom);
-        //ulozeni prvniho prvku
+        // save the first elem
         pom = L->First;
     }
 
+    //set to the state after initialization
     L->First = NULL;
     L->Last = NULL;
 }
 
 void DLInsertLast(tDLList *L, Token *token_in, int *err_code) {
 
+    //create new element
     tDLElemPtr vkladany;
     if ((vkladany = (tDLElemPtr) malloc(sizeof(struct tDLElem))) == NULL) {
         *err_code = 99;
         return;
     }
 
-    //inicializujeme token
+    //initialize the token
     init_token(&vkladany->token, err_code);
     if (*err_code == 99) {
         return;
     }
-    //zkopirujeme tokenu typ a atribut
+    //copy the token type and attribute
     vkladany->token.type = token_in->type;
     if(string_copy(token_in->attribute, vkladany->token.attribute) != 0) {
         *err_code = 99;
         return;
     }
 
-    //pokud je seznam prazndy, vlozi se novy prvek na 1. misto a je zároveň i poslední
+    //if there are no elements in the list, the new elem becomes first and last at the same time
     if (L->First == NULL) {
         L->First = vkladany;
         L->Last = vkladany;
         vkladany->rptr = NULL;
     }
+    //else we insert the element at the end of the list
     else {
         L->Last->rptr = vkladany;
         L->Last = vkladany;
@@ -72,16 +75,16 @@ void DLInsertLast(tDLList *L, Token *token_in, int *err_code) {
 }
 
 void DLDeleteFirst (tDLList *L) {
-    //overeni prazdnosti seznamu
+    //we check if the list contains any elements
     if (L->First == NULL)
         return;
-    //ulozeni ukazatele na druhy prvek
+    //save the pointer to the second elem
     tDLElemPtr druhy = L->First->rptr;
-    //uvolneni prvniho prvku z pameti
+    //free the first elem
     string_free(L->First->token.attribute);
     free(L->First->token.attribute);
     free(L->First);
-    //druhy prvek se stava prvnim
+    //the second elem becomes the first one
     L->First = druhy;
 }
 
