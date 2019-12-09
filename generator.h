@@ -54,11 +54,9 @@ void gen_if_end(int cond_id);
 void gen_while(int cycle_id);
 void gen_while_end(int cycle_id);
 
-//functions for evaluating expression
 int gen_push_operand(Token token, int is_global);
 void gen_operation(symbols symbol);
 
-//functions for checking type compatibilities generated in the beginning
 void gen_type_check_arithmetic();
 void gen_type_check_arithmetic_plus();
 void gen_type_check_relation();

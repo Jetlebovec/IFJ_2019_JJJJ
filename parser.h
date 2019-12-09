@@ -53,6 +53,27 @@ typedef struct {
 
 } prog_data;
 
+//enum of symbol indexes for prec. table
+typedef enum
+{
+    LS,     //1
+    GT,     //2
+    LSEQ,   //3
+    GTEQ,   //4
+    EQ,     //5
+    NEQ,    //6
+    PLUS,   //7
+    MINUS,  //8
+    MUL,    //9
+    DIV,    //10
+    IDIV,   //11
+    LBR,    //12
+    RBR,    //13
+	TERM,	//14
+	ASSIGN, //15
+    DOLLAR  //16
+
+} Prec_table_symbol;
 
 /**
  * @brief Main parser function
