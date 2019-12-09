@@ -14,22 +14,7 @@
 #include <stdlib.h>
 #include "parser.h"
 
-//function prototypes TODO: put in header
-int program(prog_data* data);
-int statement(prog_data* data);
-int def_function(prog_data* data);
-int term(prog_data* data);
-int term_n(prog_data* data);
-int print(prog_data* data);
-int print_n(prog_data* data);
-int param(prog_data* data);
-int param_n(prog_data* data);
-int statement_fun(prog_data* data);
-int return_value(prog_data* data);
-int idwhat(prog_data* data);
-int assign(prog_data* data);
-
-//checking keywords
+//macros for checking keywords
 #define DEF string_compare_char(data->token.attribute, "def") == 0
 #define ELSE string_compare_char(data->token.attribute, "else") == 0
 #define IF string_compare_char(data->token.attribute, "if") == 0
@@ -38,7 +23,7 @@ int assign(prog_data* data);
 #define RETURN string_compare_char(data->token.attribute, "return") == 0
 #define WHILE string_compare_char(data->token.attribute, "while") == 0
 
-//macro to check if the token is value
+//macro to check if the token is a value
 #define IS_VALUE(token)             \
 token.type == TOKEN_STRING ||       \
 token.type == TOKEN_NUM ||          \
@@ -46,7 +31,7 @@ token.type == TOKEN_NUM_DEC ||      \
 token.type == TOKEN_NUM_EXP ||      \
 token.type == TOKEN_IDENTIFIER
 
-//macro to check if token could be beginning of expression
+//macro to check if token could be beginning of an expression (without the id option)
 #define IS_EXPR(token)              \
 token.type == TOKEN_STRING ||       \
 token.type == TOKEN_NUM ||          \
@@ -54,7 +39,7 @@ token.type == TOKEN_NUM_DEC ||      \
 token.type == TOKEN_NUM_EXP ||      \
 token.type == TOKEN_LBRACKET
 
-//macro to check if token is operator
+//macro to check if token is an operator
 #define IS_OP(token)                \
 token.type == TOKEN_PLUS ||         \
 token.type == TOKEN_MINUS ||        \
@@ -69,7 +54,7 @@ token.type == TOKEN_EQUAL ||        \
 token.type == TOKEN_NOT_EQUAL
 
 
-//checks if we want to use the statement rule
+//checks if we can use the statement/statement_fun rule
 #define IS_STATEMENT_FUN (IF || WHILE || PASS || RETURN || IS_VALUE(data->token) || IS_EXPR(data->token))
 #define IS_STATEMENT (IF || WHILE || PASS || IS_VALUE(data->token) || IS_EXPR(data->token))
 
@@ -78,7 +63,7 @@ token.type == TOKEN_NOT_EQUAL
 err = get_token(&(data->token), data->file);    \
 if (err != 0) { return err; }
 
-//checking if we got the expected token
+//checking if we got the expected token type
 #define CHECK_TOKEN_TYPE(data, token_type)   \
 if(data->token.type != token_type) {   \
     return SYNTAX_ERR; }
@@ -91,6 +76,7 @@ if(string_compare_char(data->token.attribute, keyword) != 0) {   \
 
 // <program> rule
 int program(prog_data* data) {
+
     //error number stored
     int err = 0;
     //if there is no loaded token, get one
@@ -136,11 +122,7 @@ int statement(prog_data* data)
 {
     int err = 0;
 
-//<statement> -> <expression> EOL <statement>
-//rozdelil jsem rozpoznavani expressionu, kdyz zacina id bude to resit az pravidlo id what
-//tady bude pripad kdy zacina random hodnotou (cislo, retezec..)
-
-// <statement> -> <expression> EOL <statement>
+    // <statement> -> <expression> EOL <statement>
     if(IS_EXPR(data->token))
     {
         //EXPRESSION
@@ -154,6 +136,7 @@ int statement(prog_data* data)
             GET_TOKEN(data)
         }
 
+        //we analyse and generate the expression
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
@@ -165,6 +148,7 @@ int statement(prog_data* data)
 
         CHECK_TOKEN_TYPE(data, TOKEN_EOL)
         GET_TOKEN(data)
+        //recursive statement-rule call
         return statement(data);
     }
 
@@ -189,7 +173,7 @@ int statement(prog_data* data)
     if(IF)
     {
         data->if_count++;
-        int if_count = data->if_count;
+        int if_count = data->if_count; //we store the if_count in case nested-if would occur
 
         //EXPRESSION
         //we add the whole expression until colon is found into List
@@ -208,6 +192,7 @@ int statement(prog_data* data)
             GET_TOKEN(data)
         }
 
+        //analyse and generate the expression
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
@@ -232,7 +217,6 @@ int statement(prog_data* data)
         //recursive calling of statement rule
         if (IS_STATEMENT)
         {
-
             err = statement(data);
 
             if (err != 0) {
@@ -294,7 +278,7 @@ int statement(prog_data* data)
     {
 
         data->while_count++;
-        int while_count = data->while_count;
+        int while_count = data->while_count; //we store the while_count in case of nested-cycle occurrence
 
         //EXPRESSION
         //we add the whole expression until colon is found into List
@@ -313,8 +297,10 @@ int statement(prog_data* data)
             GET_TOKEN(data)
         }
 
+        //GENERATE
         printf("\nLABEL $while_%d", while_count);
 
+        //analyse and generate the expression
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
@@ -336,7 +322,7 @@ int statement(prog_data* data)
 
         GET_TOKEN(data)
 
-        //recursive statement
+        //recursive statement call
         if (IS_STATEMENT)
         {
 
@@ -381,12 +367,11 @@ int statement_fun(prog_data* data)
 {
     int err = 0;
 
-//<statement_fun> -> <expression> EOL <statement_fun>
-
+    //<statement_fun> -> <expression> EOL <statement_fun>
     if(IS_EXPR(data->token))
     {
         //EXPRESSION
-        //we add the whole expression until eol is found into List
+        //we add the whole expression, until eol is found, into List
         while(data->token.type != TOKEN_EOL)
         {
             DLInsertLast(&data->expression_list, &data->token, &err);
@@ -396,6 +381,7 @@ int statement_fun(prog_data* data)
             GET_TOKEN(data)
         }
 
+        //analyse and generate the expression
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
@@ -407,15 +393,15 @@ int statement_fun(prog_data* data)
 
         CHECK_TOKEN_TYPE(data, TOKEN_EOL)
         GET_TOKEN(data)
+        //recursive statement call
         return statement_fun(data);
     }
 
-// <statement_fun> -> id <idwhat> EOL <statement_fun>
+    //<statement_fun> -> id <idwhat> EOL <statement_fun>
     if(data->token.type == TOKEN_IDENTIFIER)
     {
 
         err = idwhat(data);
-
         if(err != 0) {
             return err;
         }
@@ -423,7 +409,7 @@ int statement_fun(prog_data* data)
         CHECK_TOKEN_TYPE(data,TOKEN_EOL)
 
         GET_TOKEN(data)
-
+        //recursive statement call
         return statement_fun(data);
     }
 
@@ -451,6 +437,7 @@ int statement_fun(prog_data* data)
             GET_TOKEN(data)
         }
 
+        //analyse and generate the expression
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
@@ -472,11 +459,11 @@ int statement_fun(prog_data* data)
 
         GET_TOKEN(data)
 
+        //recursive statement call
         if (IS_STATEMENT_FUN)
         {
 
             err = statement_fun(data);
-
             if (err != 0) {
                 return err;
             }
@@ -512,7 +499,6 @@ int statement_fun(prog_data* data)
         {
 
             err = statement_fun(data);
-
             if (err != 0) {
                 return err;
             }
@@ -552,6 +538,7 @@ int statement_fun(prog_data* data)
             GET_TOKEN(data)
         }
 
+        //GENERATE
         printf("\nLABEL $while_%d", while_count);
 
         err = expression(data);   //precedential analysis
@@ -579,7 +566,6 @@ int statement_fun(prog_data* data)
         {
 
             err = statement_fun(data);
-
             if (err != 0) {
                 return err;
             }
@@ -608,20 +594,19 @@ int statement_fun(prog_data* data)
         return statement_fun(data);
     }
 
-//<statement_fun> -> return <return_value> EOL <statement_fun>
+    //<statement_fun> -> return <return_value> EOL <statement_fun>
     if(RETURN)
     {
         GET_TOKEN(data)
 
         err = return_value(data);
-        //return expression is the top of the stack
-
+        //return's expression value is the top of the stack
         if(err != 0) {
             return err;
         }
 
         //GENERATE
-        //we dont need to know the fun name cause we dont generate the jump-over-fun LABEL
+        //we dont need to know the fun name cause we dont generate the jump-over-fun LABEL when we only return
         gen_function_end(false, "none");
 
         CHECK_TOKEN_TYPE(data, TOKEN_EOL)
@@ -643,7 +628,7 @@ int def_function(prog_data* data)
     //entering the function body
     data->in_function = true;
 
-    //if the function was used before, we need to check the param count is the same
+    //if the function was used before, we need to check if the param count is the same
     bool used_before = false;
 
     GET_TOKEN(data)
@@ -651,17 +636,16 @@ int def_function(prog_data* data)
     CHECK_TOKEN_TYPE(data, TOKEN_IDENTIFIER)
 
     // sem control
-
-    //function already defined - redefiniton is not allowed
+    //function already defined
     if(symtable_search_function(&data->global_table, data->token.attribute->str, &data->current_fun_data) == 0)
     {
-        //the fun is in symtable because it was used before its definition -> its defined now
+        //the fun is in symtable because it was used before its definition -> its being defined now
         if (data->current_fun_data->defined == false) {
-            data->current_fun_data->defined = true;
 
+            data->current_fun_data->defined = true;
             used_before = true;
         }
-        //if it was defined before, its forbidden
+        //if it was defined before, its redefinition
         else {
             return SEM_UNDEF_ERR;
         }
@@ -679,14 +663,14 @@ int def_function(prog_data* data)
 
         //saving pointer to symdata of this function for counting params
         symtable_search_function(&data->global_table, data->token.attribute->str, &data->current_fun_data);
-        //function has just been defined, hurá
+        //function has just been defined
         data->current_fun_data->defined = true;
     }
 
     //GENERATE
+    //saving the function name
     char* fun_name = malloc((32 + data->token.attribute->length) * sizeof(char));
     strcpy(fun_name, data->token.attribute->str);
-
     gen_function_start(fun_name);
 
     GET_TOKEN(data)
@@ -705,7 +689,7 @@ int def_function(prog_data* data)
         return err;
     }
 
-    //if the function was called/defined before, check if the param count is the same
+    //if the function was called/defined before, check if the param count was the same
     if(used_before == true) {
         if (paramCountBefore != data->current_fun_data->param_count) {
             return SEM_PARAM_ERR;
@@ -732,7 +716,6 @@ int def_function(prog_data* data)
     {
 
         err = statement_fun(data);
-
         if (err != 0) {
             return err;
         }
@@ -763,22 +746,22 @@ int idwhat(prog_data* data)
     //error number stored
     int err = 0;
 
-    //ulozeni predchoziho tokenu - identifikator promenne, dulezite asf
+    //storing the current token so we can look at another
     Token temp;
     init_token(&temp, &err);
     if (err != 0) {
         return err;
     }
-    //zkopirujeme tokenu typ a atribut
+    //we copy the token type and token attribute
     temp.type = data->token.type;
     if(string_copy(data->token.attribute, temp.attribute) != 0) {
         return ERROR_INTERNAL;
     }
-    //token ulozen jako temp
+    //token has been stored as temp
 
     GET_TOKEN(data)
 
-    //muze prijit operator a bude se vyhodnocovat jako vyraz
+    //if the next token is operator, we deal with an expression
     if(IS_OP(data->token))
     {
         //EXPRESSION
@@ -802,6 +785,7 @@ int idwhat(prog_data* data)
             GET_TOKEN(data)
         }
 
+        //analyse and generate the expression
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
@@ -809,6 +793,7 @@ int idwhat(prog_data* data)
         DLDisposeList(&data->expression_list);
 
         //GENERATE
+        //the result is no longer used
         gen_move_exp_res("exp_result", false);
 
         return SYNTAX_OK;
@@ -817,7 +802,7 @@ int idwhat(prog_data* data)
     //<idwhat> -> = <assign>
     if (data->token.type == TOKEN_ASSIGN) {
 
-        //we cant define a variable with a same name as function
+        //cant define/assign a variable with the same name as an existing function
         if (symtable_search_function(&data->global_table, temp.attribute->str, &data->current_fun_data) == 0)
         {
             return SEM_UNDEF_ERR;
@@ -832,11 +817,12 @@ int idwhat(prog_data* data)
 
         tSymdata *pom;
 
-        //we add the new defined variable to local table if in function or to global table if in main body
+        //we add the new defined variable to local table if in_function or to global table if in main body
         if (data->in_function == true) {
 
             if (symtable_search_variable(&data->local_table, temp.attribute->str, &pom) != 0) {
 
+                //store the variable in symtable
                 err = symtable_create_variable(&data->local_table, temp.attribute->str);
                 if (err != 0)
                     return err;
@@ -851,6 +837,7 @@ int idwhat(prog_data* data)
         else {
             if (symtable_search_variable(&data->global_table, temp.attribute->str, &pom) != 0) {
 
+                //store the variable in symtable
                 err = symtable_create_variable(&data->global_table, temp.attribute->str);
                 if (err != 0)
                     return err;
@@ -863,6 +850,7 @@ int idwhat(prog_data* data)
             gen_move_exp_res(temp.attribute->str, false);
         }
 
+        //free the temporary token
         string_free(temp.attribute);
         free(temp.attribute);
 
@@ -875,10 +863,11 @@ int idwhat(prog_data* data)
         //if the function was used before, we need to check the param count is the same
         bool used_before = false;
 
+        //store the function name to generate the jump_over-label later on
         char* fun_name = malloc((32 + data->token.attribute->length) * sizeof(char));
         strcpy(fun_name, temp.attribute->str);
 
-        //variable with the same name exists
+        //variable with the same name exists - not a function
         if (symtable_search_variable(&data->global_table, temp.attribute->str, &data->current_fun_data) == 0)
         {
             return SEM_UNDEF_ERR;
@@ -897,13 +886,14 @@ int idwhat(prog_data* data)
             symtable_search_function(&data->global_table, temp.attribute->str, &data->current_fun_data);
         }
 
-        //if func is a func that has unlimited paramCount like "print", we set used_before to false
-        //so it doesnt check the previous number of params
+        //if the function is "print", we process it individually
         if (strcmp(temp.attribute->str, "print") == 0) {
+
             err = print(data);
             if (err != 0) {
                 return err;
             }
+            //GENERATE line end after all print params are processed
             printf("\nWRITE string@\\010");
 
             CHECK_TOKEN_TYPE(data, TOKEN_RBRACKET)
@@ -950,9 +940,10 @@ int idwhat(prog_data* data)
 
     }
 
-    //<idwhat> -> Ɛ (id muze byt samotne na radku pokud bylo definovano)
+    //<idwhat> -> Ɛ  == is alone on the line - valid if defined
     else {
         tSymdata *pom;
+        //check if var was defined
         if ((symtable_search_variable(&data->local_table, temp.attribute->str, &pom) != 0) &&
             (symtable_search_variable(&data->global_table, temp.attribute->str, &pom) != 0)) {
 
@@ -984,12 +975,12 @@ int term(prog_data* data)
     //<term> -> None <term_n>
     if (IS_VALUE(data->token) || NONE)
     {
-        //if term is id
+        //if term/arg is id
         bool identifier = true;
-        //if term is in local frame
+        //if term/arg is in local frame
         bool local = true;
 
-        //check if token is ID adn check where it was defined, if local or global or not defined
+        //check if token is ID and check where it was defined, if local or global frame, or not defined at all
         if (data->token.type == TOKEN_IDENTIFIER) {
             if (symtable_search_variable(&data->local_table, data->token.attribute->str, &pom) == 0) {
                 local = true;
@@ -1004,12 +995,13 @@ int term(prog_data* data)
         else {
             identifier = false;
         }
-        //increment param count
+        //increment param count for unique indexing params in temporary frame
         data->current_fun_data->param_count++;
 
         //push the param into temporary frame
         gen_tf_defvar(data->current_fun_data->param_count);
 
+        //GENERATE
         err = gen_move_arg(data->current_fun_data->param_count, &(data->token), local, identifier);
         if (err != 0) {
             return err;
@@ -1041,7 +1033,7 @@ int term_n(prog_data* data)
 
 }
 
-// <term> rule - print
+// <term> rule - print version
 int print(prog_data* data)
 {
     //error number stored
@@ -1064,7 +1056,7 @@ int print(prog_data* data)
         //if term is in local frame
         bool local = true;
 
-        //check if token is ID adn check where it was defined, if local or global or not defined
+        //check if token is ID adn check where it was defined, if local or global frame, or not defined at all
         if (data->token.type == TOKEN_IDENTIFIER) {
             if (symtable_search_variable(&data->local_table, data->token.attribute->str, &pom) == 0) {
                 local = true;
@@ -1081,12 +1073,13 @@ int print(prog_data* data)
         }
 
         //push the param into temporary frame
-        gen_tf_defvar(1);
+        gen_tf_defvar(1); //param id is always "1" since print func is always called with only one param
         err = gen_move_arg(1, &(data->token), local, identifier);
         if (err != 0) {
             return err;
         }
 
+        //call the print function for every print param
         gen_call_fun("print");
 
         return print_n(data);
@@ -1107,6 +1100,8 @@ int print_n(prog_data* data)
 
     //<term_n> -> , <term>
     if(data->token.type == TOKEN_COMMA) {
+
+        //GENERATE a space between every print param
         printf("\nWRITE string@\\032");
         return print(data);
     }
@@ -1133,7 +1128,7 @@ int param(prog_data* data)
        {
            return SEM_UNDEF_ERR;
        }
-       //look for var in local table (if previous param wasnt same name)
+       //look for var in local table (if previous param wasn't same name)
        else if (symtable_search_variable(&data->local_table, data->token.attribute->str, &pom) == 0)
        {
            return SEM_UNDEF_ERR;
@@ -1144,6 +1139,7 @@ int param(prog_data* data)
            err = symtable_create_variable(&data->local_table, data->token.attribute->str);
            if (err != 0)
                return err;
+           //increment the param count
            data->current_fun_data->param_count++;
 
            //GENERATE
@@ -1212,18 +1208,18 @@ int assign(prog_data* data) {
         return SYNTAX_OK;
     }
 
-    //ulozeni predchoziho tokenu - identifikator promenne, dulezite asf
+    //storing the current token so we can look on the another
     Token temp;
     init_token(&temp, &err);
     if (err != 0) {
         return err;
     }
-    //zkopirujeme tokenu typ a atribut
+    //we copy the token type and attribute
     temp.type = data->token.type;
     if(string_copy(data->token.attribute, temp.attribute) != 0) {
         return ERROR_INTERNAL;
     }
-    //token ulozen jako temp
+    //token has been stored as temp
 
     GET_TOKEN(data)
 
@@ -1234,6 +1230,7 @@ int assign(prog_data* data) {
         //if the function was used before, we need to check the param count is the same
         bool used_before = false;
 
+        //store the function name so the function call can be generated later
         char* fun_name = malloc((32 + data->token.attribute->length) * sizeof(char));
         strcpy(fun_name, temp.attribute->str);
 
@@ -1256,8 +1253,7 @@ int assign(prog_data* data) {
             symtable_search_function(&data->global_table, temp.attribute->str, &data->current_fun_data);
         }
 
-        //if func is a func that has unlimited paramCount like "print", we set used_before to false
-        //so it doesnt check the previous number of params
+        //if the function is "print", we process it individually
         if (strcmp(temp.attribute->str, "print") == 0) {
             err = print(data);
             if (err != 0) {
@@ -1325,7 +1321,7 @@ int assign(prog_data* data) {
         //EXPRESSION
         //we add the whole expression until eol is found into List
 
-        //WE NEED TO STORE THE PREVIOUS TOKEN FIRST
+        //WE NEED TO STORE THE PREVIOUS TOKEN into the list FIRST
         DLInsertLast(&data->expression_list, &temp, &err);
         if (err != 0) {
             return err;
@@ -1333,7 +1329,7 @@ int assign(prog_data* data) {
         string_free(temp.attribute);
         free(temp.attribute);
 
-        //storing rest of the expression
+        //storing the rest of the expression
         while(data->token.type != TOKEN_EOL)
         {
             DLInsertLast(&data->expression_list, &data->token, &err);
@@ -1343,6 +1339,7 @@ int assign(prog_data* data) {
             GET_TOKEN(data)
         }
 
+        //analyse and generate the expression
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
@@ -1371,6 +1368,7 @@ int return_value(prog_data* data)
             GET_TOKEN(data)
         }
 
+        //analyse and generate the expression
         err = expression(data);   //precedential analysis
         if (err != 0) {
             return err;
@@ -1380,9 +1378,10 @@ int return_value(prog_data* data)
         return SYNTAX_OK;
     }
 
+    //<return_value> -> Ɛ
+
     //GENERATE
     printf("PUSHS nil@nil");
-    //<return_value> -> Ɛ
     return SYNTAX_OK;
 
 }
@@ -1391,6 +1390,8 @@ int add_predefined(prog_data* data) {
 
     char* fce;
     int err = 0;
+
+    //create a function in symtable and initialize its function data
 
     fce = "inputs";
     err = symtable_create_function(&data->global_table, fce);
@@ -1464,6 +1465,8 @@ int analyse()
 {
     int err_code = 0;
 
+    //INITIALISE EVERYTHING
+
     // Initialize indentation stack of the scanner
     stack_init(&indent_stack);
     stack_push(&indent_stack, 0);
@@ -1474,11 +1477,12 @@ int analyse()
         return ERROR_INTERNAL;
     }
 
-    //initialize the structure to store parser data
+    //initialize the structure to store tokens
     init_token(&(Data->token), &err_code);
     if (err_code != 0)
         return err_code;
 
+    //structure for expressions
     DLInitList(&Data->expression_list);
 
     Data->if_count=0;
@@ -1495,6 +1499,9 @@ int analyse()
 
     Data->file = stdin;
 
+    //INITIALISATION COMPLETE
+
+    //ad all predefined functions to symtable
     err_code = add_predefined(Data);
     if (err_code != 0) {
         return err_code;
@@ -1507,32 +1514,21 @@ int analyse()
     //starting the recursive descent
     err_code = program(Data);
 
+    //check if every function used in the program has been defined
     if (symtable_contains_undefined(&Data->global_table) != 0) {
         err_code = SEM_UNDEF_ERR;
     }
 
-
-    //test print
-    //printf("%d\n", err_code);
+    //beauty print
     printf("\n");
+
+    //dispose symtables
+    symtable_dispose(&Data->global_table);
+    symtable_dispose(&Data->local_table);
 
     free(Data);
 
     return err_code;
 
-    /*
-    //ODSUD SEGFAULT XD
-
-    //free list
-    DLDisposeList(&Data->expression_list);
-
-    //free symtables
-    symtable_dispose(&Data->global_table);
-    symtable_dispose(&Data->local_table);
-
-    // Free token
-    string_free(Data->token.attribute);
-    free(Data->token.attribute);
-    */
 }
 
