@@ -21,6 +21,8 @@
 #include "token_list.h"
 #include "precedential_stack.h"
 #include "generator.h"
+
+///various errors that can occur during the analysis
 #define LEX_OK			            0
 #define SYNTAX_OK 					0
 #define LEX_ERR         			1   //lexical analysis error
@@ -32,48 +34,28 @@
 #define SEM_ZERO_ERR                9   //dividing by zero error
 #define ERROR_INTERNAL             99   //internal compiler error
 
+///the main structure for parser data distribution
 typedef struct {
-    tBSTNodePtr global_table;        // Global symbol table
-    tBSTNodePtr local_table;        // Local symbol table
+    tBSTNodePtr global_table;        /// Global table of symbols
+    tBSTNodePtr local_table;        /// Local table of symbols
 
-    FILE *file; //soubor, ze kterého čte scanner
+    FILE *file;     ///the file from which the scanner gets tokens - usually stdin
 
-    Token token; //
+    Token token;     ///actual loaded token
 
-    bool token_loaded;  //overeni, zda nacitat novy token
+    bool token_loaded;  ///tells us if new token has been loaded
 
-    bool in_function;
+    bool in_function;   ///tells us if the parser is currently in function body
 
-    tDLList expression_list; //list of tokens that form expression
+    tDLList expression_list; ///list of tokens that form expression and is used by prec. analysis
 
-    tSymdata *current_fun_data;
+    tSymdata *current_fun_data; ///pointer to current function data
 
-    int if_count;
-    int while_count;
+    int if_count;       ///index of current if-condition to generate unique labels in ifjcode19
+    int while_count;    ///index of current while-cycle to generate unique labels in ifjcode19
 
 } prog_data;
 
-//enum of symbol indexes for prec. table
-typedef enum
-{
-    LS,     //1
-    GT,     //2
-    LSEQ,   //3
-    GTEQ,   //4
-    EQ,     //5
-    NEQ,    //6
-    PLUS,   //7
-    MINUS,  //8
-    MUL,    //9
-    DIV,    //10
-    IDIV,   //11
-    LBR,    //12
-    RBR,    //13
-	TERM,	//14
-	ASSIGN, //15
-    DOLLAR  //16
-
-} Prec_table_symbol;
 
 /**
  * @brief Main parser function
@@ -81,6 +63,38 @@ typedef enum
  */
 int analyse();
 
+/**
+ * functions representing the rules of grammar
+ * Each function returns error code and uses structure prog_data
+ * for the analysis and generating the code
+ */
+int program(prog_data* data);
+int statement(prog_data* data);
+int def_function(prog_data* data);
+int term(prog_data* data);
+int term_n(prog_data* data);
+int print(prog_data* data);
+int print_n(prog_data* data);
+int param(prog_data* data);
+int param_n(prog_data* data);
+int statement_fun(prog_data* data);
+int return_value(prog_data* data);
+int idwhat(prog_data* data);
+int assign(prog_data* data);
+
+/**
+ * @brief adds predefined functions into global table
+ * @param data contains data needed for the analysis and generating the code
+ * @return Returns error code
+ */
+int add_predefined(prog_data* data);
+
+/**
+ * @brief Main precedential analysis function
+ * @param data contains data needed for the analysis and generating the code
+ * @return Returns error code
+ */
 int expression(prog_data* data);
+
 
 #endif // PARSER_H_INCLUDED
