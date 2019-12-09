@@ -19,10 +19,6 @@
 
 #define IS_VALUE loaded_token.type == TOKEN_IDENTIFIER || (loaded_token.type == TOKEN_KEYWORD && !strcmp("None",loaded_token.attribute->str)) || loaded_token.type == TOKEN_NUM || loaded_token.type == TOKEN_NUM_DEC || loaded_token.type == TOKEN_NUM_EXP || loaded_token.type == TOKEN_STRING
 
-int reduce();
-Prec_table_symbol get_symbol_index(symbols symbol);
-symbols get_symbol(Token* token);
-int symbol_count();
 
 //precedence table
 char prec_table[TABLE_SIZE][TABLE_SIZE] = { /*
@@ -189,13 +185,14 @@ symbols get_symbol(Token* token)
 	}
 }
 
+//stack used for analysis
 stack_top_t symbol_stack;
 
 //access to current token
 #define TOKEN data->expression_list.First->token
 //get next token
 #define NEXT_TOKEN DLDeleteFirst(&(data->expression_list))
-//end of exp
+//end of expression(token list is empty)
 #define IS_END data->expression_list.First == NULL
 
 
@@ -230,12 +227,6 @@ void pop_n(int n, stack_top_t* stack)
     }
 }
 
-/*
-int type_control(symbols operation)
-{
-	//TODO
-}
-*/
 
 //reduce 1 or 3 terms to nonterm based on rules and do all required actions
 int reduce()
@@ -256,6 +247,7 @@ int reduce()
 	if(count == 1)
 	{
 		//E->i rule
+		//get symbol from stack
 		symbol1 = symbol_stack.top->symbol;
 
 		if(symbol1 == S_ID || symbol1 == S_INT || symbol1 == S_FLOAT || symbol1 == S_STR || symbol1 == S_NONE)
@@ -276,7 +268,7 @@ int reduce()
 	}
 
     //if there are three symbols, it will be some kind of operations between two nonterms E?E or E->(E)
-    //aka operation between two operands we already have on stack in real code
+    //aka stack operation between two operands we already have on stack in real code
 
 	else if (count == 3)
 	{
@@ -284,6 +276,7 @@ int reduce()
 		symbol2 = symbol_stack.top->next->symbol;
 		symbol1 = symbol_stack.top->next->next->symbol;
 	}
+	//no other possible rule
 	else
 	{
 		return SYNTAX_ERR;
@@ -298,9 +291,6 @@ int reduce()
 	//E->E?E
 	else if (symbol1 == S_NONTERM && symbol3 == S_NONTERM)
 	{
-		//TODO check compatibility of types
-		//type_control(symbol2);
-
         //switch according to operation between two operands, instructions for type control and for
         //coresponding stack operation will be generated
 		switch (symbol2)
@@ -376,15 +366,16 @@ int reduce()
 //main function for expression handle
 int expression(prog_data* data)
 {
+	//err code returned to analysis
 	int err = 0;
 
+	//global/local function 
 	int global_id = 0;
 
 	//init stack
 	init(&symbol_stack);
 
-	//init of token for imputing in the end of list when all input tokens are parsed, until everything from stack is parsed
-	//(weird solution but works)
+	//init of token for imputing in the end of list when all input tokens were parsed, until everything from stack is parsed
 	tString string;
 	string_init(&string);
 	string_append_char(&string,'X');
@@ -393,15 +384,17 @@ int expression(prog_data* data)
 	token.attribute = &string;
 	token.type = TOKEN_EOL;
 
+	//currently loaded token from list
 	Token loaded_token;
 	init_token(&loaded_token, &err);
 
 	//input symbol readed from token
 	symbols actual_symbol;
+
 	//terminal symbol nearest to the stack top
 	stack_item_t* top_terminal;
 
-	//$ bottom of stack
+	//pushing $ - bottom of stack
 	if (push(&symbol_stack, S_DOLLAR) == 1)
     {
         return ERROR_INTERNAL;
@@ -412,8 +405,10 @@ int expression(prog_data* data)
 	{		
 		//get index of token type
 		actual_symbol = get_symbol(&TOKEN);		
+		//get first terminal from stack
 		top_terminal = find_terminal(&symbol_stack);
 		loaded_token = (TOKEN);
+		//if symbol loaded from token is not allowed in expressions
 		if(actual_symbol == S_UNDEF)
 		{
 			return SYNTAX_ERR;
@@ -425,7 +420,7 @@ int expression(prog_data* data)
 		}
 
         tSymdata *pom;
-        //if variable is not defined
+        //if it is variable, check if is defined
         if (TOKEN.type == TOKEN_IDENTIFIER) {
 
 			if (symtable_search_function(&data->global_table, TOKEN.attribute->str, &pom) == 0)
@@ -481,14 +476,15 @@ int expression(prog_data* data)
                 {
                     return ERROR_INTERNAL;
                 }
-				//if it is value/id generate push instruction (operand on stack)
+
+				//if it is value/id generate push instruction (operand on stack in final code)
 			
 				if(IS_VALUE)
 				{
 					gen_push_operand(loaded_token, global_id);
 				}
 
-				//move forward in list - get next symbol
+				//move forward in list - get next token for next symbol
 				NEXT_TOKEN;
 	
 				break;
@@ -518,7 +514,7 @@ int expression(prog_data* data)
 
 		}
 		//when list is empty but stack not, we have to first handle all remaining symbols on stack till it is empty
-		//we keep adding new token in list with unkown type which will be seen as $ - ending symbol
+		//we keep adding new token in list with EOL type which will be converted to $ - ending symbol
 		if(data->expression_list.First == NULL && symbol_stack.top->next != NULL)
 		{
 			DLInsertLast(&data->expression_list, &token, &err);
